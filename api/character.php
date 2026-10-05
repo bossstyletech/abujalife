@@ -217,6 +217,117 @@ if ($action === 'morning_routine') {
     ]);
 }
 
+if ($action === 'start_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => "You don't have a job yet! Browse available careers or run a side hustle."], 400);
+    }
+
+    $stmtJob = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmtJob->execute([$char['current_job_id']]);
+    $job = $stmtJob->fetch();
+
+    if (!$job) {
+        jsonResponse(['success' => false, 'error' => 'Job not found.'], 404);
+    }
+
+    $energyReq = (int)$job['energy_cost'];
+    if ((int)$char['energy'] < $energyReq) {
+        jsonResponse(['success' => false, 'error' => "You are too tired ({$energyReq}% energy needed). Rest or take a coffee before your shift."], 400);
+    }
+
+    jsonResponse([
+        'success' => true,
+        'job' => $job,
+        'shift_duration_seconds' => 45,
+        'energy_cost' => $energyReq,
+        'base_salary' => (float)$job['daily_salary']
+    ]);
+}
+
+if ($action === 'finish_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => "No active job found."], 400);
+    }
+
+    $stmtJob = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmtJob->execute([$char['current_job_id']]);
+    $job = $stmtJob->fetch();
+
+    if (!$job) {
+        jsonResponse(['success' => false, 'error' => 'Job not found.'], 404);
+    }
+
+    $energyReq = (int)$job['energy_cost'];
+    $tips = max(0, (float)($_POST['tips'] ?? 0));
+    $bonuses = max(0, (float)($_POST['bonuses'] ?? 0));
+    $penalties = max(0, (float)($_POST['penalties'] ?? 0));
+
+    $baseSalary = (float)$job['daily_salary'];
+    $finalPay = max(0, $baseSalary + $tips + $bonuses - $penalties);
+
+    $stmtUpdate = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash + ?, 
+            energy = CASE WHEN energy - ? < 0 THEN 0 ELSE energy - ? END, 
+            time_of_day = 'Evening', 
+            intelligence = intelligence + 1,
+            street_cred = street_cred + 2,
+            happiness = CASE WHEN happiness + 5 > 100 THEN 100 ELSE happiness + 5 END
+        WHERE id = ?
+    ");
+    $stmtUpdate->execute([$finalPay, $energyReq, $energyReq, $char['id']]);
+
+    $logMsg = "Completed full 8-hour workday as {$job['title']}. Salary: " . formatNaira($baseSalary);
+    if ($tips > 0) $logMsg .= " + Tips: " . formatNaira($tips);
+    if ($bonuses > 0) $logMsg .= " + Performance: " . formatNaira($bonuses);
+    if ($penalties > 0) $logMsg .= " - Deductions: " . formatNaira($penalties);
+
+    logActivity($char['id'], 'work_shift', $logMsg, $finalPay, -$energyReq, 5);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "Shift officially closed! Net pay of " . formatNaira($finalPay) . " credited to your wallet.",
+        'final_pay' => $finalPay,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+if ($action === 'abandon_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => "No active job found."], 400);
+    }
+
+    $stmtJob = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmtJob->execute([$char['current_job_id']]);
+    $job = $stmtJob->fetch();
+
+    $progress = min(100, max(0, (float)($_POST['progress'] ?? 20)));
+    $partialSalary = ($progress >= 50) ? round(((float)$job['daily_salary'] * ($progress / 100)) * 0.4, 2) : 0;
+    $energyCost = round((int)$job['energy_cost'] * ($progress / 100));
+
+    // Severe penalty for walking out early
+    $stmtUpdate = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash + ?, 
+            energy = CASE WHEN energy - ? < 0 THEN 0 ELSE energy - ? END, 
+            street_cred = CASE WHEN street_cred - 12 < 0 THEN 0 ELSE street_cred - 12 END,
+            happiness = CASE WHEN happiness - 15 < 0 THEN 0 ELSE happiness - 15 END,
+            time_of_day = 'Evening'
+        WHERE id = ?
+    ");
+    $stmtUpdate->execute([$partialSalary, $energyCost, $energyCost, $char['id']]);
+
+    $msg = "You sneaked out of work at {$progress}% of shift! Oga caught you leaving: 'You dey leave desk?!' Docked salary and issued a formal query! -12 Street Cred.";
+    logActivity($char['id'], 'work_abandon', $msg, $partialSalary, -$energyCost, -15);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'partial_pay' => $partialSalary,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
 if ($action === 'go_to_work') {
     if (!$char['current_job_id']) {
         jsonResponse(['success' => false, 'error' => "You don't have a job yet! Browse available careers or run a side hustle."], 400);

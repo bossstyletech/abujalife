@@ -70,6 +70,116 @@ if ($action === 'apply') {
     ]);
 }
 
+if ($action === 'start_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => 'You currently do not have a job. Apply for an available role first!'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmt->execute([$char['current_job_id']]);
+    $job = $stmt->fetch();
+
+    if (!$job) {
+        jsonResponse(['success' => false, 'error' => 'Job record not found.'], 404);
+    }
+
+    $energyCost = (int)$job['energy_cost'];
+    if ((int)$char['energy'] < $energyCost) {
+        jsonResponse(['success' => false, 'error' => "You are too exhausted to work this shift! Required energy: {$energyCost}%. Take a nap or rest."], 400);
+    }
+
+    jsonResponse([
+        'success' => true,
+        'job' => $job,
+        'shift_duration_seconds' => 45,
+        'energy_cost' => $energyCost,
+        'base_salary' => (float)$job['daily_salary']
+    ]);
+}
+
+if ($action === 'finish_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => 'No active job.'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmt->execute([$char['current_job_id']]);
+    $job = $stmt->fetch();
+
+    if (!$job) {
+        jsonResponse(['success' => false, 'error' => 'Job record not found.'], 404);
+    }
+
+    $energyCost = (int)$job['energy_cost'];
+    $tips = max(0, (float)($_POST['tips'] ?? 0));
+    $bonuses = max(0, (float)($_POST['bonuses'] ?? 0));
+    $penalties = max(0, (float)($_POST['penalties'] ?? 0));
+
+    $baseSalary = (float)$job['daily_salary'];
+    $finalPay = max(0, $baseSalary + $tips + $bonuses - $penalties);
+
+    $stmtUpdate = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash + ?, 
+            energy = CASE WHEN energy - ? < 0 THEN 0 ELSE energy - ? END, 
+            time_of_day = 'Evening', 
+            intelligence = intelligence + 1,
+            street_cred = street_cred + 2,
+            happiness = CASE WHEN happiness + 5 > 100 THEN 100 ELSE happiness + 5 END
+        WHERE id = ?
+    ");
+    $stmtUpdate->execute([$finalPay, $energyCost, $energyCost, $char['id']]);
+
+    $logMsg = "Completed full 8-hour workday as {$job['title']}. Salary: " . formatNaira($baseSalary);
+    if ($tips > 0) $logMsg .= " + Tips: " . formatNaira($tips);
+    if ($bonuses > 0) $logMsg .= " + Performance: " . formatNaira($bonuses);
+    if ($penalties > 0) $logMsg .= " - Deductions: " . formatNaira($penalties);
+
+    logActivity($char['id'], 'work_shift', $logMsg, $finalPay, -$energyCost, 5);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "Shift officially closed! Net pay of " . formatNaira($finalPay) . " credited.",
+        'final_pay' => $finalPay,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+if ($action === 'abandon_shift') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => 'No active job.'], 400);
+    }
+
+    $stmt = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmt->execute([$char['current_job_id']]);
+    $job = $stmt->fetch();
+
+    $progress = min(100, max(0, (float)($_POST['progress'] ?? 20)));
+    $partialSalary = ($progress >= 50) ? round(((float)$job['daily_salary'] * ($progress / 100)) * 0.4, 2) : 0;
+    $energyCost = round((int)$job['energy_cost'] * ($progress / 100));
+
+    $stmtUpdate = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash + ?, 
+            energy = CASE WHEN energy - ? < 0 THEN 0 ELSE energy - ? END, 
+            street_cred = CASE WHEN street_cred - 12 < 0 THEN 0 ELSE street_cred - 12 END,
+            happiness = CASE WHEN happiness - 15 < 0 THEN 0 ELSE happiness - 15 END,
+            time_of_day = 'Evening'
+        WHERE id = ?
+    ");
+    $stmtUpdate->execute([$partialSalary, $energyCost, $energyCost, $char['id']]);
+
+    $msg = "You sneaked out of work at {$progress}% of shift! Oga issued a formal query! -12 Street Cred.";
+    logActivity($char['id'], 'work_abandon', $msg, $partialSalary, -$energyCost, -15);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'partial_pay' => $partialSalary,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
 if ($action === 'work') {
     if (!$char['current_job_id']) {
         jsonResponse(['success' => false, 'error' => 'You currently do not have a job. Apply for an available role first!'], 400);

@@ -349,21 +349,422 @@ const GameApp = {
         }
     },
 
+    // ====================================================
+    // INTERACTIVE WORK SHIFT SIMULATOR ENGINE
+    // ====================================================
+    shiftState: {
+        active: false,
+        timer: null,
+        totalSeconds: 45, // 45 seconds real-time for full 8-hour workday
+        elapsed: 0,
+        progress: 0,
+        job: null,
+        baseSalary: 0,
+        tips: 0,
+        bonuses: 0,
+        penalties: 0,
+        powerOn: true,
+        isAtDesk: true,
+        bladderLevel: 0,
+        crisesTriggered: {}
+    },
+
     async goToWork() {
+        if (!this.character || !this.character.current_job_id) {
+            this.notify("You don't have a job yet! Apply in the Careers tab.", 'error');
+            return;
+        }
+
         try {
-            const res = await fetch('api/character.php?action=go_to_work', { method: 'POST' });
+            const res = await fetch('api/character.php?action=start_shift');
+            const data = await res.json();
+            if (!data.success) {
+                this.playSfx('loss');
+                this.notify(data.error || 'Failed to start shift', 'error');
+                return;
+            }
+
+            this.playSfx('click');
+            this.startWorkShift(data.job, data.base_salary);
+        } catch (e) {
+            this.notify("Error connecting to workplace.", "error");
+        }
+    },
+
+    startWorkShift(job, baseSalary) {
+        this.shiftState = {
+            active: true,
+            timer: null,
+            totalSeconds: 45,
+            elapsed: 0,
+            progress: 0,
+            job: job,
+            baseSalary: parseFloat(baseSalary || 0),
+            tips: 0,
+            bonuses: 0,
+            penalties: 0,
+            powerOn: true,
+            isAtDesk: true,
+            bladderLevel: 10,
+            crisesTriggered: {}
+        };
+
+        // Open modal
+        const modal = document.getElementById('workShiftModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        document.getElementById('shiftJobTitle').textContent = job.title || 'Federal Ministry Officer';
+        this.updateShiftUI();
+
+        // Start 1-second clock loop
+        if (this.shiftState.timer) clearInterval(this.shiftState.timer);
+        this.shiftState.timer = setInterval(() => this.tickWorkShift(), 1000);
+    },
+
+    tickWorkShift() {
+        if (!this.shiftState.active) return;
+
+        // If power is out, progress pauses until resolved!
+        if (!this.shiftState.powerOn) {
+            document.getElementById('shiftStatusText').textContent = '⚡ BLACKOUT: Office computers dark. Turn on generator to resume work!';
+            return;
+        }
+
+        this.shiftState.elapsed += 1;
+        this.shiftState.progress = Math.min(100, Math.round((this.shiftState.elapsed / this.shiftState.totalSeconds) * 100));
+
+        // Gradual bladder pressure
+        this.shiftState.bladderLevel = Math.min(100, this.shiftState.bladderLevel + 2);
+
+        this.updateShiftUI();
+
+        // Check Milestone Crises
+        const p = this.shiftState.progress;
+
+        // 1. Client Walk-in Crisis at ~20%
+        if (p >= 20 && !this.shiftState.crisesTriggered['client']) {
+            this.shiftState.crisesTriggered['client'] = true;
+            this.triggerShiftCrisis('client');
+        }
+
+        // 2. Nature Calls (Pee / Stomach Rumbling) at ~45%
+        if (p >= 45 && !this.shiftState.crisesTriggered['pee']) {
+            this.shiftState.crisesTriggered['pee'] = true;
+            this.triggerShiftCrisis('pee');
+        }
+
+        // 3. NEPA Blackout at ~68%
+        if (p >= 68 && !this.shiftState.crisesTriggered['nepa']) {
+            this.shiftState.crisesTriggered['nepa'] = true;
+            this.triggerShiftCrisis('nepa');
+        }
+
+        // 4. Oga Boss Patrol at ~85%
+        if (p >= 85 && !this.shiftState.crisesTriggered['boss']) {
+            this.shiftState.crisesTriggered['boss'] = true;
+            this.triggerShiftCrisis('boss');
+        }
+
+        // 5. Shift Complete at 100%
+        if (p >= 100) {
+            clearInterval(this.shiftState.timer);
+            this.completeWorkShift();
+        }
+    },
+
+    updateShiftUI() {
+        const s = this.shiftState;
+        const p = s.progress;
+
+        // Virtual Clock Time (09:00 AM to 05:00 PM over 8 hours)
+        const totalMinutes = Math.round((p / 100) * (8 * 60)); // 0 to 480 mins
+        const hour = 9 + Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        const hour12 = hour > 12 ? hour - 12 : hour;
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const timeStr = `${String(hour12).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${ampm}`;
+
+        document.getElementById('shiftClockTime').textContent = timeStr;
+        document.getElementById('shiftTimeDisplay').textContent = `${s.elapsed}s / ${s.totalSeconds}s`;
+        document.getElementById('shiftProgressBar').style.width = `${p}%`;
+        document.getElementById('shiftPctText').textContent = `${p}%`;
+
+        // Accumulated Pay
+        const currentAccumulated = Math.max(0, Math.round((s.baseSalary * (p / 100)) + s.tips + s.bonuses - s.penalties));
+        document.getElementById('shiftAccPay').textContent = this.formatNaira(currentAccumulated);
+
+        // Environmental Indicators
+        const envPower = document.getElementById('shiftEnvPower');
+        const envPowerText = document.getElementById('shiftEnvPowerText');
+        if (s.powerOn) {
+            envPower.className = "p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-center gap-1.5";
+            envPowerText.textContent = "Power: ON";
+        } else {
+            envPower.className = "p-2.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+            envPowerText.textContent = "Power: ⚡ OUT";
+        }
+
+        const envBladder = document.getElementById('shiftEnvBladder');
+        const envBladderText = document.getElementById('shiftEnvBladderText');
+        if (s.bladderLevel >= 75) {
+            envBladder.className = "p-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+            envBladderText.textContent = "Bladder: 🚨 FULL";
+        } else {
+            envBladder.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
+            envBladderText.textContent = "Bladder: OK";
+        }
+
+        const envBoss = document.getElementById('shiftEnvBoss');
+        const envBossText = document.getElementById('shiftEnvBossText');
+        if (s.crisesTriggered['boss'] && !s.bossCrisisResolved) {
+            envBoss.className = "p-2.5 rounded-2xl bg-purple-50 border border-purple-300 text-purple-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+            envBossText.textContent = "Oga: AT DESK 👀";
+        } else {
+            envBoss.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
+            envBossText.textContent = "Oga: In Office";
+        }
+    },
+
+    triggerShiftCrisis(type) {
+        const crisisBox = document.getElementById('shiftCrisisCard');
+        if (!crisisBox) return;
+
+        this.playSfx('click');
+        crisisBox.classList.remove('hidden');
+
+        if (type === 'client') {
+            crisisBox.className = "rounded-2xl p-4 border bg-amber-50 border-amber-200 text-amber-950 animate-fade-up space-y-2.5";
+            crisisBox.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">👤</span>
+                    <div>
+                        <h4 class="font-extrabold text-xs text-amber-900">VIP Client Walk-in!</h4>
+                        <p class="text-[11px] text-amber-800">Alhaji Musa walks up to your desk demanding express tender clearance for his firm.</p>
+                    </div>
+                </div>
+                <div class="space-y-1.5 pt-1">
+                    <button onclick="GameApp.resolveShiftCrisis('client', 'polite')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
+                        <span>🤝 Attend respectfully & swiftly</span>
+                        <span class="text-[10px] text-emerald-700">+₦3,500 tip</span>
+                    </button>
+                    <button onclick="GameApp.resolveShiftCrisis('client', 'kola')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
+                        <span>😏 Request "Kola Nut" facilitation fee</span>
+                        <span class="text-[10px] text-amber-700">50/50: ₦5k OR reported!</span>
+                    </button>
+                    <button onclick="GameApp.resolveShiftCrisis('client', 'delay')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
+                        <span>⏳ Tell him system is down (Delay)</span>
+                        <span class="text-[10px] text-rose-700">Customer drama</span>
+                    </button>
+                </div>
+            `;
+        } else if (type === 'pee') {
+            crisisBox.className = "rounded-2xl p-4 border bg-sky-50 border-sky-200 text-sky-950 animate-fade-up space-y-2.5";
+            crisisBox.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">🚽</span>
+                    <div>
+                        <h4 class="font-extrabold text-xs text-sky-900">Nature is Calling Loudly!</h4>
+                        <p class="text-[11px] text-sky-800">Your stomach is rumbling from spicy breakfast street food! You desperately need the restroom.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="GameApp.resolveShiftCrisis('pee', 'go')" class="py-2.5 px-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center">
+                        🏃 Rush to Restroom (5s)
+                    </button>
+                    <button onclick="GameApp.resolveShiftCrisis('pee', 'hold')" class="py-2.5 px-3 bg-white hover:bg-sky-100 border border-sky-300 text-sky-900 rounded-xl font-bold text-xs transition active:scale-95 text-center">
+                        😣 Hold It Like a Soldier
+                    </button>
+                </div>
+            `;
+        } else if (type === 'nepa') {
+            this.shiftState.powerOn = false;
+            crisisBox.className = "rounded-2xl p-4 border bg-rose-50 border-rose-300 text-rose-950 animate-fade-up space-y-2.5";
+            crisisBox.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚡</span>
+                    <div>
+                        <h4 class="font-extrabold text-xs text-rose-900">NEPA Blackout – Work Halted!</h4>
+                        <p class="text-[11px] text-rose-800">Power just went out! Desktops are dead and ACs turned off. Productivity frozen.</p>
+                    </div>
+                </div>
+                <div class="space-y-1.5 pt-1">
+                    <button onclick="GameApp.resolveShiftCrisis('nepa', 'generator')" class="w-full py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-gears"></i> Pull Mikano Generator Cord (+Boss Praise)
+                    </button>
+                    <button onclick="GameApp.resolveShiftCrisis('nepa', 'wait')" class="w-full py-2 px-3 bg-white hover:bg-rose-100 border border-rose-200 text-rose-900 rounded-xl font-bold text-xs transition active:scale-95 text-center">
+                        🕯️ Wait in Dark with Rechargeable Fan
+                    </button>
+                </div>
+            `;
+        } else if (type === 'boss') {
+            crisisBox.className = "rounded-2xl p-4 border bg-purple-50 border-purple-200 text-purple-950 animate-fade-up space-y-2.5";
+            crisisBox.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">👔</span>
+                    <div>
+                        <h4 class="font-extrabold text-xs text-purple-900">Surprise Inspection by Oga!</h4>
+                        <p class="text-[11px] text-purple-800">The Managing Director is pacing down the aisle checking what everyone is doing.</p>
+                    </div>
+                </div>
+                <div class="pt-1">
+                    <button onclick="GameApp.resolveShiftCrisis('boss', 'busy')" class="w-full py-2.5 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-keyboard"></i> Type Spreadsheets Furiously & Greet "Good afternoon Sir!"
+                    </button>
+                </div>
+            `;
+        }
+    },
+
+    resolveShiftCrisis(type, choice) {
+        const crisisBox = document.getElementById('shiftCrisisCard');
+        if (crisisBox) crisisBox.classList.add('hidden');
+
+        const s = this.shiftState;
+
+        if (type === 'client') {
+            if (choice === 'polite') {
+                s.tips += 3500;
+                this.playSfx('money');
+                this.notify("Alhaji Musa smiled: 'You be good boy!' Handed you ₦3,500 tip.", 'success');
+            } else if (choice === 'kola') {
+                if (Math.random() > 0.45) {
+                    s.tips += 5000;
+                    this.playSfx('money');
+                    this.notify("Client slipped ₦5,000 kola nut cash into your drawer!", 'success');
+                } else {
+                    s.penalties += 2000;
+                    this.playSfx('loss');
+                    this.notify("Client yelled and reported you to Oga! ₦2,000 deducted from shift pay.", 'error');
+                }
+            } else {
+                s.penalties += 1000;
+                this.notify("Client grumbled loudly and walked out. Customer feedback score reduced.", 'info');
+            }
+        } else if (type === 'pee') {
+            if (choice === 'go') {
+                s.isAtDesk = false;
+                s.bladderLevel = 0;
+                document.getElementById('shiftStatusText').textContent = '🚽 In the restroom relieving yourself...';
+                this.notify("You dashed to the restroom. Huge relief! (+10 happiness).", 'info');
+                setTimeout(() => {
+                    s.isAtDesk = true;
+                    document.getElementById('shiftStatusText').textContent = '💼 Normal Duties: Attending to office files...';
+                }, 4000);
+            } else {
+                this.notify("You held it in painfully. Sweating profusely at your desk!", 'error');
+            }
+        } else if (type === 'nepa') {
+            s.powerOn = true;
+            if (choice === 'generator') {
+                s.bonuses += 2500;
+                this.playSfx('win');
+                this.notify("Generator roaring! Light restored. Oga gave you +₦2,500 initiative bonus!", 'success');
+            } else {
+                this.notify("Switched to rechargeable light. Working at half speed.", 'info');
+            }
+        } else if (type === 'boss') {
+            this.shiftState.bossCrisisResolved = true;
+            if (s.isAtDesk) {
+                s.bonuses += 3000;
+                this.playSfx('win');
+                this.notify("Oga nodded approvingly: 'Keep it up!' Performance bonus +₦3,000 unlocked!", 'success');
+            } else {
+                s.penalties += 2000;
+                this.playSfx('loss');
+                this.notify("Oga saw your empty desk: 'Where is this staff?!' ₦2,000 docked for absent desk.", 'error');
+            }
+        }
+
+        this.updateShiftUI();
+    },
+
+    shiftDoWorkTask() {
+        if (!this.shiftState.active || !this.shiftState.powerOn) return;
+        this.shiftState.elapsed += 2; // Speeds up progress
+        this.playSfx('click');
+        this.notify("Typing vigorously! Shift accelerated by 2 seconds.", 'info');
+        this.updateShiftUI();
+    },
+
+    shiftGoBathroom() {
+        if (!this.shiftState.active) return;
+        this.resolveShiftCrisis('pee', 'go');
+    },
+
+    abandonShiftPrompt() {
+        const confirmed = confirm("⚠️ ARE YOU SURE YOU WANT TO SNEAK OUT EARLY?\n\nOga and the security will catch you at the gate!\nYou will LOSE your daily salary and get issued a formal disciplinary query (-12 Street Cred)!");
+        if (!confirmed) return;
+
+        clearInterval(this.shiftState.timer);
+        this.shiftState.active = false;
+
+        const modal = document.getElementById('workShiftModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const formData = new FormData();
+        formData.append('progress', this.shiftState.progress);
+
+        fetch('api/character.php?action=abandon_shift', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                this.playSfx('loss');
+                this.notify(data.message, 'error');
+                this.fetchCharacter();
+            })
+            .catch(() => this.notify("Left work early.", "error"));
+    },
+
+    async completeWorkShift() {
+        this.shiftState.active = false;
+        clearInterval(this.shiftState.timer);
+
+        const modal = document.getElementById('workShiftModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const s = this.shiftState;
+        const formData = new FormData();
+        formData.append('tips', s.tips);
+        formData.append('bonuses', s.bonuses);
+        formData.append('penalties', s.penalties);
+
+        try {
+            const res = await fetch('api/character.php?action=finish_shift', { method: 'POST', body: formData });
             const data = await res.json();
             if (data.success) {
                 this.playSfx('money');
-                this.notify(data.message, 'success');
+                
+                // Show summary receipt modal
+                const sumModal = document.getElementById('shiftSummaryModal');
+                document.getElementById('sumBasePay').textContent = this.formatNaira(s.baseSalary);
+                document.getElementById('sumTips').textContent = `+${this.formatNaira(s.tips)}`;
+                document.getElementById('sumBonus').textContent = `+${this.formatNaira(s.bonuses)}`;
+                document.getElementById('sumPenalties').textContent = `-${this.formatNaira(s.penalties)}`;
+                document.getElementById('sumNetPay').textContent = this.formatNaira(data.final_pay);
+
+                if (sumModal) {
+                    sumModal.classList.remove('hidden');
+                    sumModal.classList.add('flex');
+                }
+
                 await this.fetchCharacter();
             } else {
-                this.playSfx('loss');
-                this.notify(data.error, 'error');
+                this.notify(data.error || 'Failed to close shift', 'error');
             }
-        } catch (e) {
-            this.notify("Work commute error", "error");
+        } catch(e) {
+            this.notify("Error closing shift.", "error");
         }
+    },
+
+    closeShiftSummary() {
+        const sumModal = document.getElementById('shiftSummaryModal');
+        if (sumModal) {
+            sumModal.classList.add('hidden');
+            sumModal.classList.remove('flex');
+        }
+        this.notify("Shift ended! Heading home for the evening.", 'success');
     },
 
     async advanceDay() {

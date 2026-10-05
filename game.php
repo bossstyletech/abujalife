@@ -1389,6 +1389,132 @@ if (!$char) {
         </div>
     </div>
 
+    <!-- ========================================================
+         8. INTERACTIVE WORK SHIFT SIMULATOR MODAL
+         ======================================================== -->
+    <div id="workShiftModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <!-- Shift Header -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <div>
+                        <h3 id="shiftJobTitle" class="text-base font-extrabold text-slate-900 leading-tight">Federal Ministry Officer</h3>
+                        <span class="text-xs text-slate-500 font-mono font-bold flex items-center gap-1.5 mt-0.5">
+                            <span id="shiftPulseDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span id="shiftClockTime">09:00 AM</span> • <span id="shiftTimeDisplay">45s shift</span>
+                        </span>
+                    </div>
+                </div>
+                <!-- Live Pay Earned Counter -->
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Accumulated Pay</span>
+                    <span id="shiftAccPay" class="font-mono font-bold text-base text-emerald-600">₦0.00</span>
+                </div>
+            </div>
+
+            <!-- Shift Progress Bar & Workplace Status -->
+            <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold text-slate-700">
+                    <span id="shiftStatusText">💼 Normal Duties: Attending to office files...</span>
+                    <span id="shiftPctText" class="font-mono text-emerald-600 font-extrabold">0%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
+                    <div id="shiftProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                    <span>09:00 AM (Clock In)</span>
+                    <span>01:00 PM (Lunch)</span>
+                    <span>05:00 PM (Clock Out)</span>
+                </div>
+            </div>
+
+            <!-- Shift Environment & Vitals Indicators -->
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div id="shiftEnvPower" class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-xs text-emerald-600"></i> <span id="shiftEnvPowerText">Power: ON</span>
+                </div>
+                <div id="shiftEnvBladder" class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-restroom text-xs text-sky-600"></i> <span id="shiftEnvBladderText">Bladder: OK</span>
+                </div>
+                <div id="shiftEnvBoss" class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-user-tie text-xs text-slate-600"></i> <span id="shiftEnvBossText">Oga: Busy</span>
+                </div>
+            </div>
+
+            <!-- DYNAMIC MID-SHIFT CRISIS CARD (Client, NEPA, Pee/Bathroom, Boss Inspection) -->
+            <div id="shiftCrisisCard" class="hidden rounded-2xl p-4 border animate-fade-up space-y-3">
+                <!-- Dynamically populated via GameApp.triggerShiftCrisis() -->
+            </div>
+
+            <!-- Routine Desktop Actions (Active when no blocking crisis) -->
+            <div id="shiftRoutineActions" class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+                <span class="text-[11px] font-bold text-slate-700 block">Workplace Desk Quick Actions:</span>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="GameApp.shiftDoWorkTask()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-keyboard text-emerald-600"></i> Process Files (+Speed)
+                    </button>
+                    <button onclick="GameApp.shiftGoBathroom()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-person-running text-sky-600"></i> Use Restroom (Pee)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Early Departure Button -->
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] text-slate-400 leading-tight">Leaving early has severe consequences: docked salary & query!</span>
+                <button onclick="GameApp.abandonShiftPrompt()" class="py-2 px-3.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-bold text-xs rounded-xl transition active:scale-95 whitespace-nowrap">
+                    <i class="fa-solid fa-door-open mr-1"></i> Sneak Out Early
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         9. SHIFT SUMMARY DIALOG MODAL
+         ======================================================== -->
+    <div id="shiftSummaryModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-fade-up text-center space-y-4">
+            <div id="shiftSummaryIcon" class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-2xl shadow-sm">
+                🎉
+            </div>
+            <div>
+                <h3 id="shiftSummaryTitle" class="text-lg font-extrabold text-slate-900">Work Shift Officially Closed!</h3>
+                <p id="shiftSummarySubtitle" class="text-xs text-slate-500 mt-1">Full 8-hour shift logged. Here is your daily payroll breakdown:</p>
+            </div>
+
+            <!-- Breakdown Receipt Card -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-2 text-left font-medium">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Base Daily Salary:</span>
+                    <strong id="sumBasePay" class="font-mono text-slate-900">₦0.00</strong>
+                </div>
+                <div class="flex justify-between text-emerald-700">
+                    <span>Client Tips & Gits:</span>
+                    <strong id="sumTips" class="font-mono">+₦0.00</strong>
+                </div>
+                <div class="flex justify-between text-blue-700">
+                    <span>Boss Performance Bonus:</span>
+                    <strong id="sumBonus" class="font-mono">+₦0.00</strong>
+                </div>
+                <div class="flex justify-between text-rose-700">
+                    <span>Disciplinary Deductions:</span>
+                    <strong id="sumPenalties" class="font-mono">-₦0.00</strong>
+                </div>
+                <div class="border-t border-slate-200 pt-2 flex justify-between font-bold text-sm text-slate-900">
+                    <span>Net Paid to Wallet:</span>
+                    <strong id="sumNetPay" class="font-mono text-emerald-600 text-base">₦0.00</strong>
+                </div>
+            </div>
+
+            <button onclick="GameApp.closeShiftSummary()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
+                Collect Pay & Head Home (Evening)
+            </button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="assets/js/world3d.js"></script>
     <script src="assets/js/phone.js"></script>
