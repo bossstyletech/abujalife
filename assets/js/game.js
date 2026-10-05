@@ -93,6 +93,8 @@ const GameApp = {
         await this.fetchCharacter();
         this.switchTab('overview');
         this.checkForRandomEvent();
+        this.checkWeather();
+        this.calculateAgentFees();
 
         // Initialize 3D Workplace & House World
         if (window.World3D) {
@@ -200,6 +202,8 @@ const GameApp = {
         this.updateStatBar('barHappiness', 'valHappiness', c.happiness, 100, '%');
         this.updateStatBar('barIntelligence', 'valIntelligence', c.intelligence, 100, ' IQ');
         this.updateStatBar('barStreetCred', 'valStreetCred', c.street_cred, 100, ' Cred');
+
+        this.checkSapaStatus();
     },
 
     updateStatBar(barId, valId, value, max = 100, unit = '%') {
@@ -266,6 +270,9 @@ const GameApp = {
 
         if (tabId === 'jobs') this.loadJobs();
         if (tabId === 'hustles') this.loadHustles();
+        if (tabId === 'transport') this.checkWeather();
+        if (tabId === 'social') { this.checkConnections(); this.checkDecemberEvent(); }
+        if (tabId === 'economy') { this.checkSapaStatus(); this.calculateAgentFees(); }
         if (tabId === 'realestate') this.loadRealEstate();
         if (tabId === 'vehicles') this.loadVehicles();
         if (tabId === 'lifestyle') this.loadLifestyle();
@@ -1102,6 +1109,352 @@ const GameApp = {
         const res = await fetch('api/auth.php?action=logout');
         const data = await res.json();
         window.location.href = data.redirect || 'index.php';
+    },
+
+    // ====================================================
+    // WEATHER & FLOOD SYSTEM
+    // ====================================================
+    weatherState: { isRaining: false, floodLevel: 0, fareMultiplier: 1 },
+
+    async checkWeather() {
+        try {
+            const res = await fetch('api/street.php?action=flash_flood');
+            const data = await res.json();
+            if (!data.success) return;
+            
+            this.weatherState = {
+                isRaining: data.is_raining,
+                floodLevel: data.flood_level,
+                fareMultiplier: data.danfo_fare_multiplier || 1
+            };
+            
+            const banner = document.getElementById('weatherBanner');
+            const icon = document.getElementById('weatherIcon');
+            const statusTitle = document.getElementById('weatherStatusTitle');
+            const statusDesc = document.getElementById('weatherStatusDesc');
+            const floodBadge = document.getElementById('weatherFloodBadge');
+            const fareDisplay = document.getElementById('danfoFareDisplay');
+            
+            if (data.is_raining) {
+                if (banner) { banner.classList.remove('hidden'); }
+                if (icon) icon.textContent = data.flood_level >= 2 ? '🌊' : '🌧️';
+                if (statusTitle) statusTitle.textContent = data.flood_level >= 2 ? '⚠️ Flood Alert!' : '🌧️ Rain Falling - FCT';
+                if (statusDesc) statusDesc.textContent = data.description;
+                if (floodBadge) { floodBadge.textContent = `FLOOD LV.${data.flood_level}`; floodBadge.classList.toggle('hidden', data.flood_level === 0); }
+                if (fareDisplay) fareDisplay.innerHTML = `Base Fare: <s>₦500</s> | <span class="text-rose-600 font-extrabold">RAIN FARE: ₦${500 * data.danfo_fare_multiplier}</span>`;
+            } else {
+                if (banner) banner.classList.add('hidden');
+                if (icon) icon.textContent = '☀️';
+                if (statusTitle) statusTitle.textContent = 'Clear Skies';
+                if (statusDesc) statusDesc.textContent = 'Normal fares apply. No flood risk.';
+                if (fareDisplay) fareDisplay.innerHTML = 'Base Fare: <strong>₦500</strong> | Rain: ₦1,000';
+            }
+        } catch(e) { console.error('Weather check failed', e); }
+    },
+
+    // ====================================================
+    // TRANSPORT MECHANICS
+    // ====================================================
+    async playDanfoRush() {
+        const formData = new FormData();
+        formData.append('is_raining', this.weatherState.isRaining ? 1 : 0);
+        try {
+            const res = await fetch('api/street.php?action=danfo_rush', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(data.won ? 'win' : 'loss');
+                this.notify(data.message, data.won ? 'success' : 'error');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Action failed', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    lastmaEventData: null,
+
+    async triggerLastmaCheckpoint() {
+        try {
+            const res = await fetch('api/street.php?action=lastma_checkpoint', { method: 'POST' });
+            const data = await res.json();
+            if (!data.success) { this.notify(data.error || 'Error', 'error'); return; }
+            
+            if (data.event_triggered) {
+                this.lastmaEventData = data;
+                const modal = document.getElementById('lastmaModal');
+                const violation = document.getElementById('lastmaViolation');
+                const desc = document.getElementById('lastmaDesc');
+                if (violation) violation.textContent = data.violation;
+                if (desc) desc.textContent = 'LASTMA officer signals you to pull over. How do you handle this?';
+                if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            } else {
+                this.notify('Checkpoint cleared! No violations detected. Safe travels!', 'success');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async resolveLastma(choice) {
+        const modal = document.getElementById('lastmaModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        const formData = new FormData();
+        formData.append('negotiation_choice', choice);
+        try {
+            const res = await fetch('api/street.php?action=lastma_checkpoint', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                const isGood = (data.cash_change >= 0 && data.cred_change >= 0) || (data.cred_change > 0);
+                this.playSfx(isGood ? 'win' : 'loss');
+                this.notify(data.message, isGood ? 'success' : 'error');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Failed', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async takeOkadaRide() {
+        try {
+            const res = await fetch('api/street.php?action=okada_ride', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                const isBad = data.outcome === 'bad';
+                this.playSfx(isBad ? 'loss' : 'win');
+                this.notify(data.message, isBad ? 'error' : 'success');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async buyFromHawker(item) {
+        const formData = new FormData();
+        formData.append('item', item);
+        try {
+            const res = await fetch('api/street.php?action=goslow_hawker', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('money');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async visitSuyaSpot() {
+        try {
+            const res = await fetch('api/street.php?action=suya_spot', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                this.notify(data.message, 'success');
+                if (data.contact_met) { setTimeout(() => this.notify('🤝 New Connection Made! Check your network.', 'info'), 1500); }
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async dealWithAgbero(choice) {
+        const formData = new FormData();
+        formData.append('choice', choice);
+        try {
+            const res = await fetch('api/street.php?action=agbero_encounter', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(data.cost > 5000 ? 'loss' : 'click');
+                this.notify(data.message, data.cost > 5000 ? 'error' : 'success');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    // ====================================================
+    // SOCIAL LIFE MECHANICS
+    // ====================================================
+    async owambeAction(action2) {
+        const formData = new FormData();
+        formData.append('action2', action2);
+        if (action2 === 'spray_money') {
+            const amt = document.getElementById('sprayAmount')?.value || 10000;
+            formData.append('spray_amount', amt);
+        }
+        try {
+            const res = await fetch('api/street.php?action=owambe_party', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(action2 === 'spray_money' ? 'money' : 'win');
+                this.notify(data.message, 'success');
+                if (data.connections_made) { setTimeout(() => this.notify('🤝 Oga Connection Unlocked! You know somebody now.', 'info'), 1500); }
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async attendReligiousService(type) {
+        const formData = new FormData();
+        formData.append('type', type);
+        try {
+            const res = await fetch('api/street.php?action=religious_service', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                this.notify(data.message, 'success');
+                if (data.job_tip) { setTimeout(() => this.notify(`💼 Job Tip from congregation: ${data.job_tip}`, 'info'), 2000); }
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async ajoAction(action2) {
+        const formData = new FormData();
+        formData.append('action2', action2);
+        try {
+            const res = await fetch('api/street.php?action=ajo_contribution', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(data.payout_amount > 0 ? 'money' : 'click');
+                this.notify(data.message, 'success');
+                const ajoStatus = document.getElementById('ajoStatus');
+                if (ajoStatus && data.ajo_status) ajoStatus.textContent = data.ajo_status;
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    async nepaAction(action2) {
+        const formData = new FormData();
+        formData.append('action2', action2);
+        try {
+            const res = await fetch('api/street.php?action=nepa_roulette', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                const isGood = data.power_status === 'on';
+                this.playSfx(isGood ? 'win' : 'loss');
+                this.notify(data.message, isGood ? 'success' : 'error');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    // ====================================================
+    // STREET ECONOMY MECHANICS
+    // ====================================================
+    async playHagglingGame() {
+        const market = document.getElementById('hagglingMarket')?.value || 'balogun';
+        const item = document.getElementById('hagglingItem')?.value || 'phone';
+        const pct = parseInt(document.getElementById('hagglingSlider')?.value || 60);
+        const formData = new FormData();
+        formData.append('market', market);
+        formData.append('item_type', item);
+        formData.append('offer_percentage', pct);
+        try {
+            const res = await fetch('api/street.php?action=market_haggle', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                const won = data.haggle_result === 'accepted';
+                this.playSfx(won ? 'money' : 'loss');
+                this.notify(data.message, won ? 'success' : 'error');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Error', 'error');
+            }
+        } catch(e) { this.notify('Connection error', 'error'); }
+    },
+
+    checkSapaStatus() {
+        if (!this.character) return;
+        const cash = parseFloat(this.character.cash || 0);
+        const bank = parseFloat(this.character.bank || 0);
+        const total = cash + bank;
+        let sapaLevel = 0;
+        let sapaText = 'No Sapa';
+        let advice = 'You are financially stable. Keep grinding!';
+        
+        if (total < 5000) { sapaLevel = 100; sapaText = '😩 MAXIMUM SAPA'; advice = 'Omo you don finish! Run POS or collect Ajo payout now!'; }
+        else if (total < 20000) { sapaLevel = 85; sapaText = '😰 Deep Sapa'; advice = 'Deep sapa mode. Buy Gala and pure water. Premium spots locked!'; }
+        else if (total < 50000) { sapaLevel = 65; sapaText = '😟 Moderate Sapa'; advice = 'Surviving. Avoid big spends. Run side hustle urgently.'; }
+        else if (total < 150000) { sapaLevel = 40; sapaText = '😐 Mild Sapa'; advice = 'Manageable but tight. Keep a side gig running.'; }
+        else if (total < 500000) { sapaLevel = 15; sapaText = '🙂 Normal'; advice = 'You are comfortable. Keep building!'; }
+        else { sapaLevel = 0; sapaText = '💰 No Sapa'; advice = 'Oga! You are doing well. Stay grinding!'; }
+        
+        // Update displays
+        const sapaBar = document.getElementById('sapaBar');
+        const sapaLevelText = document.getElementById('sapaLevelText');
+        const sapaAdvice = document.getElementById('sapaAdvice');
+        const pillSapaVal = document.getElementById('pillSapaVal');
+        const barSapa = document.getElementById('barSapa');
+        const valSapa = document.getElementById('valSapa');
+        
+        if (sapaBar) sapaBar.style.width = sapaLevel + '%';
+        if (sapaLevelText) sapaLevelText.textContent = sapaText;
+        if (sapaAdvice) sapaAdvice.textContent = advice;
+        if (pillSapaVal) pillSapaVal.textContent = sapaLevel > 50 ? '😩 SAPA' : 'OK';
+        if (barSapa) barSapa.style.width = sapaLevel + '%';
+        if (valSapa) valSapa.textContent = sapaText;
+    },
+
+    calculateAgentFees() {
+        const sel = document.getElementById('rentPropertySelect');
+        if (!sel) return;
+        const yearlyRent = parseFloat(sel.value);
+        const twoYears = yearlyRent * 2;
+        const agent = yearlyRent * 0.1;
+        const agreement = yearlyRent * 0.05;
+        const total = twoYears + agent + agreement;
+        
+        const fmt = (n) => '₦' + n.toLocaleString('en-NG', {minimumFractionDigits:0});
+        const calcRent = document.getElementById('calcRent');
+        const calcAgent = document.getElementById('calcAgent');
+        const calcAgreement = document.getElementById('calcAgreement');
+        const calcTotal = document.getElementById('calcTotal');
+        if (calcRent) calcRent.textContent = fmt(twoYears);
+        if (calcAgent) calcAgent.textContent = fmt(agent);
+        if (calcAgreement) calcAgreement.textContent = fmt(agreement);
+        if (calcTotal) calcTotal.textContent = fmt(total);
+    },
+
+    checkConnections() {
+        if (!this.character) return;
+        const cred = parseInt(this.character.street_cred || 0);
+        let msg = '';
+        if (cred >= 80) msg = '👑 Oga level! You have deep connections. VIP clubs & government contracts open.';
+        else if (cred >= 50) msg = '🤝 Good network. Mid-level jobs & lounge access available.';
+        else if (cred >= 25) msg = '📞 Some contacts. Attend more parties & church to build stronger network.';
+        else msg = '😶 No connections yet. Attend Owambe and religious services to build your network!';
+        
+        const display = document.getElementById('connectionsDisplay');
+        if (display) display.textContent = msg;
+        this.notify(msg, 'info');
+    },
+
+    checkDecemberEvent() {
+        const month = new Date().getMonth() + 1; // 1-12
+        const badge = document.getElementById('decemberBadge');
+        const statusEl = document.getElementById('decemberStatus');
+        if (month === 12) {
+            if (badge) badge.classList.remove('hidden');
+            if (statusEl) statusEl.textContent = '🎄 DECEMBER IS HERE! Prices are 2x. IJGB crowd everywhere. Concerts, suya joints packed. Go spray money!';
+            this.notify('🎄 December IJGB Season Active! Economy inflated. Party hard!', 'info');
+        } else {
+            if (badge) badge.classList.add('hidden');
+            const monthsUntilDec = month < 12 ? 12 - month : 12;
+            if (statusEl) statusEl.textContent = `December IJGB season coming in ${monthsUntilDec} month(s). Economy will inflate. Save up for the season!`;
+            this.notify(`December season in ${monthsUntilDec} month(s). Save up!`, 'info');
+        }
     }
 };
 

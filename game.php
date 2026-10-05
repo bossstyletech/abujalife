@@ -88,6 +88,16 @@ if (!$char) {
     <!-- Main Workspace (Layered on Clean White Background) -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
+        <!-- Weather Banner (Rain & Flood) -->
+        <div id="weatherBanner" class="hidden bg-gradient-to-r from-slate-700 to-blue-900 text-white rounded-2xl p-3 flex items-center gap-3 text-xs font-semibold">
+            <i class="fa-solid fa-cloud-rain text-blue-300 text-lg animate-pulse"></i>
+            <div class="flex-1">
+                <span class="font-extrabold text-sm block" id="weatherTitle">🌧️ Heavy Rain Alert – FCT!</span>
+                <span id="weatherDesc" class="text-blue-200">Danfo fares have doubled. Flooded roads slowing traffic. Buy Pure Water from hawkers.</span>
+            </div>
+            <span id="weatherFloodBadge" class="px-2 py-1 rounded-full bg-rose-500 text-white text-[10px] font-bold">FLOOD LV.2</span>
+        </div>
+
         <!-- ========================================================
              1. CENTRAL 3D ROTATABLE WORKPLACE & RESIDENCE SHOWCASE
              ======================================================== -->
@@ -207,6 +217,15 @@ if (!$char) {
             </button>
             <button id="btn-tab-hustles" onclick="GameApp.switchTab('hustles')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
                 Street Hustles
+            </button>
+            <button id="btn-tab-transport" onclick="GameApp.switchTab('transport')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
+                🚌 Lagos Streets
+            </button>
+            <button id="btn-tab-social" onclick="GameApp.switchTab('social')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
+                🎉 Social Life
+            </button>
+            <button id="btn-tab-economy" onclick="GameApp.switchTab('economy')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
+                💰 Street Economy
             </button>
             <button id="btn-tab-realestate" onclick="GameApp.switchTab('realestate')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
                 Real Estate
@@ -397,6 +416,302 @@ if (!$char) {
             </div>
         </section>
 
+        <!-- TRANSPORT TAB -->
+        <section id="tab-transport" class="game-tab-content hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-slate-900">🚌 Abuja Street Transport & Commuting</h3>
+                <p class="text-xs text-slate-500">Navigate Danfo buses, LASTMA checkpoints, Okadas, and Go-Slow traffic like a true FCT citizen.</p>
+            </div>
+            
+            <!-- Weather Status Card -->
+            <div id="transportWeatherCard" class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-xl">
+                        <span id="weatherIcon">☀️</span>
+                    </div>
+                    <div>
+                        <h4 id="weatherStatusTitle" class="font-bold text-sm text-slate-900">Clear Skies</h4>
+                        <p id="weatherStatusDesc" class="text-xs text-slate-500">Normal fares apply across FCT.</p>
+                    </div>
+                </div>
+                <button onclick="GameApp.checkWeather()" class="text-xs text-slate-500 hover:text-slate-900 transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Danfo Rush -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-white text-lg mb-3">🚐</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Danfo Rush Hour</h4>
+                    <p class="text-xs text-slate-500 mb-3">Race to grab a seat in a yellow Danfo during rush hour. Fares double when it rains!</p>
+                    <div id="danfoFareDisplay" class="text-xs font-bold text-amber-700 mb-3">Base Fare: ₦500 | Rain: ₦1,000</div>
+                    <button onclick="GameApp.playDanfoRush()" class="w-full py-2.5 bg-yellow-500 hover:bg-yellow-400 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                        🏃 Rush to Board!
+                    </button>
+                </div>
+                
+                <!-- LASTMA Checkpoint -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-700 text-lg mb-3">🚦</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">LASTMA Checkpoint</h4>
+                    <p class="text-xs text-slate-500 mb-3">Private car drivers face random checkpoints. Minor violation? Negotiate or pay fine.</p>
+                    <button onclick="GameApp.triggerLastmaCheckpoint()" class="w-full py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                        🚗 Drive Through Checkpoint
+                    </button>
+                </div>
+                
+                <!-- Okada Ride -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-800 flex items-center justify-center text-white text-lg mb-3">🏍️</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Okada Express</h4>
+                    <p class="text-xs text-slate-500 mb-3">Fast travel via motorcycle. Risk getting dropped in a puddle or stopped on banned highways!</p>
+                    <button onclick="GameApp.takeOkadaRide()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                        🏍️ Hop On Okada!
+                    </button>
+                </div>
+                
+                <!-- Go-Slow Hawkers -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-700 text-lg mb-3">🌯</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Go-Slow Hawkers</h4>
+                    <p class="text-xs text-slate-500 mb-2">Stuck in traffic? Buy snacks from fast-moving hawkers through your window!</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="GameApp.buyFromHawker('gala')" class="py-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-900 font-bold text-[11px] rounded-xl transition active:scale-95">🌭 Gala ₦300</button>
+                        <button onclick="GameApp.buyFromHawker('plantain_chips')" class="py-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-900 font-bold text-[11px] rounded-xl transition active:scale-95">🍟 Plantain ₦200</button>
+                        <button onclick="GameApp.buyFromHawker('lacasera')" class="py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 font-bold text-[11px] rounded-xl transition active:scale-95">🥤 Lacasera ₦250</button>
+                        <button onclick="GameApp.buyFromHawker('purewater')" class="py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 font-bold text-[11px] rounded-xl transition active:scale-95">💧 Pure Water ₦50</button>
+                    </div>
+                </div>
+                
+                <!-- Late Night Suya -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center text-red-700 text-lg mb-3">🍢</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Late-Night Suya Spot</h4>
+                    <p class="text-xs text-slate-500 mb-3">Open after 8PM only. Best stat boost in the game. A social hub for networking in Abuja!</p>
+                    <button onclick="GameApp.visitSuyaSpot()" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                        🔥 Order Suya & Relax
+                    </button>
+                </div>
+                
+                <!-- Agbero Encounter -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-200 flex items-center justify-center text-slate-700 text-lg mb-3">😤</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Agbero Encounter</h4>
+                    <p class="text-xs text-slate-500 mb-3">Drivers & Keke riders face daily agbero dues at bus stops. Pay or risk your mirrors!</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="GameApp.dealWithAgbero('pay_dues')" class="py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold text-[11px] rounded-xl transition active:scale-95">💵 Pay Dues</button>
+                        <button onclick="GameApp.dealWithAgbero('refuse')" class="py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 font-bold text-[11px] rounded-xl transition active:scale-95">🛡️ Refuse & Risk</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOCIAL LIFE TAB -->
+        <section id="tab-social" class="game-tab-content hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-slate-900">🎉 Abuja Social Life & Community</h3>
+                <p class="text-xs text-slate-500">Owambe parties, religious services, networking, and money spraying. "Who You Know" unlocks everything.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Owambe Party -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700 text-lg mb-3">👗</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Owambe Saturday</h4>
+                    <p class="text-xs text-slate-500 mb-3">Aso-Ebi invite! Attend, spray money on the dance floor, and network with Abuja's elite.</p>
+                    <div class="space-y-2">
+                        <button onclick="GameApp.owambeAction('attend')" class="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl transition active:scale-95">👗 Attend (₦5,000 Aso-Ebi)</button>
+                        <div class="flex gap-2">
+                            <input type="number" id="sprayAmount" placeholder="₦ to spray" value="10000" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                            <button onclick="GameApp.owambeAction('spray_money')" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs rounded-xl transition active:scale-95">💸 Spray!</button>
+                        </div>
+                        <button onclick="GameApp.owambeAction('network')" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95">🤝 Network & Mingle</button>
+                    </div>
+                </div>
+                
+                <!-- Religious Services -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 text-lg mb-3">🕌</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Religious Services</h4>
+                    <p class="text-xs text-slate-500 mb-3">Attend Friday Juma'at or Sunday service. Massive luck boost, health recovery & job tips from congregation.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="GameApp.attendReligiousService('jumat')" class="py-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold text-xs rounded-xl transition active:scale-95">🕌 Juma'at</button>
+                        <button onclick="GameApp.attendReligiousService('church')" class="py-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 font-bold text-xs rounded-xl transition active:scale-95">⛪ Church</button>
+                    </div>
+                </div>
+                
+                <!-- Ajo Thrift System -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-teal-100 flex items-center justify-center text-teal-700 text-lg mb-3">🏦</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Ajo Thrift Contribution</h4>
+                    <p class="text-xs text-slate-500 mb-3">Community banking. Contribute ₦5,000/week. After 12 weeks, collect your lump sum + 10% bonus!</p>
+                    <div id="ajoStatus" class="text-xs font-bold text-teal-700 mb-3">Not in any Ajo group yet.</div>
+                    <div class="space-y-2">
+                        <button onclick="GameApp.ajoAction('join')" class="w-full py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl transition active:scale-95">🤝 Join Ajo Group</button>
+                        <button onclick="GameApp.ajoAction('contribute')" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95">💵 Contribute This Week (₦5,000)</button>
+                        <button onclick="GameApp.ajoAction('check_payout')" class="w-full py-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs rounded-xl transition active:scale-95">💰 Check Payout Status</button>
+                    </div>
+                </div>
+                
+                <!-- NEPA Power Roulette -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-yellow-100 flex items-center justify-center text-yellow-700 text-xl mb-3">⚡</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">NEPA / Power Grid Roulette</h4>
+                    <p class="text-xs text-slate-500 mb-3">Electricity is never guaranteed. Buy generator fuel, use inverter, or just pray NEPA brings light.</p>
+                    <div class="space-y-2">
+                        <button onclick="GameApp.nepaAction('buy_fuel')" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs rounded-xl transition active:scale-95">⛽ Buy Generator Fuel (₦8-15k)</button>
+                        <button onclick="GameApp.nepaAction('use_inverter')" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95">🔋 Use Inverter</button>
+                        <button onclick="GameApp.nepaAction('pray_light')" class="w-full py-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 font-bold text-xs rounded-xl transition active:scale-95">🙏 Pray for Light (Risky!)</button>
+                        <button onclick="GameApp.nepaAction('buy_inverter')" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 font-bold text-xs rounded-xl transition active:scale-95">🏪 Buy Inverter System (₦120k)</button>
+                    </div>
+                </div>
+                
+                <!-- Who You Know -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-lg mb-3">👔</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">"Who You Know" Network</h4>
+                    <p class="text-xs text-slate-500 mb-3">Certain VIP clubs and high-paying jobs need connections. Network your way to the top.</p>
+                    <div id="connectionsDisplay" class="text-xs text-slate-600 mb-3">No Oga connections yet. Attend parties & church!</div>
+                    <button onclick="GameApp.checkConnections()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition active:scale-95">🔐 Check My Network Access</button>
+                </div>
+                
+                <!-- December IJGB Inflation -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-20 h-20 bg-red-600/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div class="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center text-red-700 text-lg mb-3">🎄</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">December IJGB Season</h4>
+                    <p class="text-xs text-slate-500 mb-3" id="decemberStatus">"I Just Got Back" season. Economy inflates massively. Elite parties & expensive concerts arrive!</p>
+                    <div id="decemberBadge" class="hidden px-3 py-1.5 bg-red-600 text-white text-xs font-bold rounded-full text-center mb-3">🔥 DECEMBER INFLATION ACTIVE</div>
+                    <button onclick="GameApp.checkDecemberEvent()" class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl transition active:scale-95">🎉 Check December Events</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STREET ECONOMY TAB -->
+        <section id="tab-economy" class="game-tab-content hidden">
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-slate-900">💰 Street Economy & Market Life</h3>
+                <p class="text-xs text-slate-500">Haggle at Balogun Market, manage sapa levels, run multiple hustles, and deal with housing agent fees.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Market Haggling -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm md:col-span-2">
+                    <div class="w-10 h-10 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-700 text-lg mb-3">🏪</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Market Haggling Mini-Game</h4>
+                    <p class="text-xs text-slate-500 mb-3">Accepting the first price marks you as a "mugu" and kills your street cred. Haggle hard!</p>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1">Market</label>
+                            <select id="hagglingMarket" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                                <option value="balogun">🛍️ Balogun Market</option>
+                                <option value="computer_village">💻 Computer Village</option>
+                                <option value="wuse_market">🥬 Wuse Market</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 block mb-1">Item Type</label>
+                            <select id="hagglingItem" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                                <option value="phone">📱 Phone (₦85k base)</option>
+                                <option value="clothes">👕 Clothes (₦15k base)</option>
+                                <option value="electronics">💻 Electronics (₦45k base)</option>
+                                <option value="food">🥬 Food Stuff (₦5k base)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-xs font-bold text-slate-700 block mb-1">Your Counter-Offer (% of asking price)</label>
+                        <div class="flex gap-2">
+                            <input type="range" id="hagglingSlider" min="10" max="100" value="60" class="flex-1" oninput="document.getElementById('hagglingPct').textContent = this.value + '%'">
+                            <span id="hagglingPct" class="text-xs font-bold text-emerald-700 w-10 text-right">60%</span>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>🔥 Sharpe Bargain</span><span>😅 Fair Offer</span><span>🤦 Mugu Price</span>
+                        </div>
+                    </div>
+                    <button onclick="GameApp.playHagglingGame()" class="w-full py-2.5 bg-orange-500 hover:bg-orange-400 text-white font-bold text-xs rounded-xl transition active:scale-95">🗣️ Start Haggling!</button>
+                </div>
+                
+                <!-- Sapa Meter -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-700 text-lg mb-3">😩</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Sapa (Financial Stress) Meter</h4>
+                    <p class="text-xs text-slate-500 mb-3">Your broke-o-meter. High sapa blocks premium locations. Eat street food to survive the month.</p>
+                    <div id="sapaDetailDisplay" class="space-y-2 mb-3">
+                        <div class="bg-violet-50 border border-violet-200 rounded-xl p-3">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-violet-800">Current Sapa Level:</span>
+                                <span id="sapaLevelText" class="text-violet-900">Loading...</span>
+                            </div>
+                            <div class="w-full bg-violet-100 h-2 rounded-full overflow-hidden mt-2">
+                                <div id="sapaBar" class="bg-violet-600 h-full rounded-full transition-all" style="width:0%"></div>
+                            </div>
+                            <p id="sapaAdvice" class="text-[10px] text-violet-700 mt-2">You're financially stable!</p>
+                        </div>
+                    </div>
+                    <button onclick="GameApp.checkSapaStatus()" class="w-full py-2 bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs rounded-xl transition active:scale-95">📊 Check Sapa Status</button>
+                </div>
+                
+                <!-- Housing Agent Fees -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-700 flex items-center justify-center text-white text-lg mb-3">🏠</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Agent Fee Reality Check</h4>
+                    <p class="text-xs text-slate-500 mb-3">Renting in Abuja means paying: 2 years rent upfront + Agent Fee (10%) + Agreement Fee (5%). Brutal!</p>
+                    <div id="agentFeeCalculator" class="space-y-2 text-xs">
+                        <select id="rentPropertySelect" onchange="GameApp.calculateAgentFees()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                            <option value="450000">Self-Contain, Lugbe (₦450k/yr)</option>
+                            <option value="1200000">2-Bed Flat, Kubwa (₦1.2M/yr)</option>
+                            <option value="3500000">3-Bed Apartment, Gwarinpa (₦3.5M/yr)</option>
+                            <option value="15000000">4-Bed Duplex, Wuse 2 (₦15M/yr)</option>
+                        </select>
+                        <div id="agentFeeBreakdown" class="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                            <div class="flex justify-between"><span>2 Years Rent:</span> <strong id="calcRent">₦900,000</strong></div>
+                            <div class="flex justify-between text-amber-700"><span>Agent Fee (10%):</span> <strong id="calcAgent">₦90,000</strong></div>
+                            <div class="flex justify-between text-rose-700"><span>Agreement Fee (5%):</span> <strong id="calcAgreement">₦45,000</strong></div>
+                            <div class="flex justify-between font-bold text-slate-900 border-t border-slate-200 pt-1 mt-1"><span>Total Upfront:</span> <strong id="calcTotal">₦1,035,000</strong></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Face-Me-I-Face-You Compound -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 text-lg mb-3">🏘️</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Face-Me-I-Face-You Life</h4>
+                    <p class="text-xs text-slate-500 mb-3">Starter compound life. Share bathrooms with nosey neighbors. Manage gossip and water-pumping disputes.</p>
+                    <div id="compoundEvents" class="space-y-2 text-xs text-slate-600">
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5">👀 Mama Ngozi is spreading gist about your rent arrears...</div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">💧 It's your turn to pump water from the borehole today.</div>
+                    </div>
+                </div>
+                
+                <!-- Mainland vs Island Analysis -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm md:col-span-2">
+                    <div class="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-700 text-lg mb-3">🌉</div>
+                    <h4 class="font-bold text-sm text-slate-900 mb-1">Abuja District Divide: Maitama/Asokoro vs Kubwa/Lugbe</h4>
+                    <p class="text-xs text-slate-500 mb-3">High-status districts give social prestige but cost triple. Mass districts mean long commutes but affordable hustle life.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                            <h5 class="font-bold text-xs text-amber-900 mb-2">💎 Maitama / Asokoro / Wuse 2</h5>
+                            <ul class="text-[11px] text-amber-800 space-y-1">
+                                <li>✅ +60 Social Status Boost</li>
+                                <li>✅ VIP Clubs & Embassies Access</li>
+                                <li>❌ 3x Higher Rent</li>
+                                <li>❌ Higher Lifestyle Maintenance</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                            <h5 class="font-bold text-xs text-slate-900 mb-2">🏘️ Kubwa / Lugbe / Nyanya</h5>
+                            <ul class="text-[11px] text-slate-700 space-y-1">
+                                <li>✅ Affordable Rent & Street Food</li>
+                                <li>✅ Best Hustle Opportunities</li>
+                                <li>❌ Long Commutes to CBD</li>
+                                <li>❌ -20 Social Status</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ========================================================
@@ -410,6 +725,8 @@ if (!$char) {
             <span class="flex items-center gap-1 text-amber-600"><i class="fa-solid fa-bolt text-[11px]"></i> <span id="pillEnergy">100%</span></span>
             <span class="text-slate-300">•</span>
             <span class="flex items-center gap-1 font-mono text-emerald-700 font-extrabold"><span id="pillCash">₦0</span></span>
+            <span class="text-slate-300">•</span>
+            <span class="flex items-center gap-1 text-violet-700" id="pillSapa"><i class="fa-solid fa-face-tired text-[11px]"></i> <span id="pillSapaVal">OK</span></span>
         </div>
         <div class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
             <i id="pillIcon" class="fa-solid fa-chevron-up text-[10px]"></i>
@@ -484,6 +801,17 @@ if (!$char) {
                     <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                         <div id="barStreetCred" class="bg-purple-600 h-full rounded-full transition-all duration-300" style="width: <?= min(100, $char['street_cred']) ?>%"></div>
                     </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between font-bold mb-1">
+                        <span class="text-violet-700"><i class="fa-solid fa-face-tired mr-1"></i> Financial Stress (Sapa)</span>
+                        <span id="valSapa" class="text-slate-600 font-mono">OK</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div id="barSapa" class="bg-violet-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-0.5">High sapa blocks premium spots. Eat street food to survive.</p>
                 </div>
             </div>
 
@@ -913,6 +1241,32 @@ if (!$char) {
                 <button onclick="GameApp.closeWardrobeModal()" class="w-1/3 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition">Cancel</button>
                 <button onclick="GameApp.saveWardrobeLook()" class="flex-1 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">Save & Apply Look in 3D</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         7. LASTMA CHECKPOINT NEGOTIATION MODAL
+         ======================================================== -->
+    <div id="lastmaModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl relative animate-fade-up">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl mb-4">
+                🚦
+            </div>
+            <h3 id="lastmaTitle" class="text-base font-bold text-slate-900 mb-1">LASTMA Traffic Checkpoint!</h3>
+            <p id="lastmaDesc" class="text-xs text-slate-500 mb-4">You've been flagged for a minor traffic violation. How do you handle this?</p>
+            <div id="lastmaViolation" class="bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs text-rose-800 font-medium mb-4"></div>
+            <div class="space-y-2">
+                <button onclick="GameApp.resolveLastma('bribe')" class="w-full p-3.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-2xl text-xs font-bold text-left transition active:scale-95">
+                    💵 <strong>"Settle" the Officer (₦3,000-₦8,000)</strong> — Quick resolution, no questions asked
+                </button>
+                <button onclick="GameApp.resolveLastma('argue')" class="w-full p-3.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-900 rounded-2xl text-xs font-bold text-left transition active:scale-95">
+                    😤 <strong>Argue Your Case</strong> — 50/50: free pass OR ₦5,000 court fine
+                </button>
+                <button onclick="GameApp.resolveLastma('receipt')" class="w-full p-3.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 rounded-2xl text-xs font-bold text-left transition active:scale-95">
+                    📄 <strong>Show Road Worthiness Receipt</strong> — 80% chance they let you go free
+                </button>
+            </div>
+            <button onclick="document.getElementById('lastmaModal').classList.add('hidden'); document.getElementById('lastmaModal').classList.remove('flex')" class="w-full mt-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-2xl transition">Drive Away (Escape)</button>
         </div>
     </div>
 
