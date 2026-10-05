@@ -9,13 +9,29 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ----------------------------------------------------
-// 1. Database Credentials (Configurable via ENV or defaults)
+// 1. Database Credentials (Configurable via ENV or Railway Defaults)
 // ----------------------------------------------------
-define('DB_HOST', getenv('DB_HOST') ?: '127.0.0.1');
-define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_NAME', getenv('DB_NAME') ?: 'abuja_life');
-define('DB_USER', getenv('DB_USER') ?: 'root');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+$rawHost = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+$rawPort = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+$rawName = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'abuja_life';
+$rawUser = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
+$rawPass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : '');
+
+// If Railway MYSQL_URL is provided, parse it directly
+if ($mysqlUrl = getenv('MYSQL_URL')) {
+    $parsed = parse_url($mysqlUrl);
+    if (!empty($parsed['host'])) $rawHost = $parsed['host'];
+    if (!empty($parsed['port'])) $rawPort = $parsed['port'];
+    if (!empty($parsed['path'])) $rawName = ltrim($parsed['path'], '/');
+    if (!empty($parsed['user'])) $rawUser = $parsed['user'];
+    if (isset($parsed['pass'])) $rawPass = $parsed['pass'];
+}
+
+define('DB_HOST', $rawHost);
+define('DB_PORT', $rawPort);
+define('DB_NAME', $rawName);
+define('DB_USER', $rawUser);
+define('DB_PASS', $rawPass);
 define('DB_CHARSET', 'utf8mb4');
 
 define('APP_NAME', 'Abuja Life');
