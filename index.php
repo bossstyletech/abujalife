@@ -127,24 +127,24 @@ if (getAuthUserId()) {
          CHARACTER CREATION WIZARD (ORIGIN QUIZ + FACE BUILDER + SIGNUP)
          ============================================================ -->
     <div id="wizardModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-fade-up">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-4 sm:p-6 md:p-8 shadow-2xl relative my-4 sm:my-8 animate-fade-up max-h-[92vh] overflow-y-auto">
             
-            <button onclick="closeWizard()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center absolute top-5 right-5 transition">
+            <button onclick="closeWizard()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center absolute top-4 sm:top-5 right-4 sm:right-5 transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
 
             <!-- Wizard Progress Steps -->
-            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
                     <span id="stepBadge1" class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">1</span>
                     <span class="text-xs font-bold text-slate-800">Origin Quiz</span>
                 </div>
-                <div class="h-0.5 flex-1 bg-slate-200 mx-3"></div>
+                <div class="h-0.5 flex-1 bg-slate-200 mx-2 sm:mx-3"></div>
                 <div class="flex items-center gap-2">
                     <span id="stepBadge2" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center">2</span>
                     <span class="text-xs font-bold text-slate-500">Appearance</span>
                 </div>
-                <div class="h-0.5 flex-1 bg-slate-200 mx-3"></div>
+                <div class="h-0.5 flex-1 bg-slate-200 mx-2 sm:mx-3"></div>
                 <div class="flex items-center gap-2">
                     <span id="stepBadge3" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center">3</span>
                     <span class="text-xs font-bold text-slate-500">Identity</span>
@@ -155,7 +155,7 @@ if (getAuthUserId()) {
             <div id="wizardStep1" class="space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-slate-900">How does your story in Abuja begin?</h2>
-                    <p class="text-xs text-slate-500 mt-1">Answer these 3 questions to calculate your starting family background and wealth.</p>
+                    <p class="text-xs text-slate-500 mt-1">Answer these questions to calculate your starting family background and wealth.</p>
                 </div>
 
                 <!-- Question 1 -->
@@ -202,99 +202,133 @@ if (getAuthUserId()) {
             </div>
 
             <!-- STEP 2: BITMOJI 3D CHARACTER STUDIO (HEAD TO FEET IN REAL TIME) -->
-            <div id="wizardStep2" class="space-y-4 hidden">
+            <!-- STEP 2: BITMOJI 3D CHARACTER STUDIO (CUSTOM NAME, FACE, THE FIT, KICKS) -->
+            <div id="wizardStep2" class="space-y-3.5 hidden">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-900">Abuja 3D Character & Wardrobe Studio</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Pick your base persona and switch 3D outfits in real time. Drag left/right to spin 360°!</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-900">Abuja 3D Character Studio</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Pick your face, dress your fit, and choose kicks in real time. Drag to rotate 360°!</p>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                        Live 3D Renders
+                        Live 3D Customizer
                     </span>
                 </div>
 
-                <!-- 1. CHOOSE YOUR ABUJA CHARACTER PERSONA (9 DISTINCT NIGERIAN ARCHETYPES) -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 mb-2">1. Choose Persona Archetype</label>
-                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-2">
-                        <button type="button" onclick="selectCharacter('tunde')" class="char-card p-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-center transition transform active:scale-95 group">
-                            <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Tunde</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Tech Bro</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('emeka')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Emeka</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Dealmaker</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('farouk')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Farouk</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Aristocrat</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('chidi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Chidi</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Creative</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('zainab')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Zainab</span>
-                            <span class="block text-[9px] text-slate-500 truncate">FinTech</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('blessing')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Blessing</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Curator</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('ibrahim')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ibrahim</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Oil & Gas</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('segun')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Segun</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Hustler</span>
-                        </button>
-                        <button type="button" onclick="selectCharacter('ngozi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ngozi</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Attorney</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Studio Layout: 3D Viewport on Left, Wardrobe Controls on Right -->
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                <!-- Studio Layout: 3D Viewport on Left (Desktop) / Top (Mobile), Controls on Right (Desktop) / Bottom (Mobile) -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5 items-start">
                     
-                    <!-- 3D Character Viewport Column -->
-                    <div class="md:col-span-5 flex flex-col items-center">
-                        <div id="bitmojiStudioContainer" class="w-full h-[460px] sm:h-[500px] rounded-3xl bg-slate-50 border border-slate-200/90 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
+                    <!-- 3D Character Viewport Column (Mobile responsive height) -->
+                    <div class="md:col-span-5 flex flex-col items-center w-full">
+                        <div id="bitmojiStudioContainer" class="w-full h-[340px] sm:h-[400px] md:h-[480px] rounded-3xl bg-slate-50 border border-slate-200/90 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
                             <div class="text-xs text-slate-400 animate-pulse">Initializing 3D Character Studio...</div>
                         </div>
 
                         <!-- 3D Interaction Helpers -->
-                        <div class="w-full mt-2.5 space-y-1.5">
-                            <button type="button" onclick="turnCharacterAround()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+                        <div class="w-full mt-2 space-y-1">
+                            <button type="button" onclick="turnCharacterAround()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-arrows-rotate text-xs"></i> Turn Around 180°
                             </button>
-                            <p class="text-[11px] text-slate-500 text-center font-medium">
+                            <p class="text-[10px] sm:text-[11px] text-slate-500 text-center font-medium">
                                 <i class="fa-solid fa-hand-pointer text-slate-400 mr-1"></i> Drag left/right to spin 360°
                             </p>
                         </div>
                     </div>
 
-                    <!-- Wardrobe & Customization Selectors Column -->
-                    <div class="md:col-span-7 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    <!-- Character Customization Controls Column -->
+                    <div class="md:col-span-7 flex flex-col w-full space-y-3">
                         
-                        <!-- 2. REAL-TIME 3D OUTFIT SELECTION -->
-                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="block text-xs font-bold text-slate-800">2. Wardrobe & Outfits</label>
+                        <!-- 1. CUSTOM NAME INPUT (Allows typing any name they want!) -->
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-bold text-slate-800">
+                                    <i class="fa-solid fa-signature text-emerald-600 mr-1"></i> Character Name
+                                </label>
+                                <span class="text-[10px] text-slate-400">Type any name you want</span>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="charStudioNameInput" 
+                                oninput="onStudioNameChanged(this.value)" 
+                                placeholder="Type your character name (e.g. Dapo Adeleke)..." 
+                                class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-500 shadow-sm transition"
+                            />
+                        </div>
+
+                        <!-- 2. CUSTOMIZER TABS (Face, The Fit, Kicks) -->
+                        <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold text-slate-600">
+                            <button type="button" onclick="switchStudioTab('face')" id="tabBtn-face" class="flex-1 py-2 rounded-xl bg-white text-emerald-950 font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-user text-xs"></i> <span>1. Face</span>
+                            </button>
+                            <button type="button" onclick="switchStudioTab('outfit')" id="tabBtn-outfit" class="flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-shirt text-xs"></i> <span>2. The Fit</span>
+                            </button>
+                            <button type="button" onclick="switchStudioTab('kicks')" id="tabBtn-kicks" class="flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-shoe-prints text-xs"></i> <span>3. Kicks</span>
+                            </button>
+                        </div>
+
+                        <!-- TAB 1: FACE & PERSONA SELECTION -->
+                        <div id="studioTab-face" class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-700">Choose Face & Persona:</span>
+                                <span class="text-[10px] text-slate-400">9 Nigerian Archetypes</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 max-h-[290px] sm:max-h-[320px] overflow-y-auto pr-1">
+                                <button type="button" onclick="selectCharacter('tunde')" class="char-card p-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-center transition transform active:scale-95 group">
+                                    <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Tunde</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Tech Bro</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('emeka')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Emeka</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Dealmaker</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('farouk')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Farouk</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Aristocrat</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('chidi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Chidi</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Creative</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('zainab')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Zainab</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">FinTech</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('blessing')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Blessing</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Curator</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('ibrahim')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ibrahim</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Oil & Gas</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('segun')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Segun</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Hustler</span>
+                                </button>
+                                <button type="button" onclick="selectCharacter('ngozi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                    <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
+                                    <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ngozi</span>
+                                    <span class="block text-[9px] text-slate-500 truncate">Attorney</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: THE FIT (OUTFITS & WARDROBE) -->
+                        <div id="studioTab-outfit" class="space-y-2 hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-700">Choose Outfit Variation:</span>
                                 <span class="text-[10px] text-emerald-700 font-bold">12 Variations</span>
                             </div>
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="grid grid-cols-2 gap-2 max-h-[290px] sm:max-h-[320px] overflow-y-auto pr-1">
                                 <button type="button" onclick="applyOutfit('hoodie')" class="outfit-btn p-2.5 rounded-xl border border-emerald-600 bg-emerald-50 text-xs font-bold text-emerald-950 transition text-left active:scale-95">
                                     🧥 Tech Bro Hoodie
                                 </button>
@@ -328,20 +362,23 @@ if (getAuthUserId()) {
                             </div>
                         </div>
 
-                        <!-- 3. FOOTWEAR & SHOES QUICK SELECTOR -->
-                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
-                            <label class="block text-xs font-bold text-slate-800 mb-2">3. Footwear Kicks</label>
+                        <!-- TAB 3: KICKS (FOOTWEAR) -->
+                        <div id="studioTab-kicks" class="space-y-2 hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-slate-700">Choose Footwear Kicks:</span>
+                                <span class="text-[10px] text-slate-400">Sneakers & Shoes</span>
+                            </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="applyOutfit('hoodie')" class="p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                <button type="button" onclick="applyOutfit('hoodie')" class="shoe-btn p-2.5 rounded-xl border border-emerald-600 bg-emerald-50 text-xs font-bold text-emerald-950 transition text-left active:scale-95">
                                     👟 Crisp White AF1s
                                 </button>
-                                <button type="button" onclick="applyOutfit('black_hoodie')" class="p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                <button type="button" onclick="applyOutfit('black_hoodie')" class="shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
                                     🏀 High-Top Air Jordans
                                 </button>
-                                <button type="button" onclick="applyOutfit('suit')" class="p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                <button type="button" onclick="applyOutfit('suit')" class="shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
                                     👞 Handcrafted Leather Loafers
                                 </button>
-                                <button type="button" onclick="applyOutfit('joggers')" class="p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                <button type="button" onclick="applyOutfit('joggers')" class="shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
                                     🩴 Designer Casual Slides
                                 </button>
                             </div>
@@ -356,7 +393,7 @@ if (getAuthUserId()) {
                         Back
                     </button>
                     <button onclick="goToWizardStep(3)" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
-                        Confirm 3D Looks & Proceed <i class="fa-solid fa-arrow-right ml-1"></i>
+                        Next: Email & Account Setup <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
             </div>
@@ -450,11 +487,44 @@ if (getAuthUserId()) {
         let calculatedArchetype = 'middle';
         let selectedCharacter = 'tunde';
         let selectedOutfit = 'hoodie';
+        let userCustomName = '';
+
+        function onStudioNameChanged(val) {
+            userCustomName = (val || '').trim();
+            if (window.avatarStudio) {
+                window.avatarStudio.setName(userCustomName);
+            }
+            const wizInput = document.getElementById('wizFullName');
+            if (wizInput) {
+                wizInput.value = userCustomName;
+            }
+        }
+
+        function switchStudioTab(tabId) {
+            ['face', 'outfit', 'kicks'].forEach(t => {
+                const panel = document.getElementById(`studioTab-${t}`);
+                const btn = document.getElementById(`tabBtn-${t}`);
+                if (t === tabId) {
+                    if (panel) panel.classList.remove('hidden');
+                    if (btn) {
+                        btn.className = "flex-1 py-2 rounded-xl bg-white text-emerald-950 font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95";
+                    }
+                } else {
+                    if (panel) panel.classList.add('hidden');
+                    if (btn) {
+                        btn.className = "flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95";
+                    }
+                }
+            });
+        }
 
         function selectCharacter(charId) {
             selectedCharacter = charId;
             if (window.avatarStudio) {
                 window.avatarStudio.setCharacter(charId);
+                if (userCustomName) {
+                    window.avatarStudio.setName(userCustomName);
+                }
             }
             document.querySelectorAll('.char-card').forEach(btn => {
                 const onclickAttr = btn.getAttribute('onclick') || '';
@@ -465,14 +535,15 @@ if (getAuthUserId()) {
                 }
             });
 
-            // Suggest character name and gender in Step 3
+            // Set character name suggestion if user hasn't typed custom name
             if (typeof window.getCharacterById === 'function') {
                 const char = window.getCharacterById(charId);
                 if (char) {
+                    const studioInput = document.getElementById('charStudioNameInput');
                     const nameInput = document.getElementById('wizFullName');
-                    if (nameInput && (!nameInput.value || nameInput.dataset.autoFilled === 'true')) {
-                        nameInput.value = char.name;
-                        nameInput.dataset.autoFilled = 'true';
+                    if (!userCustomName) {
+                        if (studioInput) studioInput.value = char.name;
+                        if (nameInput) nameInput.value = char.name;
                     }
                     const genderSelect = document.getElementById('wizGender');
                     if (genderSelect && char.gender) {
@@ -488,6 +559,7 @@ if (getAuthUserId()) {
                 window.avatarStudio.setOutfit(outfitKey);
             }
             highlightActiveOption('outfit-btn', outfitKey);
+            highlightActiveOption('shoe-btn', outfitKey);
         }
 
         function startCharacterCreationWizard() {
@@ -532,13 +604,12 @@ if (getAuthUserId()) {
                             height: 400,
                             showPlatform: true
                         });
-                        if (window.avatarStudio) {
-                            window.avatarStudio.setSkin(selectedSkin);
-                            highlightActiveOption('hair-btn', 'fade');
-                            highlightActiveOption('top-btn', 'hoodie');
-                            highlightActiveOption('bottom-btn', 'jeans_blue');
-                            highlightActiveOption('shoe-btn', 'sneakers');
-                            highlightActiveOption('acc-btn', 'none');
+                        const studioInput = document.getElementById('charStudioNameInput');
+                        if (userCustomName) {
+                            window.avatarStudio.setName(userCustomName);
+                            if (studioInput) studioInput.value = userCustomName;
+                        } else if (studioInput && studioInput.value) {
+                            window.avatarStudio.setName(studioInput.value);
                         }
                     } else if (window.avatarStudio) {
                         window.avatarStudio.resize();
@@ -546,6 +617,11 @@ if (getAuthUserId()) {
                 }, 60);
             } else if (step === 3) {
                 calculateArchetypeSummary();
+                const studioInput = document.getElementById('charStudioNameInput');
+                const wizName = document.getElementById('wizFullName');
+                if (studioInput && studioInput.value && wizName) {
+                    wizName.value = studioInput.value;
+                }
             }
         }
 

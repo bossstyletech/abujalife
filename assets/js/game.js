@@ -989,6 +989,20 @@ const GameApp = {
         }
     },
 
+    switchWardrobeTab(tabId) {
+        ['face', 'outfit', 'kicks'].forEach(t => {
+            const panel = document.getElementById(`gameWardrobeTab-${t}`);
+            const btn = document.getElementById(`gameTabBtn-${t}`);
+            if (t === tabId) {
+                if (panel) panel.classList.remove('hidden');
+                if (btn) btn.className = "flex-1 py-2 rounded-xl bg-white text-purple-950 font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95";
+            } else {
+                if (panel) panel.classList.add('hidden');
+                if (btn) btn.className = "flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95";
+            }
+        });
+    },
+
     setWardrobeCharacter(charId) {
         if (this.wardrobeStudio) {
             this.wardrobeStudio.setCharacter(charId);

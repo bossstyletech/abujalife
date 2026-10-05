@@ -751,145 +751,160 @@ if (!$char) {
          6. IN-GAME BITMOJI 3D WARDROBE STUDIO MODAL
          ======================================================== -->
     <div id="gameWardrobeModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-fade-up">
-            <button onclick="GameApp.closeWardrobeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center absolute top-5 right-5 transition">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full p-4 sm:p-6 md:p-8 shadow-2xl relative my-4 sm:my-8 animate-fade-up max-h-[92vh] overflow-y-auto">
+            <button onclick="GameApp.closeWardrobeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center absolute top-4 sm:top-5 right-4 sm:right-5 transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
 
-            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+            <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-900">Bitmoji 3D Wardrobe Studio</h3>
-                    <p class="text-xs text-slate-500">Change tops, jeans, kicks, and hairstyles in real time. Drag to rotate 360°!</p>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900">Bitmoji 3D Wardrobe Studio</h3>
+                    <p class="text-xs text-slate-500">Customize your face, outfit, and kicks in real time. Drag to rotate 360°!</p>
                 </div>
                 <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-50 text-purple-800 border border-purple-200">
                     Live 3D Customizer
                 </span>
             </div>
 
-            <!-- Studio Grid -->
-            <div class="space-y-4">
-                
-                <!-- 1. BASE PERSONA ARCHETYPE SELECTOR -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-800 mb-2">1. Character Persona</label>
-                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-2">
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('tunde')" class="wardrobe-char-card p-2 rounded-2xl border-2 border-purple-600 bg-purple-50 text-center transition transform active:scale-95 group">
-                            <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Tunde</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Tech Bro</span>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5 items-start">
+                <!-- 3D Canvas Column (Mobile responsive height) -->
+                <div class="md:col-span-5 flex flex-col items-center w-full">
+                    <div id="gameBitmojiContainer" class="w-full h-[340px] sm:h-[400px] md:h-[480px] rounded-3xl bg-slate-50 border border-slate-200 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
+                    <div class="w-full mt-2 space-y-1">
+                        <button type="button" onclick="GameApp.turnWardrobeAvatar()" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrows-rotate text-xs"></i> Turn Around 180°
                         </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('emeka')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Emeka</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Dealmaker</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('farouk')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Farouk</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Aristocrat</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('chidi')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Chidi</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Creative</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('zainab')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Zainab</span>
-                            <span class="block text-[9px] text-slate-500 truncate">FinTech</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('blessing')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Blessing</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Curator</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('ibrahim')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ibrahim</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Oil & Gas</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('segun')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Segun</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Hustler</span>
-                        </button>
-                        <button type="button" onclick="GameApp.setWardrobeCharacter('ngozi')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
-                            <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ngozi</span>
-                            <span class="block text-[9px] text-slate-500 truncate">Attorney</span>
-                        </button>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 text-center font-medium">
+                            <i class="fa-solid fa-hand-pointer text-slate-400 mr-1"></i> Drag left/right to spin 360°
+                        </p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-                    <!-- 3D Canvas Column -->
-                    <div class="md:col-span-5 flex flex-col items-center">
-                        <div id="gameBitmojiContainer" class="w-full h-[460px] sm:h-[500px] rounded-3xl bg-slate-50 border border-slate-200 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
-                        <div class="w-full mt-2.5 space-y-1.5">
-                            <button type="button" onclick="GameApp.turnWardrobeAvatar()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-arrows-rotate text-xs"></i> Turn Around 180°
+                <!-- Customization Controls Column -->
+                <div class="md:col-span-7 flex flex-col w-full space-y-3">
+                    
+                    <!-- CATEGORY TABS -->
+                    <div class="flex bg-slate-100 p-1 rounded-2xl text-xs font-bold text-slate-600">
+                        <button type="button" onclick="GameApp.switchWardrobeTab('face')" id="gameTabBtn-face" class="flex-1 py-2 rounded-xl bg-white text-purple-950 font-bold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-user text-xs"></i> <span>1. Face</span>
+                        </button>
+                        <button type="button" onclick="GameApp.switchWardrobeTab('outfit')" id="gameTabBtn-outfit" class="flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-shirt text-xs"></i> <span>2. The Fit</span>
+                        </button>
+                        <button type="button" onclick="GameApp.switchWardrobeTab('kicks')" id="gameTabBtn-kicks" class="flex-1 py-2 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-shoe-prints text-xs"></i> <span>3. Kicks</span>
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: FACE SELECTION -->
+                    <div id="gameWardrobeTab-face" class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-slate-700">Choose Face & Persona:</span>
+                            <span class="text-[10px] text-slate-400">9 Archetypes</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 max-h-[290px] sm:max-h-[320px] overflow-y-auto pr-1">
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('tunde')" class="wardrobe-char-card p-2 rounded-2xl border-2 border-purple-600 bg-purple-50 text-center transition transform active:scale-95 group">
+                                <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Tunde</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Tech Bro</span>
                             </button>
-                            <p class="text-[11px] text-slate-500 text-center font-medium">
-                                <i class="fa-solid fa-hand-pointer text-slate-400 mr-1"></i> Drag left/right to spin 360°
-                            </p>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('emeka')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Emeka</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Dealmaker</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('farouk')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Farouk</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Aristocrat</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('chidi')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Chidi</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Creative</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('zainab')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Zainab</span>
+                                <span class="block text-[9px] text-slate-500 truncate">FinTech</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('blessing')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Blessing</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Curator</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('ibrahim')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ibrahim</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Oil & Gas</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('segun')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Segun</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Hustler</span>
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeCharacter('ngozi')" class="wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
+                                <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.png" class="w-11 h-11 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
+                                <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ngozi</span>
+                                <span class="block text-[9px] text-slate-500 truncate">Attorney</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Customization Controls Column -->
-                    <div class="md:col-span-7 space-y-3.5 max-h-[500px] overflow-y-auto pr-1 text-xs">
-                        
-                        <!-- 2. REAL-TIME 3D OUTFITS -->
-                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="block font-bold text-slate-800">2. Wardrobe & Outfits</label>
-                                <span class="text-[10px] text-purple-700 font-bold">12 Variations</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('hoodie')" class="wardrobe-outfit-btn p-2 rounded-xl border border-purple-600 bg-purple-50 text-purple-950 font-bold transition text-left active:scale-95">
-                                    🧥 Tech Bro Hoodie
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('black_hoodie')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    🖤 Nightclub Black Streetwear
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('tshirt')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    👕 Casual White Tee & Denim
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('agbada')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    🪡 Royal Agbada & Fila Cap
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('kaftan')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    👑 Senator Navy Kaftan
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('suit')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    💼 Executive Navy Suit
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('blazer')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    👓 Techie Blazer & Chinos
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('polo')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    🎾 Country Club Polo & Khakis
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('joggers')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    🏃 Fleece Joggers & Slides
-                                </button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('sunglasses')" class="wardrobe-outfit-btn p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
-                                    🕶️ VIP Shades & Streetwear
-                                </button>
-                            </div>
+                    <!-- TAB 2: THE FIT (OUTFITS) -->
+                    <div id="gameWardrobeTab-outfit" class="space-y-2 hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-slate-700">Choose Outfit Variation:</span>
+                            <span class="text-[10px] text-purple-700 font-bold">12 Variations</span>
                         </div>
-
-                        <!-- 3. FOOTWEAR KICKS -->
-                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
-                            <label class="block font-bold text-slate-800 mb-2">3. Footwear Kicks</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('hoodie')" class="p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left">👟 White AF1s</button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('black_hoodie')" class="p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left">🏀 Air Jordans</button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('suit')" class="p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left">👞 Leather Loafers</button>
-                                <button type="button" onclick="GameApp.setWardrobeOutfit('joggers')" class="p-2 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left">🩴 Casual Slides</button>
-                            </div>
+                        <div class="grid grid-cols-2 gap-2 max-h-[290px] sm:max-h-[320px] overflow-y-auto pr-1 text-xs">
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('hoodie')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-purple-600 bg-purple-50 text-purple-950 font-bold transition text-left active:scale-95">
+                                🧥 Tech Bro Hoodie
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('black_hoodie')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                🖤 Nightclub Black Streetwear
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('tshirt')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                👕 Casual White Tee & Denim
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('agbada')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                🪡 Royal Agbada & Fila Cap
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('kaftan')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                👑 Senator Navy Kaftan
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('suit')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                💼 Executive Navy Suit
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('blazer')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                👓 Techie Blazer & Chinos
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('polo')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                🎾 Country Club Polo & Khakis
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('joggers')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                🏃 Fleece Joggers & Slides
+                            </button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('sunglasses')" class="wardrobe-outfit-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">
+                                🕶️ VIP Shades & Streetwear
+                            </button>
                         </div>
-
                     </div>
+
+                    <!-- TAB 3: FOOTWEAR KICKS -->
+                    <div id="gameWardrobeTab-kicks" class="space-y-2 hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-slate-700">Choose Footwear Kicks:</span>
+                            <span class="text-[10px] text-slate-400">Kicks & Loafers</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('hoodie')" class="wardrobe-shoe-btn p-2.5 rounded-xl border border-purple-600 bg-purple-50 font-bold text-purple-950 transition text-left active:scale-95">👟 Crisp White AF1s</button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('black_hoodie')" class="wardrobe-shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">🏀 High-Top Jordans</button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('suit')" class="wardrobe-shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">👞 Handcrafted Loafers</button>
+                            <button type="button" onclick="GameApp.setWardrobeOutfit('joggers')" class="wardrobe-shoe-btn p-2.5 rounded-xl border border-slate-200 bg-white font-bold hover:border-purple-500 transition text-left active:scale-95">🩴 Designer Casual Slides</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

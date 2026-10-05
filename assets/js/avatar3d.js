@@ -191,7 +191,7 @@ class Avatar3DStudio {
 
         const imgUrl = this.getImageUrl();
         const charData = (typeof window.getCharacterById === 'function') ? window.getCharacterById(this.state.characterId) : null;
-        const charName = charData ? charData.name : 'Abuja Citizen';
+        const charName = this.state.customName || (charData ? charData.name : 'Abuja Citizen');
 
         this.currentImageUrl = imgUrl;
 
@@ -225,15 +225,25 @@ class Avatar3DStudio {
                     />
                 </div>
 
-                <!-- Character Active Badge -->
-                <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/90 shadow-sm flex items-center gap-2 pointer-events-none z-20">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-xs font-extrabold text-slate-800">${charName}</span>
+                <!-- Character Active Badge (Live Custom Name) -->
+                <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/90 shadow-sm flex items-center gap-2 pointer-events-none z-20 max-w-[85%]">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+                    <span class="text-xs font-extrabold text-slate-800 avatar-name-label truncate">${charName}</span>
                 </div>
             </div>
         `;
 
         this.updateRotationTransform();
+    }
+
+    setName(name) {
+        this.state.customName = (name || '').trim();
+        const label = this.stageContainer ? this.stageContainer.querySelector('.avatar-name-label') : null;
+        if (label) {
+            const charData = (typeof window.getCharacterById === 'function') ? window.getCharacterById(this.state.characterId) : null;
+            const fallback = charData ? charData.name : 'Abuja Citizen';
+            label.textContent = this.state.customName || fallback;
+        }
     }
 
     // --- CHARACTER & WARDROBE API ---
