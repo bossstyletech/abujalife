@@ -29,30 +29,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abuja Life - Database Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Abuja Life | Setup</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-md w-full bg-slate-900 border border-emerald-500/30 rounded-2xl shadow-2xl p-6 sm:p-8 backdrop-blur">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
         <div class="text-center mb-6">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full mb-3 border border-emerald-500/20">
-                <i class="fa-solid fa-city text-2xl"></i>
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-slate-800 text-emerald-400 rounded-2xl mb-3">
+                <i class="fa-solid fa-database text-lg"></i>
             </div>
-            <h1 class="text-2xl font-bold tracking-tight text-white">Abuja Life Setup</h1>
-            <p class="text-sm text-slate-400 mt-1">Database Schema & Initial Game Seeding</p>
+            <h1 class="text-xl font-bold text-white tracking-tight">Abuja Life Setup</h1>
+            <p class="text-xs text-slate-400 mt-1">Database Schema & Initial Game Seeding</p>
         </div>
 
         <?php if ($message): ?>
-            <div class="mb-6 p-4 rounded-xl text-sm font-medium <?= $status === 'success' ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40' : 'bg-rose-950/80 text-rose-300 border border-rose-500/40' ?>">
+            <div class="mb-6 p-4 rounded-2xl text-xs font-medium <?= $status === 'success' ? 'bg-slate-950 text-emerald-300 border border-emerald-600/50' : 'bg-slate-950 text-rose-300 border border-rose-600/50' ?>">
                 <div class="flex items-center gap-2">
-                    <i class="fa-solid <?= $status === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation' ?>"></i>
+                    <i class="fa-solid <?= $status === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-circle-exclamation text-rose-400' ?>"></i>
                     <span><?= htmlspecialchars($message) ?></span>
                 </div>
                 <?php if ($status === 'success'): ?>
-                    <div class="mt-4">
-                        <a href="index.php" class="inline-flex items-center justify-center w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition">
+                    <div class="mt-3">
+                        <a href="index.php" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold transition active:scale-95 shadow-sm">
                             Launch Abuja Life <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
                         </a>
                     </div>
@@ -60,10 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
             </div>
         <?php endif; ?>
 
-        <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700 mb-6 text-xs text-slate-300 space-y-2">
+        <div class="bg-slate-950 rounded-2xl p-4 border border-slate-800/80 mb-6 text-xs text-slate-300 space-y-2">
             <div class="flex justify-between">
                 <span class="text-slate-400">Database Host:</span>
-                <span class="font-mono"><?= htmlspecialchars(DB_HOST) ?>:<?= htmlspecialchars(DB_PORT) ?></span>
+                <span class="font-mono text-slate-200"><?= htmlspecialchars(DB_HOST) ?>:<?= htmlspecialchars(DB_PORT) ?></span>
             </div>
             <div class="flex justify-between">
                 <span class="text-slate-400">Target Database:</span>
@@ -71,19 +78,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
             </div>
             <div class="flex justify-between">
                 <span class="text-slate-400">Database User:</span>
-                <span class="font-mono"><?= htmlspecialchars(DB_USER) ?></span>
+                <span class="font-mono text-slate-200"><?= htmlspecialchars(DB_USER) ?></span>
             </div>
         </div>
 
         <form method="POST">
-            <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-950/40 transition active:scale-[0.98]">
-                <i class="fa-solid fa-database"></i> Run Database Migration & Seed
+            <button type="submit" class="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-2xl text-xs shadow-sm transition active:scale-95">
+                <i class="fa-solid fa-play text-xs"></i> Run Database Migration & Seed
             </button>
         </form>
 
         <div class="mt-4 text-center">
-            <a href="index.php" class="text-xs text-slate-400 hover:text-emerald-400 transition">
-                Skip to Home Page
+            <a href="index.php" class="text-xs text-slate-400 hover:text-white transition">
+                Return to Home
             </a>
         </div>
     </div>

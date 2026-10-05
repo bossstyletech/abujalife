@@ -1,5 +1,6 @@
 /**
  * Abuja Life RPG - Core Frontend Game Engine
+ * Clean, Human-Designed UI with Solid Colors & Fluid Micro-Interactions
  */
 
 const GameApp = {
@@ -8,7 +9,7 @@ const GameApp = {
     activeTab: 'overview',
     pendingEvent: null,
 
-    // Audio SFX using Web Audio API (Zero external assets needed!)
+    // Web Audio API Synthesizer (Instant feedback, no external assets needed)
     playSfx(type = 'click') {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -18,40 +19,40 @@ const GameApp = {
             gain.connect(ctx.destination);
 
             if (type === 'money') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08); // A5
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.3);
-            } else if (type === 'win') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.09); // E5
-                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.18); // G5
-                gain.gain.setValueAtTime(0.25, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } else if (type === 'loss') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(300, ctx.currentTime);
-                osc.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.25);
-                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
                 osc.start();
                 osc.stop(ctx.currentTime + 0.25);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } else if (type === 'loss') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(200, ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
             } else {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(440, ctx.currentTime);
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.06);
                 osc.start();
-                osc.stop(ctx.currentTime + 0.08);
+                osc.stop(ctx.currentTime + 0.06);
             }
         } catch (e) {
-            // Ignore audio context errors if browser autoplay blocked
+            // Audio context failed or blocked by autoplay
         }
     },
 
@@ -61,16 +62,16 @@ const GameApp = {
 
     notify(message, type = 'info') {
         const toast = document.createElement('div');
-        toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold backdrop-blur transform transition-all duration-300 translate-y-2 opacity-0 z-50 border ${
-            type === 'success' ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/50' :
-            type === 'error' ? 'bg-rose-950/90 text-rose-300 border-rose-500/50' :
-            'bg-slate-900/90 text-slate-200 border-slate-700'
+        toast.className = `flex items-center gap-3 px-4 py-3 rounded-2xl shadow-lg text-xs font-semibold backdrop-blur transform transition-all duration-300 translate-y-2 opacity-0 z-50 border ${
+            type === 'success' ? 'bg-slate-900 text-emerald-300 border-emerald-600/50' :
+            type === 'error' ? 'bg-slate-900 text-rose-300 border-rose-600/50' :
+            'bg-slate-900 text-slate-200 border-slate-700'
         }`;
         
         const icon = type === 'success' ? 'fa-circle-check text-emerald-400' :
-                     type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-info text-teal-400';
+                     type === 'error' ? 'fa-triangle-exclamation text-rose-400' : 'fa-circle-info text-blue-400';
         
-        toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+        toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${message}</span>`;
         
         const container = document.getElementById('toastContainer');
         if (container) {
@@ -81,7 +82,7 @@ const GameApp = {
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 4500);
+            }, 4000);
         }
     },
 
@@ -113,9 +114,9 @@ const GameApp = {
         if (!this.character) return;
         const c = this.character;
 
-        // Player Profile info
+        // Player Info
         document.getElementById('hudName').textContent = c.full_name;
-        document.getElementById('hudAge').textContent = `${c.age} yrs (Day ${c.days_lived})`;
+        document.getElementById('hudAge').textContent = `${c.age} yrs • Day ${c.days_lived}`;
         document.getElementById('hudDistrict').textContent = c.district;
         document.getElementById('hudJob').textContent = c.job_title || 'Unemployed';
         document.getElementById('hudEducation').textContent = c.education_level;
@@ -152,27 +153,27 @@ const GameApp = {
         if (!container) return;
 
         if (logs.length === 0) {
-            container.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">No recent activities recorded.</p>`;
+            container.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">No recent activities recorded.</p>`;
             return;
         }
 
         container.innerHTML = logs.map(l => {
             let cashBadge = '';
             if (parseFloat(l.cash_change) > 0) {
-                cashBadge = `<span class="text-emerald-400 font-semibold">+${this.formatNaira(l.cash_change)}</span>`;
+                cashBadge = `<span class="text-emerald-400 font-semibold text-xs">+${this.formatNaira(l.cash_change)}</span>`;
             } else if (parseFloat(l.cash_change) < 0) {
-                cashBadge = `<span class="text-rose-400 font-semibold">-${this.formatNaira(Math.abs(l.cash_change))}</span>`;
+                cashBadge = `<span class="text-rose-400 font-semibold text-xs">-${this.formatNaira(Math.abs(l.cash_change))}</span>`;
             }
 
             return `
-                <div class="flex items-start justify-between gap-3 py-2.5 border-b border-slate-800/80 text-xs">
+                <div class="flex items-start justify-between gap-3 py-3 border-b border-slate-800/60 text-xs transition hover:bg-slate-800/30 px-2 rounded-xl">
                     <div class="flex items-start gap-2.5">
-                        <div class="w-6 h-6 rounded-md bg-slate-800 text-slate-300 flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+                        <div class="w-6 h-6 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center text-[10px] shrink-0 mt-0.5">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <p class="text-slate-300 leading-snug">${l.message}</p>
+                        <p class="text-slate-300 leading-relaxed">${l.message}</p>
                     </div>
-                    <div class="shrink-0 text-right">
+                    <div class="shrink-0 text-right ml-2">
                         ${cashBadge}
                     </div>
                 </div>
@@ -182,19 +183,47 @@ const GameApp = {
 
     switchTab(tabId) {
         this.activeTab = tabId;
+        
+        // Hide all tab panes
         document.querySelectorAll('.game-tab-content').forEach(el => el.classList.add('hidden'));
+        
+        // Reset desktop nav buttons
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500');
-            btn.classList.add('text-slate-400', 'border-transparent');
+            btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
+            btn.classList.add('text-slate-400', 'border-transparent', 'hover:text-white', 'hover:bg-slate-800');
         });
 
-        const activeContent = document.getElementById(`tab-${tabId}`);
-        if (activeContent) activeContent.classList.remove('hidden');
+        // Reset mobile bottom nav buttons
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.classList.remove('text-emerald-400');
+            btn.classList.add('text-slate-400');
+        });
 
+        // Show active content with fade animation
+        const activeContent = document.getElementById(`tab-${tabId}`);
+        if (activeContent) {
+            activeContent.classList.remove('hidden');
+            activeContent.classList.add('animate-fade-up');
+        }
+
+        // Highlight desktop button
         const activeBtn = document.getElementById(`btn-tab-${tabId}`);
         if (activeBtn) {
-            activeBtn.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500');
-            activeBtn.classList.remove('text-slate-400', 'border-transparent');
+            activeBtn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+            activeBtn.classList.remove('text-slate-400', 'border-transparent', 'hover:bg-slate-800');
+        }
+
+        // Highlight mobile button
+        const activeMobileBtn = document.getElementById(`mbtn-tab-${tabId}`);
+        if (activeMobileBtn) {
+            activeMobileBtn.classList.add('text-emerald-400');
+            activeMobileBtn.classList.remove('text-slate-400');
+        }
+
+        // Close mobile menu modal if open
+        const mobileMenuModal = document.getElementById('mobileMenuModal');
+        if (mobileMenuModal && !mobileMenuModal.classList.contains('hidden')) {
+            this.toggleMobileMenu(false);
         }
 
         // Lazy load tab specific contents
@@ -207,6 +236,23 @@ const GameApp = {
         if (tabId === 'bank') this.loadBank();
         if (tabId === 'leaderboard') this.loadLeaderboard();
         if (tabId === 'districts') this.loadDistricts();
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    toggleMobileMenu(forceState = null) {
+        const modal = document.getElementById('mobileMenuModal');
+        if (!modal) return;
+        const isOpen = !modal.classList.contains('hidden');
+        const nextState = forceState !== null ? forceState : !isOpen;
+
+        if (nextState) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     },
 
     async advanceDay() {
@@ -267,33 +313,33 @@ const GameApp = {
         container.innerHTML = data.jobs.map(j => {
             const isCurrent = this.character.current_job_id == j.id;
             return `
-                <div class="bg-slate-900 border ${isCurrent ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-slate-900 border ${isCurrent ? 'border-emerald-600 ring-1 ring-emerald-600' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700">${j.category}</span>
-                            <span class="text-xs font-mono font-bold text-amber-300">${this.formatNaira(j.daily_salary)}/day</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${j.category}</span>
+                            <span class="text-xs font-mono font-bold text-emerald-400">${this.formatNaira(j.daily_salary)}/day</span>
                         </div>
                         <h4 class="font-bold text-base text-white mb-1">${j.title}</h4>
                         <p class="text-xs text-slate-400 leading-relaxed mb-4">${j.description}</p>
-                        <div class="flex items-center gap-4 text-[11px] text-slate-400 mb-4 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
-                            <span><i class="fa-solid fa-graduation-cap text-teal-400 mr-1"></i> Req: <strong>${j.required_education}</strong></span>
-                            <span><i class="fa-solid fa-brain text-purple-400 mr-1"></i> Min IQ: <strong>${j.required_intelligence}</strong></span>
-                            <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> Energy: <strong>${j.energy_cost}%</strong></span>
+                        <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                            <span><i class="fa-solid fa-graduation-cap text-slate-400 mr-1"></i> ${j.required_education}</span>
+                            <span><i class="fa-solid fa-brain text-slate-400 mr-1"></i> IQ ${j.required_intelligence}</span>
+                            <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> ${j.energy_cost}% Energy</span>
                         </div>
                     </div>
                     <div>
                         ${isCurrent ? `
                             <div class="flex gap-2">
-                                <button onclick="GameApp.workShift()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-950/40 transition">
+                                <button onclick="GameApp.workShift()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
                                     <i class="fa-solid fa-briefcase mr-1"></i> Work Shift
                                 </button>
-                                <button onclick="GameApp.resignJob()" class="px-3 py-2.5 bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 rounded-xl font-semibold text-xs transition">
+                                <button onclick="GameApp.resignJob()" class="px-3 py-2.5 bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 rounded-xl font-semibold text-xs border border-slate-700 transition active:scale-95">
                                     Resign
                                 </button>
                             </div>
                         ` : `
-                            <button onclick="GameApp.applyJob(${j.id})" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold text-xs border border-slate-700 transition">
-                                Apply for Position
+                            <button onclick="GameApp.applyJob(${j.id})" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold text-xs border border-slate-700 transition active:scale-95">
+                                Apply for Job
                             </button>
                         `}
                     </div>
@@ -350,20 +396,20 @@ const GameApp = {
         if (!container || !data.success) return;
 
         container.innerHTML = data.courses.map(c => `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-950 text-teal-400 border border-teal-800/60">${c.institution}</span>
+                        <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${c.institution}</span>
                         <span class="text-xs font-mono font-bold text-emerald-400">${this.formatNaira(c.cost)}</span>
                     </div>
                     <h4 class="font-bold text-base text-white mb-1">${c.name}</h4>
                     <p class="text-xs text-slate-400 leading-relaxed mb-4">${c.description}</p>
-                    <div class="flex items-center gap-4 text-[11px] text-slate-300 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                        <span><i class="fa-solid fa-brain text-purple-400 mr-1"></i> IQ Boost: <strong>+${c.intelligence_gain}</strong></span>
-                        <span><i class="fa-solid fa-stamp text-amber-400 mr-1"></i> Awards: <strong>${c.qualification}</strong></span>
+                    <div class="flex items-center gap-4 text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <span><i class="fa-solid fa-brain text-purple-400 mr-1"></i> +${c.intelligence_gain} IQ</span>
+                        <span><i class="fa-solid fa-stamp text-amber-400 mr-1"></i> ${c.qualification}</span>
                     </div>
                 </div>
-                <button onclick="GameApp.enrollCourse(${c.id})" class="w-full py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-teal-950/30 transition">
+                <button onclick="GameApp.enrollCourse(${c.id})" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
                     Enroll & Study
                 </button>
             </div>
@@ -393,20 +439,20 @@ const GameApp = {
         if (!container || !data.success) return;
 
         container.innerHTML = data.hustles.map(h => `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                 <div>
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg mb-3 border border-amber-500/20">
+                    <div class="w-10 h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-lg mb-3">
                         <i class="fa-solid ${h.icon}"></i>
                     </div>
                     <h4 class="font-bold text-base text-white mb-1">${h.title}</h4>
                     <p class="text-xs text-slate-400 leading-relaxed mb-4">${h.desc}</p>
-                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mb-4 bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
-                        <div>Req Cash: <strong>${this.formatNaira(h.min_cash)}</strong></div>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                        <div>Capital: <strong>${this.formatNaira(h.min_cash)}</strong></div>
                         <div>Req Cred: <strong>${h.min_cred}</strong></div>
                         <div>Energy: <strong>${h.energy}%</strong></div>
                     </div>
                 </div>
-                <button onclick="GameApp.performHustle('${h.id}')" class="w-full py-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-amber-950/40 transition">
+                <button onclick="GameApp.performHustle('${h.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-xl border border-slate-700 transition active:scale-95">
                     Run Hustle
                 </button>
             </div>
@@ -441,23 +487,23 @@ const GameApp = {
 
         if (containerOwned) {
             if (!dataMine.properties || dataMine.properties.length === 0) {
-                containerOwned.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">You don't own any real estate properties yet. Buy one below to collect daily rent!</p>`;
+                containerOwned.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">You don't own any real estate properties yet. Buy one below to collect daily rent.</p>`;
             } else {
                 containerOwned.innerHTML = dataMine.properties.map(p => `
-                    <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">${p.district}</span>
-                                <span class="text-xs font-mono font-bold text-emerald-300">${p.is_rented_out ? 'Yield: ' + this.formatNaira(p.daily_rent_yield) + '/day' : 'Owner Occupied'}</span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${p.district}</span>
+                                <span class="text-xs font-mono font-bold text-emerald-400">${p.is_rented_out ? 'Yield: ' + this.formatNaira(p.daily_rent_yield) + '/day' : 'Occupied'}</span>
                             </div>
                             <h4 class="font-bold text-base text-white mb-1">${p.name}</h4>
                             <p class="text-xs text-slate-400 mb-3">${p.description}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="GameApp.toggleRentProperty(${p.ownership_id})" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl transition">
-                                ${p.is_rented_out ? 'Evict / Move In' : 'Rent Out for Income'}
+                            <button onclick="GameApp.toggleRentProperty(${p.ownership_id})" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white rounded-xl transition active:scale-95">
+                                ${p.is_rented_out ? 'Move In' : 'Rent Out for Income'}
                             </button>
-                            <button onclick="GameApp.sellProperty(${p.ownership_id})" class="px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 text-xs font-bold rounded-xl border border-rose-800 transition">
+                            <button onclick="GameApp.sellProperty(${p.ownership_id})" class="px-3 py-2 bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 text-xs font-semibold rounded-xl border border-slate-700 transition active:scale-95">
                                 Sell
                             </button>
                         </div>
@@ -468,21 +514,21 @@ const GameApp = {
 
         if (containerMarket && dataAll.success) {
             containerMarket.innerHTML = dataAll.properties.map(p => `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-teal-400 border border-slate-700">${p.district}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${p.district}</span>
                             <span class="text-xs font-mono font-bold text-emerald-400">${this.formatNaira(p.price)}</span>
                         </div>
                         <h4 class="font-bold text-base text-white mb-1">${p.name}</h4>
                         <p class="text-xs text-slate-400 leading-relaxed mb-4">${p.description}</p>
-                        <div class="text-[11px] text-slate-300 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 flex justify-between">
+                        <div class="text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">
                             <span>Daily Rent: <strong>${this.formatNaira(p.daily_rent_yield)}</strong></span>
                             <span>Prestige: <strong>+${p.prestige_points}</strong></span>
                         </div>
                     </div>
-                    <button onclick="GameApp.buyProperty(${p.id})" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-950/40 transition">
-                        Buy Property
+                    <button onclick="GameApp.buyProperty(${p.id})" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs transition active:scale-95 shadow-sm">
+                        Purchase Property
                     </button>
                 </div>
             `).join('');
@@ -517,7 +563,7 @@ const GameApp = {
     },
 
     async sellProperty(id) {
-        if (!confirm('Are you sure you want to liquidate this property?')) return;
+        if (!confirm('Are you sure you want to sell this property?')) return;
         const formData = new FormData();
         formData.append('ownership_id', id);
         const res = await fetch('api/realestate.php?action=sell', { method: 'POST', body: formData });
@@ -544,23 +590,23 @@ const GameApp = {
 
         if (containerOwned) {
             if (!dataMine.vehicles || dataMine.vehicles.length === 0) {
-                containerOwned.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Garage empty. Buy your first car below to hit Abuja roads!</p>`;
+                containerOwned.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-6 text-center">Garage empty. Buy your first vehicle below.</p>`;
             } else {
                 containerOwned.innerHTML = dataMine.vehicles.map(v => `
-                    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-purple-400 border border-slate-700">${v.brand}</span>
-                                <span class="text-xs font-mono font-bold text-amber-300">Upkeep: ${this.formatNaira(v.daily_upkeep)}/day</span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${v.brand}</span>
+                                <span class="text-xs font-mono font-bold text-amber-400">Upkeep: ${this.formatNaira(v.daily_upkeep)}/day</span>
                             </div>
                             <h4 class="font-bold text-base text-white mb-1">${v.name}</h4>
                             <p class="text-xs text-slate-400 mb-4">${v.description}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="GameApp.cruiseVehicle()" class="flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl font-bold text-xs shadow-lg transition">
-                                <i class="fa-solid fa-car-side mr-1"></i> Cruise Abuja
+                            <button onclick="GameApp.cruiseVehicle()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition active:scale-95">
+                                <i class="fa-solid fa-car-side mr-1"></i> Cruise City
                             </button>
-                            <button onclick="GameApp.sellVehicle(${v.ownership_id})" class="px-3 py-2 bg-rose-950 hover:bg-rose-900 text-rose-300 text-xs font-bold rounded-xl border border-rose-800 transition">
+                            <button onclick="GameApp.sellVehicle(${v.ownership_id})" class="px-3 py-2 bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 text-xs font-semibold rounded-xl border border-slate-700 transition active:scale-95">
                                 Sell
                             </button>
                         </div>
@@ -571,20 +617,20 @@ const GameApp = {
 
         if (containerMarket && dataAll.success) {
             containerMarket.innerHTML = dataAll.vehicles.map(v => `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-purple-400 border border-slate-700">${v.brand}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">${v.brand}</span>
                             <span class="text-xs font-mono font-bold text-emerald-400">${this.formatNaira(v.price)}</span>
                         </div>
                         <h4 class="font-bold text-base text-white mb-1">${v.name}</h4>
                         <p class="text-xs text-slate-400 leading-relaxed mb-4">${v.description}</p>
-                        <div class="flex justify-between text-[11px] text-slate-300 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                            <span>Road Cred: <strong>+${v.cred_bonus}</strong></span>
-                            <span>Daily Fuel/Upkeep: <strong>${this.formatNaira(v.daily_upkeep)}</strong></span>
+                        <div class="flex justify-between text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                            <span>Cred Bonus: <strong>+${v.cred_bonus}</strong></span>
+                            <span>Daily Upkeep: <strong>${this.formatNaira(v.daily_upkeep)}</strong></span>
                         </div>
                     </div>
-                    <button onclick="GameApp.buyVehicle(${v.id})" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs border border-slate-700 transition">
+                    <button onclick="GameApp.buyVehicle(${v.id})" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs transition active:scale-95 shadow-sm">
                         Purchase Vehicle
                     </button>
                 </div>
@@ -645,9 +691,9 @@ const GameApp = {
         if (!container || !data.success) return;
 
         container.innerHTML = data.activities.map(a => `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                 <div>
-                    <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center text-lg mb-3 border border-teal-500/20">
+                    <div class="w-10 h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center text-lg mb-3">
                         <i class="fa-solid ${a.icon}"></i>
                     </div>
                     <div class="flex items-center justify-between mb-1">
@@ -655,12 +701,12 @@ const GameApp = {
                         <span class="text-xs font-mono font-bold text-emerald-400">${this.formatNaira(a.cost)}</span>
                     </div>
                     <p class="text-xs text-slate-400 leading-relaxed mb-4">${a.desc}</p>
-                    <div class="flex items-center gap-3 text-[11px] text-slate-300 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                    <div class="flex items-center gap-3 text-[11px] text-slate-300 mb-4 bg-slate-950 p-3 rounded-xl border border-slate-800">
                         <span><i class="fa-solid fa-face-smile text-emerald-400 mr-1"></i> +${a.hap_gain} Happiness</span>
                         <span><i class="fa-solid fa-bolt text-amber-400 mr-1"></i> -${a.energy}% Energy</span>
                     </div>
                 </div>
-                <button onclick="GameApp.performLifestyle('${a.id}')" class="w-full py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white rounded-xl font-bold text-xs shadow-lg transition">
+                <button onclick="GameApp.performLifestyle('${a.id}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs transition active:scale-95 border border-slate-700">
                     Enjoy Activity
                 </button>
             </div>
@@ -805,25 +851,25 @@ const GameApp = {
         container.innerHTML = Object.entries(this.districts).map(([name, info]) => {
             const isCurrent = this.character.district === name;
             return `
-                <div class="bg-slate-900 border ${isCurrent ? 'border-emerald-500 ring-1 ring-emerald-500/30' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between">
+                <div class="bg-slate-900 border ${isCurrent ? 'border-emerald-600 ring-1 ring-emerald-600' : 'border-slate-800'} rounded-2xl p-5 flex flex-col justify-between transition hover:border-slate-700">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-teal-300 border border-slate-700">Tier ${info.tier}</span>
-                            <span class="text-xs font-mono font-bold text-amber-300">Fare: ${this.formatNaira(info.travel_cost)}</span>
+                            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">Tier ${info.tier}</span>
+                            <span class="text-xs font-mono font-bold text-amber-400">Fare: ${this.formatNaira(info.travel_cost)}</span>
                         </div>
                         <h4 class="font-bold text-base text-white mb-1">${name}</h4>
-                        <p class="text-xs text-slate-400 mb-4">${info.desc}</p>
-                        <p class="text-[11px] text-slate-300 mb-4 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                            Min Cred: <strong>${info.min_cred}</strong>
+                        <p class="text-xs text-slate-400 mb-4 leading-relaxed">${info.desc}</p>
+                        <p class="text-[11px] text-slate-300 mb-4 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            Min Street Cred: <strong>${info.min_cred}</strong>
                         </p>
                     </div>
                     ${isCurrent ? `
-                        <div class="text-center py-2.5 bg-emerald-950/60 text-emerald-300 border border-emerald-800 rounded-xl font-bold text-xs">
+                        <div class="text-center py-2.5 bg-slate-800 text-emerald-400 border border-slate-700 rounded-xl font-bold text-xs">
                             <i class="fa-solid fa-location-dot mr-1"></i> Current Location
                         </div>
                     ` : `
-                        <button onclick="GameApp.relocateDistrict('${name}')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold text-xs border border-slate-700 transition">
-                            Travel / Relocate
+                        <button onclick="GameApp.relocateDistrict('${name}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs transition active:scale-95 shadow-sm">
+                            Relocate to ${name}
                         </button>
                     `}
                 </div>
@@ -856,9 +902,9 @@ const GameApp = {
 
         if (containerRichest && data.richest) {
             containerRichest.innerHTML = data.richest.map((p, idx) => `
-                <div class="flex items-center justify-between py-2.5 border-b border-slate-800 text-xs">
+                <div class="flex items-center justify-between py-2.5 border-b border-slate-800/80 text-xs">
                     <div class="flex items-center gap-3">
-                        <span class="w-5 text-center font-bold text-slate-400">#${idx + 1}</span>
+                        <span class="w-5 text-center font-bold text-slate-500">#${idx + 1}</span>
                         <div>
                             <span class="font-bold text-white">${p.full_name}</span>
                             <span class="text-slate-500 block text-[10px]">${p.district} • ${p.job_title || 'Citizen'}</span>
@@ -871,9 +917,9 @@ const GameApp = {
 
         if (containerCred && data.street_kings) {
             containerCred.innerHTML = data.street_kings.map((p, idx) => `
-                <div class="flex items-center justify-between py-2.5 border-b border-slate-800 text-xs">
+                <div class="flex items-center justify-between py-2.5 border-b border-slate-800/80 text-xs">
                     <div class="flex items-center gap-3">
-                        <span class="w-5 text-center font-bold text-slate-400">#${idx + 1}</span>
+                        <span class="w-5 text-center font-bold text-slate-500">#${idx + 1}</span>
                         <div>
                             <span class="font-bold text-white">${p.full_name}</span>
                             <span class="text-slate-500 block text-[10px]">${p.district}</span>

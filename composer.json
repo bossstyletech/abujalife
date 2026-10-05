@@ -1,0 +1,10 @@
+{
+    "name": "bossstyletech/abuja-life",
+    "description": "Abuja Life - Nigerian Urban RPG Simulation",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.0",
+        "ext-pdo_mysql": "*"
+    }
+}
