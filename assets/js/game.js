@@ -147,9 +147,27 @@ const GameApp = {
         const pillCash = document.getElementById('pillCash');
         if (pillCash) pillCash.textContent = this.formatCompactNaira(c.cash);
 
-        // Drawer Avatar Skin Tone
+        // Drawer Avatar Thumbnail
         const drawerPill = document.getElementById('drawerAvatarPill');
-        if (drawerPill && c.skin_tone) drawerPill.style.backgroundColor = c.skin_tone;
+        if (drawerPill && typeof window.getCharacterOutfitImage === 'function') {
+            let charId = 'tunde';
+            let outfit = c.outfit || 'hoodie';
+            if (c.avatar && typeof c.avatar === 'string' && c.avatar.trim().startsWith('{')) {
+                try {
+                    const cfg = JSON.parse(c.avatar);
+                    if (cfg.characterId) charId = cfg.characterId;
+                    if (cfg.outfit) outfit = cfg.outfit;
+                } catch(e){}
+            } else if (c.full_name) {
+                const nameLower = c.full_name.toLowerCase();
+                const roster = ['tunde', 'emeka', 'chidi', 'farouk', 'ibrahim', 'segun', 'zainab', 'blessing', 'ngozi'];
+                for (const r of roster) {
+                    if (nameLower.includes(r)) { charId = r; break; }
+                }
+            }
+            const imgPath = window.getCharacterOutfitImage(charId, outfit);
+            drawerPill.innerHTML = `<img src="${imgPath}" class="w-full h-full rounded-full object-cover" alt="Avatar">`;
+        }
 
         // 3D HUD Indicators
         const jobLabel = document.getElementById('world3dCurrentJob');
@@ -912,13 +930,47 @@ const GameApp = {
                 if (this.character.avatar && typeof this.character.avatar === 'string' && this.character.avatar.trim().startsWith('{')) {
                     try { cfg = JSON.parse(this.character.avatar); } catch(e){}
                 }
+                let activeCharId = 'tunde';
+                let activeOutfit = this.character.outfit || 'hoodie';
+
+                if (cfg && cfg.characterId) {
+                    activeCharId = cfg.characterId;
+                } else if (this.character.full_name) {
+                    const nameLower = this.character.full_name.toLowerCase();
+                    const roster = ['tunde', 'emeka', 'chidi', 'farouk', 'ibrahim', 'segun', 'zainab', 'blessing', 'ngozi'];
+                    for (const r of roster) {
+                        if (nameLower.includes(r)) { activeCharId = r; break; }
+                    }
+                }
+                if (cfg && cfg.outfit) activeOutfit = cfg.outfit;
+
                 if (cfg) {
                     this.wardrobeStudio.loadConfig(cfg);
                 } else {
-                    this.wardrobeStudio.setSkin(this.character.skin_tone || '#704225');
-                    this.wardrobeStudio.setHair(this.character.hair_style || 'fade');
-                    this.wardrobeStudio.setTop(this.character.outfit || 'hoodie');
+                    this.wardrobeStudio.setCharacter(activeCharId);
+                    this.wardrobeStudio.setOutfit(activeOutfit);
                 }
+
+                // Highlight active character card and outfit button in wardrobe modal
+                document.querySelectorAll('.wardrobe-char-card').forEach(btn => {
+                    const onclickAttr = btn.getAttribute('onclick') || '';
+                    if (onclickAttr.includes(`'${activeCharId}'`)) {
+                        btn.className = "wardrobe-char-card p-2 rounded-2xl border-2 border-purple-600 bg-purple-50 text-center transition transform active:scale-95 group";
+                    } else {
+                        btn.className = "wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group";
+                    }
+                });
+
+                document.querySelectorAll('.wardrobe-outfit-btn').forEach(btn => {
+                    const onclickAttr = btn.getAttribute('onclick') || '';
+                    if (onclickAttr.includes(`'${activeOutfit}'`)) {
+                        btn.classList.add('border-purple-600', 'bg-purple-50', 'text-purple-950');
+                        btn.classList.remove('border-slate-200', 'bg-white');
+                    } else {
+                        btn.classList.remove('border-purple-600', 'bg-purple-50', 'text-purple-950');
+                        btn.classList.add('border-slate-200', 'bg-white');
+                    }
+                });
             }
         }, 60);
     },
@@ -935,6 +987,36 @@ const GameApp = {
         if (this.wardrobeStudio) {
             this.wardrobeStudio.turnAround();
         }
+    },
+
+    setWardrobeCharacter(charId) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setCharacter(charId);
+        }
+        document.querySelectorAll('.wardrobe-char-card').forEach(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            if (onclickAttr.includes(`'${charId}'`)) {
+                btn.className = "wardrobe-char-card p-2 rounded-2xl border-2 border-purple-600 bg-purple-50 text-center transition transform active:scale-95 group";
+            } else {
+                btn.className = "wardrobe-char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group";
+            }
+        });
+    },
+
+    setWardrobeOutfit(outfitKey) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setOutfit(outfitKey);
+        }
+        document.querySelectorAll('.wardrobe-outfit-btn').forEach(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            if (onclickAttr.includes(`'${outfitKey}'`)) {
+                btn.classList.add('border-purple-600', 'bg-purple-50', 'text-purple-950');
+                btn.classList.remove('border-slate-200', 'bg-white');
+            } else {
+                btn.classList.remove('border-purple-600', 'bg-purple-50', 'text-purple-950');
+                btn.classList.add('border-slate-200', 'bg-white');
+            }
+        });
     },
 
     setWardrobeSkin(hex) {
@@ -981,7 +1063,7 @@ const GameApp = {
         formData.append('avatar_config', JSON.stringify(cfg));
         formData.append('skin_tone', cfg.skinTone || '#704225');
         formData.append('hair_style', cfg.hairStyle || 'fade');
-        formData.append('outfit', cfg.topType || 'hoodie');
+        formData.append('outfit', cfg.outfit || cfg.topType || 'hoodie');
 
         try {
             const res = await fetch('api/character.php?action=update_looks', { method: 'POST', body: formData });

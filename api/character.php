@@ -253,7 +253,9 @@ if ($action === 'go_to_work') {
 }
 
 if ($action === 'update_looks') {
-    $avatarConfig = cleanInput($_POST['avatar_config'] ?? '');
+    $rawAvatarConfig = $_POST['avatar_config'] ?? '';
+    $decoded = json_decode($rawAvatarConfig, true);
+    $avatarConfig = is_array($decoded) ? json_encode($decoded) : null;
     $skin = cleanInput($_POST['skin_tone'] ?? $char['skin_tone'] ?? '#704225');
     $hair = cleanInput($_POST['hair_style'] ?? $char['hair_style'] ?? 'fade');
     $hairColor = cleanInput($_POST['hair_color'] ?? $char['hair_color'] ?? '#111111');

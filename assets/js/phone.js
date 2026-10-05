@@ -243,8 +243,18 @@ const PhoneApp = {
     async saveWardrobeStyle() {
         const outfit = document.getElementById('phoneSelectOutfit').value;
         const hair = document.getElementById('phoneSelectHair').value;
+        const char = GameApp.character || {};
+
+        let cfg = { characterId: 'tunde', outfit: outfit, topType: outfit, hairStyle: hair };
+        if (char.avatar && typeof char.avatar === 'string' && char.avatar.trim().startsWith('{')) {
+            try { cfg = JSON.parse(char.avatar); } catch(e){}
+        }
+        cfg.outfit = outfit;
+        cfg.topType = outfit;
+        cfg.hairStyle = hair;
 
         const formData = new FormData();
+        formData.append('avatar_config', JSON.stringify(cfg));
         formData.append('outfit', outfit);
         formData.append('hair_style', hair);
 

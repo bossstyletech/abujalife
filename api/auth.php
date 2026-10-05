@@ -15,9 +15,14 @@ if ($action === 'register') {
     $hairColor = cleanInput($_POST['hair_color'] ?? '#111111');
     $outfit = cleanInput($_POST['outfit'] ?? 'casual');
     $archetype = cleanInput($_POST['archetype'] ?? 'hustler');
-    $avatarConfig = cleanInput($_POST['avatar_config'] ?? '');
-    if (empty($avatarConfig)) {
+    $rawAvatarConfig = $_POST['avatar_config'] ?? '';
+    $decodedAvatar = json_decode($rawAvatarConfig, true);
+    if (is_array($decodedAvatar)) {
+        $avatarConfig = json_encode($decodedAvatar);
+    } else {
         $avatarConfig = json_encode([
+            'characterId' => 'tunde',
+            'outfit' => $outfit,
             'skinTone' => $skinTone,
             'hairStyle' => $hairStyle,
             'hairColor' => $hairColor,

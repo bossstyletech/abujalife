@@ -335,53 +335,40 @@ const World3D = {
         shadowMesh.position.y = 0.01;
         personaGroup.add(shadowMesh);
 
-        // Generate crisp vector sprite using Avatar3DStudio
-        if (typeof Avatar3DStudio !== 'undefined') {
-            const tempDiv = document.createElement('div');
-            const studio = new Avatar3DStudio(tempDiv, { width: 320, height: 440 });
-            if (Object.keys(cfg).length > 0) {
-                studio.loadConfig(cfg);
-            } else {
-                studio.setSkin(char.skin_tone || '#704225');
-                studio.setHair(char.hair_style || 'fade');
-                studio.setTop(char.outfit || 'hoodie');
+        // Render photorealistic 3D Character Sprite
+        let charId = cfg.characterId || 'tunde';
+        if (!cfg.characterId && char.full_name) {
+            const nameLower = char.full_name.toLowerCase();
+            const roster = ['tunde', 'emeka', 'chidi', 'farouk', 'ibrahim', 'segun', 'zainab', 'blessing', 'ngozi'];
+            for (const r of roster) {
+                if (nameLower.includes(r)) { charId = r; break; }
             }
-
-            const svgStr = studio.generateSVG();
-            const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = 400;
-                canvas.height = 520;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                URL.revokeObjectURL(url);
-
-                const texture = new THREE.CanvasTexture(canvas);
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
-
-                const spriteMat = new THREE.SpriteMaterial({
-                    map: texture,
-                    transparent: true,
-                    alphaTest: 0.05
-                });
-
-                const sprite = new THREE.Sprite(spriteMat);
-                sprite.scale.set(2.4, 3.12, 1);
-                sprite.position.set(0, 1.56, 0);
-                personaGroup.add(sprite);
-
-                if (this.renderer && this.scene && this.camera) {
-                    this.renderer.render(this.scene, this.camera);
-                }
-            };
-            img.src = url;
         }
+        const outfit = cfg.outfit || cfg.topType || char.outfit || 'hoodie';
+        const imgUrl = (typeof window.getCharacterOutfitImage === 'function')
+            ? window.getCharacterOutfitImage(charId, outfit)
+            : `assets/img/characters/${charId}/Man_standing_in_hoodie_20261005064533.jpg`;
+
+        const loader = new THREE.TextureLoader();
+        loader.load(imgUrl, (texture) => {
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+
+            const spriteMat = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                alphaTest: 0.02
+            });
+
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.scale.set(2.4, 3.12, 1);
+            sprite.position.set(0, 1.56, 0);
+            personaGroup.add(sprite);
+
+            if (this.renderer && this.scene && this.camera) {
+                this.renderer.render(this.scene, this.camera);
+            }
+        });
 
         this.characterMesh = personaGroup;
         this.currentBuildingGroup.add(personaGroup);
