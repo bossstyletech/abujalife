@@ -10,6 +10,11 @@ if ($action === 'register') {
     $password = $_POST['password'] ?? '';
     $fullName = cleanInput($_POST['full_name'] ?? '');
     $gender = cleanInput($_POST['gender'] ?? 'Male');
+    $skinTone = cleanInput($_POST['skin_tone'] ?? '#704225');
+    $hairStyle = cleanInput($_POST['hair_style'] ?? 'fade');
+    $hairColor = cleanInput($_POST['hair_color'] ?? '#111111');
+    $outfit = cleanInput($_POST['outfit'] ?? 'casual');
+    $archetype = cleanInput($_POST['archetype'] ?? 'hustler');
 
     if (empty($username) || empty($email) || empty($password) || empty($fullName)) {
         jsonResponse(['success' => false, 'error' => 'All fields are required.'], 400);
@@ -28,6 +33,36 @@ if ($action === 'register') {
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
+    // Archetype attributes
+    $startCash = 15000.00;
+    $startBank = 5000.00;
+    $startDistrict = 'Kubwa';
+    $startCred = 15;
+    $startIQ = 20;
+    $startEdu = 'SSCE';
+    $primaryCar = null;
+    $originMessage = "Arrived at Kubwa with ₦15,000 cash and pure grit. Time to conquer Abuja!";
+
+    if ($archetype === 'rich') {
+        $startCash = 1500000.00;
+        $startBank = 8500000.00;
+        $startDistrict = 'Maitama';
+        $startCred = 45;
+        $startIQ = 45;
+        $startEdu = 'BSc';
+        $primaryCar = 4; // Lexus RX 350
+        $originMessage = "Born with a silver spoon in Maitama! Your family connections gave you ₦10,000,000 and a Lexus SUV.";
+    } elseif ($archetype === 'middle') {
+        $startCash = 120000.00;
+        $startBank = 350000.00;
+        $startDistrict = 'Gwarinpa';
+        $startCred = 25;
+        $startIQ = 35;
+        $startEdu = 'BSc';
+        $primaryCar = 2; // Toyota Corolla Big Daddy
+        $originMessage = "Raised in a respectable civil servant home in Gwarinpa. You have a UniAbuja BSc and steady savings.";
+    }
+
     try {
         $pdo->beginTransaction();
 
@@ -35,16 +70,25 @@ if ($action === 'register') {
         $stmt->execute([$username, $email, $hash]);
         $userId = (int)$pdo->lastInsertId();
 
-        // Create character for user
-        $avatar = ($gender === 'Female') ? 'female_default.png' : 'male_default.png';
         $stmt = $pdo->prepare("
-            INSERT INTO characters (user_id, full_name, gender, avatar, cash, bank, district)
-            VALUES (?, ?, ?, ?, 35000.00, 10000.00, 'Kubwa')
+            INSERT INTO characters (
+                user_id, full_name, gender, skin_tone, hair_style, hair_color, outfit, archetype,
+                cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$userId, $fullName, $gender, $avatar]);
+        $stmt->execute([
+            $userId, $fullName, $gender, $skinTone, $hairStyle, $hairColor, $outfit, $archetype,
+            $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar
+        ]);
         $charId = (int)$pdo->lastInsertId();
 
-        logActivity($charId, 'birth', "Welcome to Abuja! You landed in Kubwa with ₦35,000 cash and high dreams.", 35000, 100, 100);
+        if ($primaryCar) {
+            $stmtVeh = $pdo->prepare("INSERT INTO character_vehicles (character_id, vehicle_id) VALUES (?, ?)");
+            $stmtVeh->execute([$charId, $primaryCar]);
+        }
+
+        logActivity($charId, 'origin', $originMessage, $startCash, 100, 100);
 
         $pdo->commit();
 
@@ -53,7 +97,7 @@ if ($action === 'register') {
 
         jsonResponse([
             'success' => true,
-            'message' => 'Registration successful! Welcome to Abuja Life.',
+            'message' => 'Character created! Welcome to Abuja Life.',
             'redirect' => 'game.php'
         ]);
     } catch (Exception $e) {
@@ -99,6 +143,44 @@ if ($action === 'guest') {
     $fullName = $names[array_rand($names)];
     $gender = (strpos($fullName, 'Fatima') !== false || strpos($fullName, 'Aisha') !== false || strpos($fullName, 'Zainab') !== false) ? 'Female' : 'Male';
 
+    $archetypes = ['hustler', 'middle', 'rich'];
+    $selectedArchetype = $archetypes[array_rand($archetypes)];
+    $skinTones = ['#3d2314', '#593822', '#704225', '#8d5524', '#c68642'];
+    $skin = $skinTones[array_rand($skinTones)];
+    $hairStyles = ['fade', 'afro', 'dreads', 'cornrows', 'buzz'];
+    $hair = $hairStyles[array_rand($hairStyles)];
+    $outfits = ['street', 'techie', 'corporate', 'agbada'];
+    $outfit = $outfits[array_rand($outfits)];
+
+    $startCash = 15000.00;
+    $startBank = 5000.00;
+    $startDistrict = 'Kubwa';
+    $startCred = 15;
+    $startIQ = 20;
+    $startEdu = 'SSCE';
+    $primaryCar = null;
+    $originMessage = "Guest grinder $fullName started in Kubwa from scratch!";
+
+    if ($selectedArchetype === 'rich') {
+        $startCash = 1500000.00;
+        $startBank = 8500000.00;
+        $startDistrict = 'Maitama';
+        $startCred = 45;
+        $startIQ = 45;
+        $startEdu = 'BSc';
+        $primaryCar = 4;
+        $originMessage = "Guest high-roller $fullName was born into wealth in Maitama!";
+    } elseif ($selectedArchetype === 'middle') {
+        $startCash = 120000.00;
+        $startBank = 350000.00;
+        $startDistrict = 'Gwarinpa';
+        $startCred = 25;
+        $startIQ = 35;
+        $startEdu = 'BSc';
+        $primaryCar = 2;
+        $originMessage = "Guest professional $fullName started with middle-class civil servant roots in Gwarinpa.";
+    }
+
     try {
         $pdo->beginTransaction();
 
@@ -106,15 +188,25 @@ if ($action === 'guest') {
         $stmt->execute([$username, $email, $hash]);
         $userId = (int)$pdo->lastInsertId();
 
-        $avatar = ($gender === 'Female') ? 'female_default.png' : 'male_default.png';
         $stmt = $pdo->prepare("
-            INSERT INTO characters (user_id, full_name, gender, avatar, cash, bank, district)
-            VALUES (?, ?, ?, ?, 50000.00, 15000.00, 'Kubwa')
+            INSERT INTO characters (
+                user_id, full_name, gender, skin_tone, hair_style, hair_color, outfit, archetype,
+                cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$userId, $fullName, $gender, $avatar]);
+        $stmt->execute([
+            $userId, $fullName, $gender, $skin, $hair, '#111111', $outfit, $selectedArchetype,
+            $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar
+        ]);
         $charId = (int)$pdo->lastInsertId();
 
-        logActivity($charId, 'birth', "Guest player $fullName landed in Abuja with ₦50,000 cash!", 50000, 100, 100);
+        if ($primaryCar) {
+            $stmtVeh = $pdo->prepare("INSERT INTO character_vehicles (character_id, vehicle_id) VALUES (?, ?)");
+            $stmtVeh->execute([$charId, $primaryCar]);
+        }
+
+        logActivity($charId, 'origin', $originMessage, $startCash, 100, 100);
 
         $pdo->commit();
 

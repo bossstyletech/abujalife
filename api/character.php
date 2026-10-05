@@ -192,4 +192,84 @@ if ($action === 'relocate') {
     ]);
 }
 
+if ($action === 'morning_routine') {
+    $cost = 2000.00;
+    if ((float)$char['cash'] < $cost) {
+        $cost = 0.00; // manage empty stomach
+    }
+
+    $newEnergy = min(100, (int)$char['energy'] + 15);
+    $newHappiness = min(100, (int)$char['happiness'] + 5);
+
+    $stmt = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash - ?, energy = ?, happiness = ?, time_of_day = 'Morning' 
+        WHERE id = ?
+    ");
+    $stmt->execute([$cost, $newEnergy, $newHappiness, $char['id']]);
+
+    logActivity($char['id'], 'morning', "Woke up early in {$char['district']}! Hot shower & Nigerian breakfast (yam & eggs).", -$cost, 15, 5);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "Good morning Abuja! You had breakfast and got dressed. Ready for the day's hustle.",
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+if ($action === 'go_to_work') {
+    if (!$char['current_job_id']) {
+        jsonResponse(['success' => false, 'error' => "You don't have a job yet! Browse available careers or run a side hustle."], 400);
+    }
+
+    $stmtJob = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+    $stmtJob->execute([$char['current_job_id']]);
+    $job = $stmtJob->fetch();
+
+    if (!$job) {
+        jsonResponse(['success' => false, 'error' => 'Job not found.'], 404);
+    }
+
+    $energyReq = (int)$job['energy_cost'];
+    if ((int)$char['energy'] < $energyReq) {
+        jsonResponse(['success' => false, 'error' => "You are too tired ({$energyReq}% energy needed). Rest or take a coffee."], 400);
+    }
+
+    $salary = (float)$job['daily_salary'];
+    $stmtUpdate = $pdo->prepare("
+        UPDATE characters 
+        SET cash = cash + ?, energy = energy - ?, time_of_day = 'Evening', intelligence = intelligence + 1
+        WHERE id = ?
+    ");
+    $stmtUpdate->execute([$salary, $energyReq, $char['id']]);
+
+    logActivity($char['id'], 'work', "Commuted to workplace and finished shift as {$job['title']}. Earned " . formatNaira($salary) . ".", $salary, -$energyReq, 0);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "Completed your shift at {$job['title']}! Received daily pay of " . formatNaira($salary) . ".",
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+if ($action === 'update_looks') {
+    $skin = cleanInput($_POST['skin_tone'] ?? $char['skin_tone'] ?? '#704225');
+    $hair = cleanInput($_POST['hair_style'] ?? $char['hair_style'] ?? 'fade');
+    $hairColor = cleanInput($_POST['hair_color'] ?? $char['hair_color'] ?? '#111111');
+    $outfit = cleanInput($_POST['outfit'] ?? $char['outfit'] ?? 'casual');
+
+    $stmt = $pdo->prepare("
+        UPDATE characters 
+        SET skin_tone = ?, hair_style = ?, hair_color = ?, outfit = ? 
+        WHERE id = ?
+    ");
+    $stmt->execute([$skin, $hair, $hairColor, $outfit, $char['id']]);
+
+    jsonResponse([
+        'success' => true,
+        'message' => 'Your look has been refreshed!',
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
 jsonResponse(['success' => false, 'error' => 'Invalid action.'], 400);
