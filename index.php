@@ -270,7 +270,7 @@ if (getAuthUserId()) {
                     
                     <!-- 3D Character Viewport Column -->
                     <div class="md:col-span-5 flex flex-col items-center">
-                        <div id="bitmojiStudioContainer" class="w-full h-[360px] sm:h-[400px] rounded-2xl bg-white border border-slate-200/90 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
+                        <div id="bitmojiStudioContainer" class="w-full h-[460px] sm:h-[500px] rounded-3xl bg-slate-50 border border-slate-200/90 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
                             <div class="text-xs text-slate-400 animate-pulse">Initializing 3D Character Studio...</div>
                         </div>
 
@@ -286,7 +286,7 @@ if (getAuthUserId()) {
                     </div>
 
                     <!-- Wardrobe & Customization Selectors Column -->
-                    <div class="md:col-span-7 space-y-4 max-h-[440px] overflow-y-auto pr-1">
+                    <div class="md:col-span-7 space-y-4 max-h-[500px] overflow-y-auto pr-1">
                         
                         <!-- 2. REAL-TIME 3D OUTFIT SELECTION -->
                         <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">

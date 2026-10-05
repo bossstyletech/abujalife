@@ -196,29 +196,29 @@ class Avatar3DStudio {
         this.currentImageUrl = imgUrl;
 
         this.stageContainer.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-end pb-3 select-none">
+            <div class="relative w-full h-full flex flex-col items-center justify-center p-1 sm:p-2 select-none overflow-hidden">
                 
                 <!-- 3D Pedestal Floor Platform & Ambient Glow -->
-                <div class="absolute bottom-4 w-52 h-14 rounded-full bg-gradient-to-t from-slate-200/80 via-slate-100/50 to-transparent flex items-center justify-center pointer-events-none avatar-pedestal-pulse">
+                <div class="absolute bottom-2 w-72 h-14 rounded-full bg-gradient-to-t from-slate-200/90 via-slate-100/50 to-transparent flex items-center justify-center pointer-events-none avatar-pedestal-pulse">
                     <!-- Dynamic Soft Floor Shadow -->
-                    <div class="avatar-shadow-disc w-40 h-8 rounded-full bg-slate-900/15 blur-[6px] transition-transform duration-150"></div>
+                    <div class="avatar-shadow-disc w-56 h-8 rounded-full bg-slate-900/20 blur-[6px] transition-transform duration-150"></div>
                 </div>
 
-                <!-- Photorealistic 3D Character Sprite Renders -->
-                <div class="relative z-10 w-full max-w-[280px] h-[340px] sm:h-[370px] flex items-center justify-center avatar-3d-breathe">
+                <!-- Photorealistic 3D Character Sprite Renders (Fills ~80% of Box) -->
+                <div class="relative z-10 w-full h-[90%] max-h-[92%] flex items-center justify-center avatar-3d-breathe">
                     <img 
                         src="${imgUrl}" 
                         alt="${charName}"
-                        class="avatar-sprite-img max-h-full max-w-full object-contain pointer-events-none drop-shadow-xl transition-all duration-300"
+                        class="avatar-sprite-img h-full max-h-full w-auto max-w-[95%] object-contain pointer-events-none drop-shadow-2xl transition-all duration-300"
                         style="transform: perspective(850px) rotateY(${this.state.rotationAngle}deg);"
                         onerror="this.onerror=null; this.src='assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.jpg';"
                     />
                 </div>
 
                 <!-- Character Active Badge -->
-                <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5 pointer-events-none z-20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[11px] font-bold text-slate-800">${charName}</span>
+                <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-200/90 shadow-sm flex items-center gap-2 pointer-events-none z-20">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-extrabold text-slate-800">${charName}</span>
                 </div>
             </div>
         `;

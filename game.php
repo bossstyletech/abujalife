@@ -109,6 +109,9 @@ if (!$char) {
                     <button id="btnViewHome" onclick="World3D.toggleView('home')" class="px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-slate-900 transition">
                         <i class="fa-solid fa-house text-xs mr-1 text-teal-600"></i> Residence
                     </button>
+                    <button onclick="World3D.cycleAtmosphere()" class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Lighting (Day/Sunset/Night)">
+                        <i class="fa-solid fa-sun text-xs text-amber-500"></i>
+                    </button>
                     <button id="btnAutoRotate" onclick="World3D.toggleAutoRotate()" class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Auto-Spin">
                         <i class="fa-solid fa-play text-xs"></i>
                     </button>
@@ -119,7 +122,7 @@ if (!$char) {
             </div>
 
             <!-- Three.js Canvas Container -->
-            <div id="world3d-container" class="w-full h-[360px] sm:h-[440px] rounded-2xl bg-slate-50 border border-slate-100 relative cursor-grab active:cursor-grabbing overflow-hidden">
+            <div id="world3d-container" class="w-full h-[420px] sm:h-[480px] rounded-3xl bg-slate-50 border border-slate-200/80 relative cursor-grab active:cursor-grabbing overflow-hidden shadow-inner">
                 <!-- Three.js renders in here -->
             </div>
 
@@ -821,7 +824,7 @@ if (!$char) {
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
                     <!-- 3D Canvas Column -->
                     <div class="md:col-span-5 flex flex-col items-center">
-                        <div id="gameBitmojiContainer" class="w-full h-[360px] sm:h-[400px] rounded-2xl bg-white border border-slate-200 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
+                        <div id="gameBitmojiContainer" class="w-full h-[460px] sm:h-[500px] rounded-3xl bg-slate-50 border border-slate-200 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing"></div>
                         <div class="w-full mt-2.5 space-y-1.5">
                             <button type="button" onclick="GameApp.turnWardrobeAvatar()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-arrows-rotate text-xs"></i> Turn Around 180°
@@ -833,7 +836,7 @@ if (!$char) {
                     </div>
 
                     <!-- Customization Controls Column -->
-                    <div class="md:col-span-7 space-y-3.5 max-h-[440px] overflow-y-auto pr-1 text-xs">
+                    <div class="md:col-span-7 space-y-3.5 max-h-[500px] overflow-y-auto pr-1 text-xs">
                         
                         <!-- 2. REAL-TIME 3D OUTFITS -->
                         <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
