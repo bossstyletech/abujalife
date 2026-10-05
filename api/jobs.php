@@ -91,7 +91,7 @@ if ($action === 'work') {
     $salary = (float)$job['daily_salary'];
     $stmtUpdate = $pdo->prepare("
         UPDATE characters 
-        SET cash = cash + ?, energy = energy - ?, happiness = GREATEST(0, happiness - 2), intelligence = intelligence + 1
+        SET cash = cash + ?, energy = energy - ?, happiness = CASE WHEN happiness - 2 < 0 THEN 0 ELSE happiness - 2 END, intelligence = intelligence + 1
         WHERE id = ?
     ");
     $stmtUpdate->execute([$salary, $energyCost, $char['id']]);

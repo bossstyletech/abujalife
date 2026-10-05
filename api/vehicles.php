@@ -104,13 +104,14 @@ if ($action === 'cruise') {
 
     $credGain = max(1, (int)round($car['cred_bonus'] / 5));
     $hapGain = max(5, (int)round($car['happiness_bonus'] / 3));
+    $newHappiness = min(100, (int)$char['happiness'] + $hapGain);
 
     $stmtUpdate = $pdo->prepare("
         UPDATE characters 
-        SET cash = cash - ?, energy = energy - 10, happiness = LEAST(100, happiness + ?), street_cred = street_cred + ?
+        SET cash = cash - ?, energy = energy - 10, happiness = ?, street_cred = street_cred + ?
         WHERE id = ?
     ");
-    $stmtUpdate->execute([$fuelCost, $hapGain, $credGain, $char['id']]);
+    $stmtUpdate->execute([$fuelCost, $newHappiness, $credGain, $char['id']]);
 
     $routes = [
         "cruising along the smooth curves of Shehu Shagari Way past Aso Rock.",

@@ -17,7 +17,8 @@ if ($action === 'random') {
         jsonResponse(['success' => true, 'has_event' => false]);
     }
 
-    $stmt = $pdo->query("SELECT * FROM random_events ORDER BY RAND() LIMIT 1");
+    $randFunc = (defined('DB_DRIVER') && DB_DRIVER === 'sqlite') ? 'RANDOM()' : 'RAND()';
+    $stmt = $pdo->query("SELECT * FROM random_events ORDER BY $randFunc LIMIT 1");
     $event = $stmt->fetch();
 
     if (!$event) {

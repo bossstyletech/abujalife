@@ -39,9 +39,10 @@ if ($action === 'bet') {
     if ($isWin) {
         $winnings = round($stake * $multiplier, 2);
         $netProfit = $winnings - $stake;
+        $newHap = min(100, (int)$char['happiness'] + 15);
 
-        $stmt = $pdo->prepare("UPDATE characters SET cash = cash + ?, happiness = LEAST(100, happiness + 15) WHERE id = ?");
-        $stmt->execute([$netProfit, $char['id']]);
+        $stmt = $pdo->prepare("UPDATE characters SET cash = cash + ?, happiness = ? WHERE id = ?");
+        $stmt->execute([$netProfit, $newHap, $char['id']]);
 
         $msg = "BOOM! Your " . strtoupper($risk) . " sports ticket cut through! Won " . formatNaira($winnings) . " on " . formatNaira($stake) . " stake!";
         logActivity($char['id'], 'bet_win', $msg, $netProfit, 0, 15);
@@ -55,8 +56,9 @@ if ($action === 'bet') {
             'character' => getUserCharacter($userId)
         ]);
     } else {
-        $stmt = $pdo->prepare("UPDATE characters SET cash = cash - ?, happiness = GREATEST(0, happiness - 5) WHERE id = ?");
-        $stmt->execute([$stake, $char['id']]);
+        $newHap = max(0, (int)$char['happiness'] - 5);
+        $stmt = $pdo->prepare("UPDATE characters SET cash = cash - ?, happiness = ? WHERE id = ?");
+        $stmt->execute([$stake, $newHap, $char['id']]);
 
         $msg = "Heartbreak! One team played 0-0 in the 94th minute and cut your slip. Lost " . formatNaira($stake) . ".";
         logActivity($char['id'], 'bet_loss', $msg, -$stake, 0, -5);
@@ -105,8 +107,9 @@ if ($action === 'dice') {
     if ($isWin) {
         $winnings = round($stake * $multiplier, 2);
         $net = $winnings - $stake;
-        $stmt = $pdo->prepare("UPDATE characters SET cash = cash + ?, happiness = LEAST(100, happiness + 10) WHERE id = ?");
-        $stmt->execute([$net, $char['id']]);
+        $newHap = min(100, (int)$char['happiness'] + 10);
+        $stmt = $pdo->prepare("UPDATE characters SET cash = cash + ?, happiness = ? WHERE id = ?");
+        $stmt->execute([$net, $newHap, $char['id']]);
 
         $msg = "Dice rolled ($die1 + $die2 = $total)! You won " . formatNaira($winnings) . "!";
         logActivity($char['id'], 'dice_win', $msg, $net, 0, 10);
@@ -120,8 +123,9 @@ if ($action === 'dice') {
             'character' => getUserCharacter($userId)
         ]);
     } else {
-        $stmt = $pdo->prepare("UPDATE characters SET cash = cash - ?, happiness = GREATEST(0, happiness - 3) WHERE id = ?");
-        $stmt->execute([$stake, $char['id']]);
+        $newHap = max(0, (int)$char['happiness'] - 3);
+        $stmt = $pdo->prepare("UPDATE characters SET cash = cash - ?, happiness = ? WHERE id = ?");
+        $stmt->execute([$stake, $newHap, $char['id']]);
 
         $msg = "Dice rolled ($die1 + $die2 = $total). Better luck next roll! Lost " . formatNaira($stake) . ".";
         logActivity($char['id'], 'dice_loss', $msg, -$stake, 0, -3);

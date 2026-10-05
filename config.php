@@ -1,7 +1,7 @@
 <?php
 /**
  * Abuja Life - Global Configuration & Database Bootstrapper
- * Built for standard PHP 7.4+ / 8.x environments (XAMPP, Laragon, LAMP, Docker)
+ * Supports Railway MySQL, standard MySQL, with automatic SQLite zero-config fallback.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -11,13 +11,13 @@ if (session_status() === PHP_SESSION_NONE) {
 // ----------------------------------------------------
 // 1. Database Credentials (Configurable via ENV or Railway Defaults)
 // ----------------------------------------------------
-$rawHost = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+$rawHost = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '';
 $rawPort = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
 $rawName = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'abuja_life';
 $rawUser = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'root';
 $rawPass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : '');
 
-// If Railway MYSQL_URL is provided, parse it directly
+// If Railway MYSQL_URL is provided, parse it
 if ($mysqlUrl = getenv('MYSQL_URL')) {
     $parsed = parse_url($mysqlUrl);
     if (!empty($parsed['host'])) $rawHost = $parsed['host'];
@@ -27,7 +27,7 @@ if ($mysqlUrl = getenv('MYSQL_URL')) {
     if (isset($parsed['pass'])) $rawPass = $parsed['pass'];
 }
 
-define('DB_HOST', $rawHost);
+define('DB_HOST', $rawHost ?: '127.0.0.1');
 define('DB_PORT', $rawPort);
 define('DB_NAME', $rawName);
 define('DB_USER', $rawUser);
@@ -52,7 +52,8 @@ define('ABUJA_DISTRICTS', [
 
 /**
  * Get PDO Database Connection
- * Auto-creates the database and imports db.sql if database does not exist.
+ * Attempts MySQL first. If MySQL is unavailable / connection refused,
+ * automatically falls back to SQLite (database.sqlite) so the app works seamlessly anywhere!
  */
 function getDbConnection() {
     static $pdo = null;
@@ -61,56 +62,76 @@ function getDbConnection() {
         return $pdo;
     }
 
-    $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
+    $isExplicitSqlite = (getenv('DB_CONNECTION') === 'sqlite');
 
-    try {
-        // Try connecting directly to the targeted database
-        $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
-    } catch (PDOException $e) {
-        // If database unknown (1049), attempt auto-creation
-        if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
-            try {
-                $rawPdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-                $rawPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-                $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
-                
-                // Auto seed schema from db.sql if exists
-                $sqlFile = __DIR__ . '/db.sql';
-                if (file_exists($sqlFile)) {
-                    $sqlContent = file_get_contents($sqlFile);
-                    $pdo->exec($sqlContent);
+    if (!$isExplicitSqlite && extension_loaded('pdo_mysql')) {
+        $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_TIMEOUT            => 2,
+        ];
+
+        try {
+            // Attempt MySQL connection
+            $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
+            if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
+            return $pdo;
+        } catch (PDOException $e) {
+            // If database unknown (1049), attempt auto-creation on MySQL server
+            if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
+                try {
+                    $rawPdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                    $rawPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+                    $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
+                    
+                    $sqlFile = __DIR__ . '/db.sql';
+                    if (file_exists($sqlFile)) {
+                        $pdo->exec(file_get_contents($sqlFile));
+                    }
+                    if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
+                    return $pdo;
+                } catch (Exception $inner) {
+                    // Fall through to SQLite fallback
                 }
-            } catch (Exception $innerEx) {
-                http_response_code(500);
-                header('Content-Type: application/json');
-                echo json_encode([
-                    'success' => false,
-                    'error' => 'Database connection and initialization error: ' . $innerEx->getMessage()
-                ]);
-                exit;
             }
-        } else {
-            http_response_code(500);
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'error' => 'Database connection failed: ' . $e->getMessage()
-            ]);
-            exit;
+            // Connection refused (error 2002) or MySQL unavailable: fall through to SQLite
         }
     }
 
-    return $pdo;
+    // --- Automatic SQLite Fallback ---
+    try {
+        $sqliteFile = __DIR__ . '/database.sqlite';
+        $needsInit = !file_exists($sqliteFile) || filesize($sqliteFile) === 0;
+
+        $pdo = new PDO("sqlite:" . $sqliteFile, null, null, [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+        ]);
+
+        if ($needsInit) {
+            $schemaFile = __DIR__ . '/db_sqlite.sql';
+            if (file_exists($schemaFile)) {
+                $sqlContent = file_get_contents($schemaFile);
+                $pdo->exec($sqlContent);
+            }
+        }
+
+        if (!defined('DB_DRIVER')) define('DB_DRIVER', 'sqlite');
+        return $pdo;
+    } catch (Exception $sqlEx) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'error' => 'Database initialization error: ' . $sqlEx->getMessage()
+        ]);
+        exit;
+    }
 }
 
-/**
- * Standardized JSON API Response
- */
 function jsonResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
@@ -118,9 +139,6 @@ function jsonResponse($data, $statusCode = 200) {
     exit;
 }
 
-/**
- * Sanitize user input strings
- */
 function cleanInput($input) {
     if (is_array($input)) {
         return array_map('cleanInput', $input);
@@ -128,23 +146,14 @@ function cleanInput($input) {
     return trim(htmlspecialchars((string)$input, ENT_QUOTES, 'UTF-8'));
 }
 
-/**
- * Format number into Nigerian Naira string
- */
 function formatNaira($amount) {
     return '₦' . number_format((float)$amount, 2);
 }
 
-/**
- * Check if a session has an authenticated user ID
- */
 function getAuthUserId() {
     return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
 }
 
-/**
- * Require user login or return JSON error
- */
 function requireAuth() {
     $userId = getAuthUserId();
     if (!$userId) {
@@ -157,9 +166,6 @@ function requireAuth() {
     return $userId;
 }
 
-/**
- * Fetch active character for user
- */
 function getUserCharacter($userId) {
     $pdo = getDbConnection();
     $stmt = $pdo->prepare("
@@ -178,9 +184,6 @@ function getUserCharacter($userId) {
     return $stmt->fetch();
 }
 
-/**
- * Log activity to character audit trail
- */
 function logActivity($characterId, $actionType, $message, $cashChange = 0, $energyChange = 0, $happinessChange = 0) {
     try {
         $pdo = getDbConnection();
@@ -190,6 +193,6 @@ function logActivity($characterId, $actionType, $message, $cashChange = 0, $ener
         ");
         $stmt->execute([$characterId, $actionType, $message, $cashChange, $energyChange, $happinessChange]);
     } catch (Exception $e) {
-        // Silently continue if log fails to avoid blocking core gameplay
+        // Continue silently if log fails
     }
 }

@@ -125,7 +125,7 @@ if ($action === 'sleep') {
     // Rest full energy
     $stmt = $pdo->prepare("
         UPDATE characters 
-        SET energy = max_energy, happiness = LEAST(100, happiness + 5)
+        SET energy = max_energy, happiness = CASE WHEN happiness + 5 > 100 THEN 100 ELSE happiness + 5 END
         WHERE id = ?
     ");
     $stmt->execute([$char['id']]);
@@ -147,7 +147,7 @@ if ($action === 'hospital') {
 
     $stmt = $pdo->prepare("
         UPDATE characters 
-        SET cash = cash - ?, health = 100, happiness = LEAST(100, happiness + 10)
+        SET cash = cash - ?, health = 100, happiness = CASE WHEN happiness + 10 > 100 THEN 100 ELSE happiness + 10 END
         WHERE id = ?
     ");
     $stmt->execute([$cost, $char['id']]);
