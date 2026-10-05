@@ -261,17 +261,20 @@ function getCharacterOutfitImage(characterId, outfitKey) {
 
     const targetKey = aliasMap[outfitKey] || outfitKey;
 
+    let resultPath = '';
     if (char.outfits[targetKey]) {
-        return char.outfits[targetKey];
+        resultPath = char.outfits[targetKey];
+    } else if (char.outfits['hoodie']) {
+        resultPath = char.outfits['hoodie'];
+    } else if (char.thumb) {
+        resultPath = char.thumb;
+    } else {
+        const firstKey = Object.keys(char.outfits)[0];
+        resultPath = char.outfits[firstKey] || '';
     }
 
-    // Secondary fallback
-    if (char.outfits['hoodie']) return char.outfits['hoodie'];
-    if (char.thumb) return char.thumb;
-
-    // First available image
-    const firstKey = Object.keys(char.outfits)[0];
-    return char.outfits[firstKey] || '';
+    // Prefer transparent, portrait-cropped PNG version
+    return resultPath ? resultPath.replace(/\.jpg$/i, '.png') : '';
 }
 
 if (typeof window !== 'undefined') {

@@ -536,9 +536,9 @@ const World3D = {
         const outfit = cfg.outfit || cfg.topType || char.outfit || 'hoodie';
         const imgUrl = (typeof window.getCharacterOutfitImage === 'function')
             ? window.getCharacterOutfitImage(charId, outfit)
-            : `assets/img/characters/${charId}/Man_standing_in_hoodie_20261005064533.jpg`;
+            : `assets/img/characters/${charId}/Man_standing_in_hoodie_20261005064533.png`;
 
-        // Render Crisp Big 3D Character Sprite Billboard
+        // Render Crisp Big 3D Character Sprite Billboard (Transparent PNG)
         const loader = new THREE.TextureLoader();
         loader.load(imgUrl, (texture) => {
             texture.minFilter = THREE.LinearFilter;
@@ -547,13 +547,13 @@ const World3D = {
             const spriteMat = new THREE.SpriteMaterial({
                 map: texture,
                 transparent: true,
-                alphaTest: 0.05
+                alphaTest: 0.08
             });
 
             const sprite = new THREE.Sprite(spriteMat);
-            // Prominent large scale filling ~75% of foreground view
-            sprite.scale.set(3.0, 3.9, 1.0);
-            sprite.position.set(0, 1.95, 0);
+            // Proportional portrait aspect ratio (380x768 -> 1:2)
+            sprite.scale.set(1.85, 3.7, 1.0);
+            sprite.position.set(0, 1.85, 0);
             personaGroup.add(sprite);
 
             if (this.renderer && this.scene && this.camera) {

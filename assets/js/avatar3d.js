@@ -178,8 +178,8 @@ class Avatar3DStudio {
         const shadowSkew = Math.sin(rad) * 16;
         const shadowScaleX = 1 - Math.abs(Math.sin(rad)) * 0.25;
 
-        // Realistic 3D turntable perspective with slight tilt
-        spriteEl.style.transform = `perspective(850px) rotateY(${deg}deg) translateZ(0px)`;
+        // Realistic 3D turntable perspective with slight tilt centered around character origin
+        spriteEl.style.transform = `translateX(-50%) perspective(850px) rotateY(${deg}deg)`;
         
         if (shadowEl) {
             shadowEl.style.transform = `scale(${shadowScaleX}, 1) skewX(${shadowSkew}deg)`;
@@ -196,22 +196,32 @@ class Avatar3DStudio {
         this.currentImageUrl = imgUrl;
 
         this.stageContainer.innerHTML = `
-            <div class="relative w-full h-full flex flex-col items-center justify-center p-1 sm:p-2 select-none overflow-hidden">
+            <div class="relative w-full h-full flex flex-col items-center justify-end select-none overflow-hidden rounded-3xl" style="background: radial-gradient(circle at 50% 30%, #ffffff 0%, #f8fafc 60%, #e2e8f0 100%);">
                 
                 <!-- 3D Pedestal Floor Platform & Ambient Glow -->
-                <div class="absolute bottom-2 w-72 h-14 rounded-full bg-gradient-to-t from-slate-200/90 via-slate-100/50 to-transparent flex items-center justify-center pointer-events-none avatar-pedestal-pulse">
+                <div class="absolute bottom-5 w-60 h-12 rounded-full bg-gradient-to-t from-slate-300/80 via-slate-200/40 to-transparent flex items-center justify-center pointer-events-none avatar-pedestal-pulse z-0">
                     <!-- Dynamic Soft Floor Shadow -->
-                    <div class="avatar-shadow-disc w-56 h-8 rounded-full bg-slate-900/20 blur-[6px] transition-transform duration-150"></div>
+                    <div class="avatar-shadow-disc w-48 h-6 rounded-full bg-slate-900/20 blur-[5px] transition-transform duration-150"></div>
                 </div>
 
-                <!-- Photorealistic 3D Character Sprite Renders (Fills ~80% of Box) -->
-                <div class="relative z-10 w-full h-[90%] max-h-[92%] flex items-center justify-center avatar-3d-breathe">
+                <!-- Photorealistic 3D Character Sprite Renders (Fills ~78% of Container Box) -->
+                <div class="relative z-10 w-full h-full flex items-center justify-center overflow-hidden pointer-events-none avatar-3d-breathe">
                     <img 
                         src="${imgUrl}" 
                         alt="${charName}"
-                        class="avatar-sprite-img h-full max-h-full w-auto max-w-[95%] object-contain pointer-events-none drop-shadow-2xl transition-all duration-300"
-                        style="transform: perspective(850px) rotateY(${this.state.rotationAngle}deg);"
-                        onerror="this.onerror=null; this.src='assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.jpg';"
+                        class="avatar-sprite-img pointer-events-none transition-transform duration-150 select-none drop-shadow-xl"
+                        style="
+                            position: absolute;
+                            bottom: 6%;
+                            left: 50%;
+                            height: 84%;
+                            width: auto;
+                            max-width: 90%;
+                            object-fit: contain;
+                            transform: translateX(-50%) perspective(850px) rotateY(${this.state.rotationAngle}deg);
+                            transform-origin: center bottom;
+                        "
+                        onerror="if(!this.src.endsWith('.jpg')){ this.src=this.src.replace(/\\.png$/i,'.jpg'); } else { this.src='assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png'; }"
                     />
                 </div>
 

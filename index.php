@@ -218,47 +218,47 @@ if (getAuthUserId()) {
                     <label class="block text-xs font-bold text-slate-800 mb-2">1. Choose Persona Archetype</label>
                     <div class="grid grid-cols-3 sm:grid-cols-9 gap-2">
                         <button type="button" onclick="selectCharacter('tunde')" class="char-card p-2 rounded-2xl border-2 border-emerald-600 bg-emerald-50 text-center transition transform active:scale-95 group">
-                            <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
+                            <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Tunde">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Tunde</span>
                             <span class="block text-[9px] text-slate-500 truncate">Tech Bro</span>
                         </button>
                         <button type="button" onclick="selectCharacter('emeka')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
+                            <img src="assets/img/characters/emeka/Man_wearing_green_hoodie_standing_20261005064521.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Emeka">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Emeka</span>
                             <span class="block text-[9px] text-slate-500 truncate">Dealmaker</span>
                         </button>
                         <button type="button" onclick="selectCharacter('farouk')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
+                            <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Farouk">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Farouk</span>
                             <span class="block text-[9px] text-slate-500 truncate">Aristocrat</span>
                         </button>
                         <button type="button" onclick="selectCharacter('chidi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
+                            <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Chidi">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Chidi</span>
                             <span class="block text-[9px] text-slate-500 truncate">Creative</span>
                         </button>
                         <button type="button" onclick="selectCharacter('zainab')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
+                            <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Zainab">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Zainab</span>
                             <span class="block text-[9px] text-slate-500 truncate">FinTech</span>
                         </button>
                         <button type="button" onclick="selectCharacter('blessing')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
+                            <img src="assets/img/characters/blessing/Young_woman_standing_with_sneakers_20261005064429.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Blessing">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Blessing</span>
                             <span class="block text-[9px] text-slate-500 truncate">Curator</span>
                         </button>
                         <button type="button" onclick="selectCharacter('ibrahim')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
+                            <img src="assets/img/characters/ibrahim/Man_wearing_streetwear_hoodie_20261005064416.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ibrahim">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ibrahim</span>
                             <span class="block text-[9px] text-slate-500 truncate">Oil & Gas</span>
                         </button>
                         <button type="button" onclick="selectCharacter('segun')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
+                            <img src="assets/img/characters/segun/Man_wearing_green_hoodie_standing_20261005064405.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Segun">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Segun</span>
                             <span class="block text-[9px] text-slate-500 truncate">Hustler</span>
                         </button>
                         <button type="button" onclick="selectCharacter('ngozi')" class="char-card p-2 rounded-2xl border border-slate-200 bg-white text-center transition transform hover:border-slate-300 active:scale-95 group">
-                            <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.jpg" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
+                            <img src="assets/img/characters/ngozi/Woman_wearing_hoodie_and_sunglasses_20261005064346.png" class="w-10 h-10 rounded-full mx-auto object-cover border border-slate-200 group-hover:scale-105 transition" alt="Ngozi">
                             <span class="block text-[11px] font-bold text-slate-900 mt-1 truncate">Ngozi</span>
                             <span class="block text-[9px] text-slate-500 truncate">Attorney</span>
                         </button>
