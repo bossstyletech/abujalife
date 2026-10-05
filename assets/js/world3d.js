@@ -324,114 +324,67 @@ const World3D = {
             try { cfg = JSON.parse(char.avatar); } catch(e){}
         }
 
-        const skinHex = parseInt((cfg.skinTone || char.skin_tone || '#704225').replace('#', '0x'), 16);
-        const hairHex = parseInt((cfg.hairColor || char.hair_color || '#111111').replace('#', '0x'), 16);
-        const hairStyle = cfg.hairStyle || char.hair_style || 'fade';
-        const topType = cfg.topType || char.outfit || 'hoodie';
-        const bottomType = cfg.bottomType || 'jeans_blue';
-        const shoeType = cfg.shoeType || 'sneakers';
-        const accessory = cfg.accessory || (char.outfit === 'agbada' ? 'fila_cap' : 'none');
+        const personaGroup = new THREE.Group();
+        personaGroup.position.set(1.4, 0, 3.3); // Standing near the entrance
+        personaGroup.rotation.y = -Math.PI / 10;
 
-        // Outfit colors
-        let shirtHex = 0x059669; // default emerald hoodie
-        if (topType === 'techie' || topType === 'hoodie') shirtHex = 0x059669;
-        else if (topType === 'tshirt') shirtHex = 0x2563eb;
-        else if (topType === 'agbada') shirtHex = 0xf8fafc; // white agbada
-        else if (topType === 'corporate' || topType === 'suit') shirtHex = 0x0f172a; // navy corporate suit
+        // Ground shadow for character
+        const shadowGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.02, 24);
+        const shadowMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.25 });
+        const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+        shadowMesh.position.y = 0.01;
+        personaGroup.add(shadowMesh);
 
-        // Pants colors
-        let pantsHex = 0x1d4ed8; // denim blue
-        if (bottomType === 'jeans_black') pantsHex = 0x0f172a;
-        else if (bottomType === 'sweatpants') pantsHex = 0x475569;
-        else if (bottomType === 'chinos') pantsHex = 0xb45309;
-        else if (bottomType === 'white_trouser' || topType === 'agbada') pantsHex = 0xf8fafc;
+        // Generate crisp vector sprite using Avatar3DStudio
+        if (typeof Avatar3DStudio !== 'undefined') {
+            const tempDiv = document.createElement('div');
+            const studio = new Avatar3DStudio(tempDiv, { width: 320, height: 440 });
+            if (Object.keys(cfg).length > 0) {
+                studio.loadConfig(cfg);
+            } else {
+                studio.setSkin(char.skin_tone || '#704225');
+                studio.setHair(char.hair_style || 'fade');
+                studio.setTop(char.outfit || 'hoodie');
+            }
 
-        const persona = new THREE.Group();
-        persona.position.set(1.2, 0, 3.4); // Standing at entrance
-        persona.rotation.y = -Math.PI / 8;
+            const svgStr = studio.generateSVG();
+            const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
 
-        const skinMat = new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.45 });
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 400;
+                canvas.height = 520;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
 
-        // Shoes & Kicks
-        let shoeColor = 0xffffff;
-        if (shoeType === 'jordans') shoeColor = 0xbe123c;
-        else if (shoeType === 'loafers') shoeColor = 0x1e1e1e;
-        else if (shoeType === 'slides') shoeColor = 0x0f172a;
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
 
-        const shoeMat = new THREE.MeshStandardMaterial({ color: shoeColor, roughness: 0.3 });
-        const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.35), shoeMat);
-        leftShoe.position.set(-0.16, 0.05, 0.05);
-        leftShoe.castShadow = true;
-        persona.add(leftShoe);
+                const spriteMat = new THREE.SpriteMaterial({
+                    map: texture,
+                    transparent: true,
+                    alphaTest: 0.05
+                });
 
-        const rightShoe = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.35), shoeMat);
-        rightShoe.position.set(0.16, 0.05, 0.05);
-        rightShoe.castShadow = true;
-        persona.add(rightShoe);
+                const sprite = new THREE.Sprite(spriteMat);
+                sprite.scale.set(2.4, 3.12, 1);
+                sprite.position.set(0, 1.56, 0);
+                personaGroup.add(sprite);
 
-        // Legs & Jeans / Bottoms
-        const pantsMat = new THREE.MeshStandardMaterial({ color: pantsHex, roughness: 0.65 });
-        const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.85, 10), pantsMat);
-        leftLeg.position.set(-0.16, 0.5, 0);
-        leftLeg.castShadow = true;
-        persona.add(leftLeg);
-
-        const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.08, 0.85, 10), pantsMat);
-        rightLeg.position.set(0.16, 0.5, 0);
-        rightLeg.castShadow = true;
-        persona.add(rightLeg);
-
-        // Torso & Tops
-        const torsoMat = new THREE.MeshStandardMaterial({ color: shirtHex, roughness: 0.6 });
-        const torsoWidth = topType === 'agbada' ? 0.7 : 0.48;
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(torsoWidth, 0.95, 0.3), torsoMat);
-        torso.position.set(0, 1.35, 0);
-        torso.castShadow = true;
-        persona.add(torso);
-
-        // Head
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat);
-        head.position.set(0, 2.02, 0);
-        head.castShadow = true;
-        persona.add(head);
-
-        // Hair
-        const hairMat = new THREE.MeshStandardMaterial({ color: hairHex, roughness: 0.85 });
-        if (hairStyle === 'afro') {
-            const afro = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 16), hairMat);
-            afro.position.set(0, 2.12, 0);
-            afro.castShadow = true;
-            persona.add(afro);
-        } else if (hairStyle === 'dreads') {
-            const dreads = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 16), hairMat);
-            dreads.position.set(0, 2.1, 0);
-            persona.add(dreads);
-        } else {
-            const fade = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 16), hairMat);
-            fade.position.set(0, 2.06, 0);
-            fade.castShadow = true;
-            persona.add(fade);
+                if (this.renderer && this.scene && this.camera) {
+                    this.renderer.render(this.scene, this.camera);
+                }
+            };
+            img.src = url;
         }
 
-        // Accessories (Fila, Sunglasses, Chain)
-        if (accessory === 'fila_cap' || topType === 'agbada') {
-            const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.22, 16), new THREE.MeshStandardMaterial({ color: 0x991b1b }));
-            cap.position.set(0, 2.22, 0);
-            cap.rotation.z = -0.15;
-            persona.add(cap);
-        } else if (accessory === 'sunglasses') {
-            const shades = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.06, 0.04), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 }));
-            shades.position.set(0, 2.04, 0.22);
-            persona.add(shades);
-        } else if (accessory === 'chain') {
-            const chain = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.02, 8, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9 }));
-            chain.position.set(0, 1.72, 0.06);
-            chain.rotation.x = Math.PI / 2.8;
-            persona.add(chain);
-        }
-
-        this.characterMesh = persona;
-        this.currentBuildingGroup.add(persona);
+        this.characterMesh = personaGroup;
+        this.currentBuildingGroup.add(personaGroup);
     },
 
     toggleView(mode) {
