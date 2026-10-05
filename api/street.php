@@ -81,7 +81,7 @@ if ($action === 'danfo_rush') {
         }
         $deltas = ['cash' => -$fare, 'energy' => 5, 'happiness' => 10];
         $rainMsg = $isRaining ? ' Rain dey fall but you still secure seat – respect!' : '';
-        $msg = "You sharp! You hustled into the danfo before the conductor shouted "Full"." . $rainMsg . " Fare paid: " . formatNaira($fare) . ".";
+        $msg = "You sharp! You hustled into the danfo before the conductor shouted 'Full'." . $rainMsg . " Fare paid: " . formatNaira($fare) . ".";
     } else {
         // Missed the bus – okada to chase
         $okadaCost = 200;
