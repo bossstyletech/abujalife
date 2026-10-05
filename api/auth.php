@@ -15,6 +15,18 @@ if ($action === 'register') {
     $hairColor = cleanInput($_POST['hair_color'] ?? '#111111');
     $outfit = cleanInput($_POST['outfit'] ?? 'casual');
     $archetype = cleanInput($_POST['archetype'] ?? 'hustler');
+    $avatarConfig = cleanInput($_POST['avatar_config'] ?? '');
+    if (empty($avatarConfig)) {
+        $avatarConfig = json_encode([
+            'skinTone' => $skinTone,
+            'hairStyle' => $hairStyle,
+            'hairColor' => $hairColor,
+            'topType' => $outfit,
+            'bottomType' => 'jeans_blue',
+            'shoeType' => 'sneakers',
+            'accessory' => 'none'
+        ]);
+    }
 
     if (empty($username) || empty($email) || empty($password) || empty($fullName)) {
         jsonResponse(['success' => false, 'error' => 'All fields are required.'], 400);
@@ -72,13 +84,13 @@ if ($action === 'register') {
 
         $stmt = $pdo->prepare("
             INSERT INTO characters (
-                user_id, full_name, gender, skin_tone, hair_style, hair_color, outfit, archetype,
+                user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
                 cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
-            $userId, $fullName, $gender, $skinTone, $hairStyle, $hairColor, $outfit, $archetype,
+            $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $archetype,
             $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar
         ]);
         $charId = (int)$pdo->lastInsertId();

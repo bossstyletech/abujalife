@@ -885,6 +885,123 @@ const GameApp = {
         this.pendingEvent = null;
     },
 
+    // --- BITMOJI 3D WARDROBE STUDIO ---
+    wardrobeStudio: null,
+
+    openWardrobeModal() {
+        const modal = document.getElementById('gameWardrobeModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        setTimeout(() => {
+            const container = document.getElementById('gameBitmojiContainer');
+            if (!this.wardrobeStudio && container) {
+                this.wardrobeStudio = new Avatar3DStudio('gameBitmojiContainer', {
+                    width: container.clientWidth || 320,
+                    height: 400,
+                    showPlatform: true
+                });
+            } else if (this.wardrobeStudio) {
+                this.wardrobeStudio.resize();
+            }
+
+            // Sync with current character state
+            if (this.wardrobeStudio && this.character) {
+                let cfg = null;
+                if (this.character.avatar && typeof this.character.avatar === 'string' && this.character.avatar.trim().startsWith('{')) {
+                    try { cfg = JSON.parse(this.character.avatar); } catch(e){}
+                }
+                if (cfg) {
+                    this.wardrobeStudio.loadConfig(cfg);
+                } else {
+                    this.wardrobeStudio.setSkin(this.character.skin_tone || '#704225');
+                    this.wardrobeStudio.setHair(this.character.hair_style || 'fade');
+                    this.wardrobeStudio.setTop(this.character.outfit || 'hoodie');
+                }
+            }
+        }, 60);
+    },
+
+    closeWardrobeModal() {
+        const modal = document.getElementById('gameWardrobeModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    turnWardrobeAvatar() {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.turnAround();
+        }
+    },
+
+    setWardrobeSkin(hex) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setSkin(hex);
+        }
+    },
+
+    setWardrobeHair(style) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setHair(style);
+        }
+    },
+
+    setWardrobeTop(type) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setTop(type);
+        }
+    },
+
+    setWardrobeBottom(type) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setBottom(type);
+        }
+    },
+
+    setWardrobeShoes(type) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setShoes(type);
+        }
+    },
+
+    setWardrobeAccessory(type) {
+        if (this.wardrobeStudio) {
+            this.wardrobeStudio.setAccessory(type);
+        }
+    },
+
+    async saveWardrobeLook() {
+        if (!this.wardrobeStudio) return;
+        const cfg = this.wardrobeStudio.getConfig();
+
+        const formData = new FormData();
+        formData.append('avatar_config', JSON.stringify(cfg));
+        formData.append('skin_tone', cfg.skinTone || '#704225');
+        formData.append('hair_style', cfg.hairStyle || 'fade');
+        formData.append('outfit', cfg.topType || 'hoodie');
+
+        try {
+            const res = await fetch('api/character.php?action=update_looks', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                this.notify('Wardrobe updated! Your 3D Bitmoji look is refreshed.', 'success');
+                this.closeWardrobeModal();
+                await this.fetchCharacter();
+                if (window.World3D) {
+                    World3D.updateScene();
+                }
+            } else {
+                this.notify(data.error || 'Failed to update wardrobe.', 'error');
+            }
+        } catch (e) {
+            this.notify('Connection error updating wardrobe.', 'error');
+        }
+    },
+
     async logout() {
         const res = await fetch('api/auth.php?action=logout');
         const data = await res.json();

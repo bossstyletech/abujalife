@@ -6,7 +6,7 @@ $status = 'info';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
     try {
-        if (defined('DB_DRIVER') && DB_DRIVER === 'sqlite') {
+        if (!HAS_MYSQL_CONFIG || (defined('DB_DRIVER') && DB_DRIVER === 'sqlite')) {
             $sqliteFile = __DIR__ . '/database.sqlite';
             $pdo = new PDO("sqlite:" . $sqliteFile, null, null, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['auto'])) {
         }
     } catch (Exception $e) {
         $status = 'danger';
-        $message = "Installation note: " . $e->getMessage() . " (The app also has automatic SQLite fallback)";
+        $message = "Installation notice: " . $e->getMessage();
     }
 }
 ?>

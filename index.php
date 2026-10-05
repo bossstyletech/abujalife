@@ -17,6 +17,9 @@ if (getAuthUserId()) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Three.js 3D Engine for Bitmoji Real-Time Character Creator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="assets/js/avatar3d.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -123,7 +126,7 @@ if (getAuthUserId()) {
          CHARACTER CREATION WIZARD (ORIGIN QUIZ + FACE BUILDER + SIGNUP)
          ============================================================ -->
     <div id="wizardModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-fade-up">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-fade-up">
             
             <button onclick="closeWizard()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center absolute top-5 right-5 transition">
                 <i class="fa-solid fa-xmark text-sm"></i>
@@ -197,67 +200,165 @@ if (getAuthUserId()) {
                 </button>
             </div>
 
-            <!-- STEP 2: FACE & LOOKS BUILDER -->
-            <div id="wizardStep2" class="space-y-6 hidden">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">Customize Your Persona</h2>
-                    <p class="text-xs text-slate-500 mt-1">Design your face, hair, and style. This persona will appear inside your 3D building!</p>
+            <!-- STEP 2: BITMOJI 3D CHARACTER STUDIO (HEAD TO FEET IN REAL TIME) -->
+            <div id="wizardStep2" class="space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Snapchat Bitmoji 3D Studio</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Customize skin, hairstyle, top, jeans, and shoes in real time. Drag to turn 360°!</p>
+                    </div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        Live 3D
+                    </span>
                 </div>
 
-                <!-- Live Mini Avatar Preview Card -->
-                <div class="flex items-center justify-center p-6 bg-slate-50 border border-slate-200 rounded-3xl">
-                    <div class="text-center">
-                        <div id="avatarPreviewBox" class="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl shadow-inner relative overflow-hidden transition-all duration-200" style="background-color: #704225;">
-                            <i id="avatarIcon" class="fa-solid fa-user text-white"></i>
+                <!-- Studio Layout: 3D Viewport on Left, Wardrobe Controls on Right -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+                    
+                    <!-- 3D Character Viewport Column -->
+                    <div class="md:col-span-5 flex flex-col items-center">
+                        <div id="bitmojiStudioContainer" class="w-full h-[360px] sm:h-[400px] rounded-2xl bg-white border border-slate-200/90 relative shadow-inner overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
+                            <div class="text-xs text-slate-400 animate-pulse">Initializing 3D Character Studio...</div>
                         </div>
-                        <span id="previewStyleBadge" class="text-[11px] font-bold px-3 py-1 bg-white border border-slate-200 rounded-full text-slate-700 shadow-sm">
-                            Casual Streetwear
-                        </span>
+
+                        <!-- 3D Interaction Helpers -->
+                        <div class="w-full mt-2.5 space-y-1.5">
+                            <button type="button" onclick="turnCharacterAround()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-arrows-rotate text-xs"></i> Turn Around 180°
+                            </button>
+                            <p class="text-[11px] text-slate-500 text-center font-medium">
+                                <i class="fa-solid fa-hand-pointer text-slate-400 mr-1"></i> Drag left/right to spin 360°
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Wardrobe & Customization Selectors Column -->
+                    <div class="md:col-span-7 space-y-4 max-h-[440px] overflow-y-auto pr-1">
+                        
+                        <!-- 1. SKIN COMPLEXION -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">1. Skin Complexion</label>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="button" onclick="applySkin('#2b1d0c')" title="Deep Espresso" class="skin-btn w-9 h-9 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #2b1d0c;"></button>
+                                <button type="button" onclick="applySkin('#3d2314')" title="Mahogany" class="skin-btn w-9 h-9 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #3d2314;"></button>
+                                <button type="button" onclick="applySkin('#593822')" title="Rich Cocoa" class="skin-btn w-9 h-9 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #593822;"></button>
+                                <button type="button" onclick="applySkin('#704225')" title="Warm Almond" class="skin-btn w-9 h-9 rounded-full border-2 border-white ring-2 ring-emerald-600 shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #704225;"></button>
+                                <button type="button" onclick="applySkin('#8d5524')" title="Bronze" class="skin-btn w-9 h-9 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #8d5524;"></button>
+                                <button type="button" onclick="applySkin('#c68642')" title="Caramel" class="skin-btn w-9 h-9 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 active:scale-95" style="background-color: #c68642;"></button>
+                            </div>
+                        </div>
+
+                        <!-- 2. HAIRSTYLE -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">2. Hairstyle</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <button type="button" onclick="applyHair('fade')" class="hair-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    💈 Low Fade Cut
+                                </button>
+                                <button type="button" onclick="applyHair('afro')" class="hair-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👑 Afro Crown
+                                </button>
+                                <button type="button" onclick="applyHair('dreads')" class="hair-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🦁 Dreadlocks
+                                </button>
+                                <button type="button" onclick="applyHair('cornrows')" class="hair-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    ✨ Cornrows
+                                </button>
+                                <button type="button" onclick="applyHair('buzz')" class="hair-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    ✂️ Clean Buzz
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. TOPS / UPPER BODY -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">3. Tops & Shirts</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="applyTop('hoodie')" class="top-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🧥 Tech Bro Hoodie
+                                </button>
+                                <button type="button" onclick="applyTop('tshirt')" class="top-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👕 Casual T-Shirt
+                                </button>
+                                <button type="button" onclick="applyTop('agbada')" class="top-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🪡 Royal Agbada
+                                </button>
+                                <button type="button" onclick="applyTop('suit')" class="top-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👔 Executive Navy Suit
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4. JEANS & BOTTOMS (REAL-TIME SWAP) -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">4. Jeans & Trousers</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <button type="button" onclick="applyBottom('jeans_blue')" class="bottom-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👖 Denim Blue Jeans
+                                </button>
+                                <button type="button" onclick="applyBottom('jeans_black')" class="bottom-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👖 Slim Black Jeans
+                                </button>
+                                <button type="button" onclick="applyBottom('sweatpants')" class="bottom-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🏃 Fleece Joggers
+                                </button>
+                                <button type="button" onclick="applyBottom('chinos')" class="bottom-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🟤 Khaki Chinos
+                                </button>
+                                <button type="button" onclick="applyBottom('white_trouser')" class="bottom-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    ⚪ Royal Linen White
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 5. SHOES & KICKS (REAL-TIME SWAP) -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">5. Footwear & Shoes</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="applyShoes('sneakers')" class="shoe-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👟 Crisp White AF1s
+                                </button>
+                                <button type="button" onclick="applyShoes('jordans')" class="shoe-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🏀 High-Top Air Jordans
+                                </button>
+                                <button type="button" onclick="applyShoes('loafers')" class="shoe-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    👞 Leather Loafers
+                                </button>
+                                <button type="button" onclick="applyShoes('slides')" class="shoe-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🩴 Casual Slides
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 6. ACCESSORIES -->
+                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                            <label class="block text-xs font-bold text-slate-800 mb-2">6. Accessories & Bling</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="applyAccessory('none')" class="acc-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🚫 None
+                                </button>
+                                <button type="button" onclick="applyAccessory('sunglasses')" class="acc-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🕶️ VIP Aviator Shades
+                                </button>
+                                <button type="button" onclick="applyAccessory('chain')" class="acc-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🪙 Gold Cuban Chain
+                                </button>
+                                <button type="button" onclick="applyAccessory('fila_cap')" class="acc-btn p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 hover:border-emerald-500 transition text-left active:scale-95">
+                                    🎩 Royal Fila Cap
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
-                <!-- Skin Tone Selector -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">Skin Complexion</label>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="setSkinTone('#3d2314')" class="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm focus:ring-2 focus:ring-emerald-500" style="background-color: #3d2314;"></button>
-                        <button type="button" onclick="setSkinTone('#593822')" class="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm focus:ring-2 focus:ring-emerald-500" style="background-color: #593822;"></button>
-                        <button type="button" onclick="setSkinTone('#704225')" class="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm focus:ring-2 focus:ring-emerald-500" style="background-color: #704225;"></button>
-                        <button type="button" onclick="setSkinTone('#8d5524')" class="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm focus:ring-2 focus:ring-emerald-500" style="background-color: #8d5524;"></button>
-                        <button type="button" onclick="setSkinTone('#c68642')" class="w-9 h-9 rounded-full border-2 border-slate-300 shadow-sm focus:ring-2 focus:ring-emerald-500" style="background-color: #c68642;"></button>
-                    </div>
-                </div>
-
-                <!-- Hair Style -->
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Hairstyle</label>
-                        <select id="hairSelect" onchange="updateAvatarPreview()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-600">
-                            <option value="fade">Low Cut / Fade</option>
-                            <option value="afro">Afro Crown</option>
-                            <option value="dreads">Dreadlocks</option>
-                            <option value="cornrows">Cornrows / Braids</option>
-                            <option value="buzz">Clean Shaven</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Starting Outfit</label>
-                        <select id="outfitSelect" onchange="updateAvatarPreview()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-600">
-                            <option value="street">Casual Streetwear</option>
-                            <option value="techie">Tech Bro Hoodie & Kicks</option>
-                            <option value="agbada">Royal Agbada & Fila Cap</option>
-                            <option value="corporate">Executive Navy Suit</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex gap-3">
+                <!-- Navigation between steps -->
+                <div class="flex gap-3 pt-3 border-t border-slate-100">
                     <button onclick="goToWizardStep(1)" class="w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95">
                         Back
                     </button>
                     <button onclick="goToWizardStep(3)" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
-                        Proceed to Final Account Setup <i class="fa-solid fa-arrow-right ml-1"></i>
+                        Confirm 3D Looks & Proceed <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
             </div>
@@ -382,26 +483,100 @@ if (getAuthUserId()) {
 
             document.getElementById(`wizardStep${step}`).classList.remove('hidden');
 
-            if (step === 3) {
+            if (step === 2) {
+                // Initialize or resize 3D Bitmoji Studio
+                setTimeout(() => {
+                    const studioContainer = document.getElementById('bitmojiStudioContainer');
+                    if (!window.avatarStudio && studioContainer) {
+                        window.avatarStudio = new Avatar3DStudio('bitmojiStudioContainer', {
+                            width: studioContainer.clientWidth || 320,
+                            height: 400,
+                            showPlatform: true
+                        });
+                        if (window.avatarStudio) {
+                            window.avatarStudio.setSkin(selectedSkin);
+                            highlightActiveOption('hair-btn', 'fade');
+                            highlightActiveOption('top-btn', 'hoodie');
+                            highlightActiveOption('bottom-btn', 'jeans_blue');
+                            highlightActiveOption('shoe-btn', 'sneakers');
+                            highlightActiveOption('acc-btn', 'none');
+                        }
+                    } else if (window.avatarStudio) {
+                        window.avatarStudio.resize();
+                    }
+                }, 60);
+            } else if (step === 3) {
                 calculateArchetypeSummary();
             }
         }
 
-        function setSkinTone(hex) {
-            selectedSkin = hex;
-            document.getElementById('avatarPreviewBox').style.backgroundColor = hex;
+        function turnCharacterAround() {
+            if (window.avatarStudio) {
+                window.avatarStudio.turnAround();
+            }
         }
 
-        function updateAvatarPreview() {
-            const outfit = document.getElementById('outfitSelect').value;
-            const badge = document.getElementById('previewStyleBadge');
-            const titles = {
-                street: "Casual Streetwear",
-                techie: "Tech Bro Hoodie",
-                agbada: "Royal Agbada & Cap",
-                corporate: "Executive Suit"
-            };
-            badge.textContent = titles[outfit] || "Custom Style";
+        function applySkin(hex) {
+            selectedSkin = hex;
+            if (window.avatarStudio) {
+                window.avatarStudio.setSkin(hex);
+            }
+            document.querySelectorAll('.skin-btn').forEach(btn => {
+                const style = btn.getAttribute('style') || '';
+                if (style.includes(hex)) {
+                    btn.classList.add('ring-2', 'ring-emerald-600');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-emerald-600');
+                }
+            });
+        }
+
+        function applyHair(style) {
+            if (window.avatarStudio) {
+                window.avatarStudio.setHair(style);
+            }
+            highlightActiveOption('hair-btn', style);
+        }
+
+        function applyTop(type) {
+            if (window.avatarStudio) {
+                window.avatarStudio.setTop(type);
+            }
+            highlightActiveOption('top-btn', type);
+        }
+
+        function applyBottom(type) {
+            if (window.avatarStudio) {
+                window.avatarStudio.setBottom(type);
+            }
+            highlightActiveOption('bottom-btn', type);
+        }
+
+        function applyShoes(type) {
+            if (window.avatarStudio) {
+                window.avatarStudio.setShoes(type);
+            }
+            highlightActiveOption('shoe-btn', type);
+        }
+
+        function applyAccessory(type) {
+            if (window.avatarStudio) {
+                window.avatarStudio.setAccessory(type);
+            }
+            highlightActiveOption('acc-btn', type);
+        }
+
+        function highlightActiveOption(className, value) {
+            document.querySelectorAll('.' + className).forEach(btn => {
+                const onclickAttr = btn.getAttribute('onclick') || '';
+                if (onclickAttr.includes(`'${value}'`)) {
+                    btn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-950');
+                    btn.classList.remove('border-slate-200', 'bg-white');
+                } else {
+                    btn.classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-950');
+                    btn.classList.add('border-slate-200', 'bg-white');
+                }
+            });
         }
 
         function calculateArchetypeSummary() {
@@ -445,10 +620,21 @@ if (getAuthUserId()) {
             data.append('email', document.getElementById('wizEmail').value);
             data.append('password', document.getElementById('wizPassword').value);
             data.append('gender', document.getElementById('wizGender').value);
-            data.append('skin_tone', selectedSkin);
-            data.append('hair_style', document.getElementById('hairSelect').value);
-            data.append('outfit', document.getElementById('outfitSelect').value);
             data.append('archetype', calculatedArchetype);
+
+            const cfg = window.avatarStudio ? window.avatarStudio.getConfig() : {
+                skinTone: selectedSkin,
+                hairStyle: 'fade',
+                topType: 'hoodie',
+                bottomType: 'jeans_blue',
+                shoeType: 'sneakers',
+                accessory: 'none'
+            };
+
+            data.append('avatar_config', JSON.stringify(cfg));
+            data.append('skin_tone', cfg.skinTone || selectedSkin);
+            data.append('hair_style', cfg.hairStyle || 'fade');
+            data.append('outfit', cfg.topType || 'hoodie');
 
             try {
                 const res = await fetch('api/auth.php', { method: 'POST', body: data });

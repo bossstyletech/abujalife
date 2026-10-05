@@ -27,12 +27,13 @@ if ($mysqlUrl = getenv('MYSQL_URL')) {
     if (isset($parsed['pass'])) $rawPass = $parsed['pass'];
 }
 
-define('DB_HOST', $rawHost ?: '127.0.0.1');
+define('DB_HOST', $rawHost ?: '');
 define('DB_PORT', $rawPort);
 define('DB_NAME', $rawName);
 define('DB_USER', $rawUser);
 define('DB_PASS', $rawPass);
 define('DB_CHARSET', 'utf8mb4');
+define('HAS_MYSQL_CONFIG', !empty($rawHost));
 
 define('APP_NAME', 'Abuja Life');
 define('APP_VERSION', '1.0.0');
@@ -52,8 +53,8 @@ define('ABUJA_DISTRICTS', [
 
 /**
  * Get PDO Database Connection
- * Attempts MySQL first. If MySQL is unavailable / connection refused,
- * automatically falls back to SQLite (database.sqlite) so the app works seamlessly anywhere!
+ * Uses MySQL if Railway/remote credentials exist; otherwise defaults straight to SQLite
+ * with zero connection lag and zero Connection Refused errors!
  */
 function getDbConnection() {
     static $pdo = null;
@@ -64,7 +65,7 @@ function getDbConnection() {
 
     $isExplicitSqlite = (getenv('DB_CONNECTION') === 'sqlite');
 
-    if (!$isExplicitSqlite && extension_loaded('pdo_mysql')) {
+    if (!$isExplicitSqlite && HAS_MYSQL_CONFIG && extension_loaded('pdo_mysql')) {
         $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=" . DB_CHARSET;
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -74,12 +75,11 @@ function getDbConnection() {
         ];
 
         try {
-            // Attempt MySQL connection
             $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
             if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
             return $pdo;
         } catch (PDOException $e) {
-            // If database unknown (1049), attempt auto-creation on MySQL server
+            // If database 1049 (Unknown DB), try to create
             if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
                 try {
                     $rawPdo = new PDO($dsn, DB_USER, DB_PASS, $options);
@@ -93,10 +93,10 @@ function getDbConnection() {
                     if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
                     return $pdo;
                 } catch (Exception $inner) {
-                    // Fall through to SQLite fallback
+                    // Fallback to SQLite
                 }
             }
-            // Connection refused (error 2002) or MySQL unavailable: fall through to SQLite
+            // Fall through to SQLite fallback on any connection refusal
         }
     }
 

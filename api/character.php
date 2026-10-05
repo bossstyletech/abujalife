@@ -253,21 +253,33 @@ if ($action === 'go_to_work') {
 }
 
 if ($action === 'update_looks') {
+    $avatarConfig = cleanInput($_POST['avatar_config'] ?? '');
     $skin = cleanInput($_POST['skin_tone'] ?? $char['skin_tone'] ?? '#704225');
     $hair = cleanInput($_POST['hair_style'] ?? $char['hair_style'] ?? 'fade');
     $hairColor = cleanInput($_POST['hair_color'] ?? $char['hair_color'] ?? '#111111');
     $outfit = cleanInput($_POST['outfit'] ?? $char['outfit'] ?? 'casual');
 
-    $stmt = $pdo->prepare("
-        UPDATE characters 
-        SET skin_tone = ?, hair_style = ?, hair_color = ?, outfit = ? 
-        WHERE id = ?
-    ");
-    $stmt->execute([$skin, $hair, $hairColor, $outfit, $char['id']]);
+    if ($avatarConfig) {
+        $stmt = $pdo->prepare("
+            UPDATE characters 
+            SET avatar = ?, skin_tone = ?, hair_style = ?, hair_color = ?, outfit = ? 
+            WHERE id = ?
+        ");
+        $stmt->execute([$avatarConfig, $skin, $hair, $hairColor, $outfit, $char['id']]);
+    } else {
+        $stmt = $pdo->prepare("
+            UPDATE characters 
+            SET skin_tone = ?, hair_style = ?, hair_color = ?, outfit = ? 
+            WHERE id = ?
+        ");
+        $stmt->execute([$skin, $hair, $hairColor, $outfit, $char['id']]);
+    }
+
+    logActivity($char['id'], 'wardrobe', "Refreshed character 3D appearance & wardrobe style.", 0, 0, 5);
 
     jsonResponse([
         'success' => true,
-        'message' => 'Your look has been refreshed!',
+        'message' => 'Your look has been refreshed in 3D!',
         'character' => getUserCharacter($userId)
     ]);
 }
