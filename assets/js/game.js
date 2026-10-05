@@ -247,8 +247,60 @@ const GameApp = {
         }).join('');
     },
 
+    activeHub: 'city',
+
+    switchMenuHub(hubId) {
+        this.activeHub = hubId;
+        document.querySelectorAll('.hub-btn').forEach(btn => {
+            btn.classList.remove('bg-white', 'text-emerald-950', 'font-extrabold', 'shadow-sm');
+            btn.classList.add('text-slate-600', 'hover:text-slate-900', 'font-bold');
+        });
+        const activeHubBtn = document.getElementById(`hubBtn-${hubId}`);
+        if (activeHubBtn) {
+            activeHubBtn.classList.add('bg-white', 'text-emerald-950', 'font-extrabold', 'shadow-sm');
+            activeHubBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'font-bold');
+        }
+
+        document.querySelectorAll('.hub-subnav').forEach(nav => nav.classList.add('hidden'));
+        const activeSubnav = document.getElementById(`subnav-${hubId}`);
+        if (activeSubnav) activeSubnav.classList.remove('hidden');
+
+        const hubDefaults = {
+            city: 'overview',
+            hustle: 'jobs',
+            wealth: 'realestate',
+            social: 'social'
+        };
+        const defaultTab = hubDefaults[hubId] || 'overview';
+        this.switchTab(defaultTab);
+    },
+
     switchTab(tabId) {
         this.activeTab = tabId;
+
+        // Ensure parent hub button and subnav are synchronized
+        const tabToHub = {
+            overview: 'city', transport: 'city', vehicles: 'city',
+            jobs: 'hustle', hustles: 'hustle', economy: 'hustle',
+            realestate: 'wealth', bank: 'wealth', leaderboard: 'wealth',
+            social: 'social', lifestyle: 'social', casino: 'social'
+        };
+        const targetHub = tabToHub[tabId];
+        if (targetHub) {
+            this.activeHub = targetHub;
+            document.querySelectorAll('.hub-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-emerald-950', 'font-extrabold', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'hover:text-slate-900', 'font-bold');
+            });
+            const hubBtn = document.getElementById(`hubBtn-${targetHub}`);
+            if (hubBtn) {
+                hubBtn.classList.add('bg-white', 'text-emerald-950', 'font-extrabold', 'shadow-sm');
+                hubBtn.classList.remove('text-slate-600', 'hover:text-slate-900');
+            }
+            document.querySelectorAll('.hub-subnav').forEach(nav => nav.classList.add('hidden'));
+            const subnav = document.getElementById(`subnav-${targetHub}`);
+            if (subnav) subnav.classList.remove('hidden');
+        }
         
         document.querySelectorAll('.game-tab-content').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(btn => {

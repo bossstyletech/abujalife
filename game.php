@@ -208,43 +208,78 @@ if (!$char) {
         <!-- ========================================================
              3. TAB NAVIGATION (Careers, Hustles, Real Estate, etc.)
              ======================================================== -->
-        <div class="flex items-center gap-1.5 overflow-x-auto py-2 text-xs font-bold whitespace-nowrap bg-white p-2 rounded-2xl border border-slate-200/90 shadow-sm">
-            <button id="btn-tab-overview" onclick="GameApp.switchTab('overview')" class="tab-btn px-4 py-2 rounded-xl bg-emerald-600 text-white transition active:scale-95">
-                Overview
-            </button>
-            <button id="btn-tab-jobs" onclick="GameApp.switchTab('jobs')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Careers & Ministries
-            </button>
-            <button id="btn-tab-hustles" onclick="GameApp.switchTab('hustles')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Street Hustles
-            </button>
-            <button id="btn-tab-transport" onclick="GameApp.switchTab('transport')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                🚌 Lagos Streets
-            </button>
-            <button id="btn-tab-social" onclick="GameApp.switchTab('social')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                🎉 Social Life
-            </button>
-            <button id="btn-tab-economy" onclick="GameApp.switchTab('economy')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                💰 Street Economy
-            </button>
-            <button id="btn-tab-realestate" onclick="GameApp.switchTab('realestate')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Real Estate
-            </button>
-            <button id="btn-tab-vehicles" onclick="GameApp.switchTab('vehicles')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Car Garage
-            </button>
-            <button id="btn-tab-lifestyle" onclick="GameApp.switchTab('lifestyle')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Abuja Leisure
-            </button>
-            <button id="btn-tab-bank" onclick="GameApp.switchTab('bank')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Bank & Loans
-            </button>
-            <button id="btn-tab-casino" onclick="GameApp.switchTab('casino')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Abuja Bet
-            </button>
-            <button id="btn-tab-leaderboard" onclick="GameApp.switchTab('leaderboard')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 transition active:scale-95">
-                Hall of Fame
-            </button>
+        <!-- ========================================================
+             3. ARRANGE MASTER MENUS & CATEGORIES (ORGANIZED NAVIGATION)
+             ======================================================== -->
+        <div class="bg-white p-3 rounded-3xl border border-slate-200/90 shadow-sm space-y-2.5">
+            <!-- Tier 1: Master Category Hubs -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold text-slate-600">
+                <button type="button" onclick="GameApp.switchMenuHub('city')" id="hubBtn-city" class="hub-btn py-2 px-3 rounded-xl bg-white text-emerald-950 font-extrabold shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-city text-emerald-600 text-xs"></i> <span>City & Commute</span>
+                </button>
+                <button type="button" onclick="GameApp.switchMenuHub('hustle')" id="hubBtn-hustle" class="hub-btn py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-briefcase text-blue-600 text-xs"></i> <span>Career & Hustle</span>
+                </button>
+                <button type="button" onclick="GameApp.switchMenuHub('wealth')" id="hubBtn-wealth" class="hub-btn py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-building-columns text-amber-600 text-xs"></i> <span>Assets & Bank</span>
+                </button>
+                <button type="button" onclick="GameApp.switchMenuHub('social')" id="hubBtn-social" class="hub-btn py-2 px-3 rounded-xl text-slate-600 hover:text-slate-900 font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fa-solid fa-champagne-glasses text-purple-600 text-xs"></i> <span>Social & Leisure</span>
+                </button>
+            </div>
+
+            <!-- Tier 2: Arranged Sub-Tabs for Active Hub -->
+            <!-- Hub: City & Commute -->
+            <div id="subnav-city" class="hub-subnav flex items-center gap-2 overflow-x-auto text-xs font-bold">
+                <button id="btn-tab-overview" onclick="GameApp.switchTab('overview')" class="tab-btn px-4 py-2 rounded-xl bg-emerald-600 text-white transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-newspaper text-xs"></i> Life Feed
+                </button>
+                <button id="btn-tab-transport" onclick="GameApp.switchTab('transport')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bus text-xs text-yellow-600"></i> Lagos/FCT Streets & Danfo
+                </button>
+                <button id="btn-tab-vehicles" onclick="GameApp.switchTab('vehicles')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-car text-xs text-slate-700"></i> Car Garage
+                </button>
+            </div>
+
+            <!-- Hub: Career & Hustle -->
+            <div id="subnav-hustle" class="hub-subnav hidden flex items-center gap-2 overflow-x-auto text-xs font-bold">
+                <button id="btn-tab-jobs" onclick="GameApp.switchTab('jobs')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-landmark text-xs text-emerald-600"></i> Careers & Ministries
+                </button>
+                <button id="btn-tab-hustles" onclick="GameApp.switchTab('hustles')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-xs text-amber-500"></i> Street Hustles
+                </button>
+                <button id="btn-tab-economy" onclick="GameApp.switchTab('economy')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-scale-balanced text-xs text-orange-600"></i> Market Haggling & Sapa
+                </button>
+            </div>
+
+            <!-- Hub: Assets & Bank -->
+            <div id="subnav-wealth" class="hub-subnav hidden flex items-center gap-2 overflow-x-auto text-xs font-bold">
+                <button id="btn-tab-realestate" onclick="GameApp.switchTab('realestate')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-house-chimney text-xs text-teal-600"></i> Real Estate
+                </button>
+                <button id="btn-tab-bank" onclick="GameApp.switchTab('bank')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-vault text-xs text-blue-600"></i> Bank & Loans
+                </button>
+                <button id="btn-tab-leaderboard" onclick="GameApp.switchTab('leaderboard')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-trophy text-xs text-amber-500"></i> Hall of Fame
+                </button>
+            </div>
+
+            <!-- Hub: Social & Leisure -->
+            <div id="subnav-social" class="hub-subnav hidden flex items-center gap-2 overflow-x-auto text-xs font-bold">
+                <button id="btn-tab-social" onclick="GameApp.switchTab('social')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-champagne-glasses text-xs text-purple-600"></i> Owambe & Community
+                </button>
+                <button id="btn-tab-lifestyle" onclick="GameApp.switchTab('lifestyle')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-tree text-xs text-emerald-600"></i> Abuja Leisure Hotspots
+                </button>
+                <button id="btn-tab-casino" onclick="GameApp.switchTab('casino')" class="tab-btn px-4 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-50 border border-slate-200 transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-dice text-xs text-rose-600"></i> Abuja Bet & Dice
+                </button>
+            </div>
         </div>
 
         <!-- 3A. OVERVIEW FEED -->
@@ -877,54 +912,138 @@ if (!$char) {
                             <h3 class="text-xl font-extrabold text-slate-900"><?= htmlspecialchars($char['full_name']) ?></h3>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-3 text-center">
-                            <!-- OPay / Bank -->
-                            <button onclick="PhoneApp.openApp('bank')" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition">
-                                    <i class="fa-solid fa-wallet"></i>
+                        <div class="grid grid-cols-4 gap-2.5 text-center">
+                            <!-- NaijaGram (Social Media) -->
+                            <button onclick="PhoneApp.openApp('naijagram')" class="flex flex-col items-center group">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-hashtag"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">AbujaPay</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">NaijaGram</span>
                             </button>
 
-                            <!-- Games -->
-                            <button onclick="PhoneApp.openApp('games')" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition">
-                                    <i class="fa-solid fa-gamepad"></i>
+                            <!-- NaijaConnect (VIP Contacts) -->
+                            <button onclick="PhoneApp.openApp('contacts')" class="flex flex-col items-center group">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-address-book"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">Arcade</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Connect</span>
+                            </button>
+
+                            <!-- OPay / Bank -->
+                            <button onclick="PhoneApp.openApp('bank')" class="flex flex-col items-center group">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">AbujaPay</span>
                             </button>
 
                             <!-- WhatsApp Chat -->
                             <button onclick="PhoneApp.openApp('chat')" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-green-500 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition">
+                                <div class="w-12 h-12 rounded-2xl bg-green-500 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
                                     <i class="fa-brands fa-whatsapp"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">NaijaChat</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">NaijaChat</span>
                             </button>
 
                             <!-- Bolt Rides -->
                             <button onclick="PhoneApp.openApp('rides')" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition">
+                                <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
                                     <i class="fa-solid fa-car"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">Bolt</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Bolt</span>
                             </button>
 
                             <!-- Wardrobe / Jiji Style -->
                             <button onclick="PhoneApp.openApp('wardrobe')" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md group-hover:scale-105 transition">
+                                <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
                                     <i class="fa-solid fa-shirt"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">Wardrobe</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Wardrobe</span>
+                            </button>
+
+                            <!-- Games -->
+                            <button onclick="PhoneApp.openApp('games')" class="flex flex-col items-center group">
+                                <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-gamepad"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Arcade</span>
                             </button>
 
                             <!-- Close Phone -->
                             <button onclick="PhoneApp.toggle()" class="flex flex-col items-center group">
-                                <div class="w-14 h-14 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center text-xl shadow-sm group-hover:scale-105 transition">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition">
                                     <i class="fa-solid fa-power-off"></i>
                                 </div>
-                                <span class="text-[11px] font-bold text-slate-700 mt-1.5">Lock</span>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Lock</span>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- APP: NAIJAGRAM (SOCIAL MEDIA) -->
+                    <div id="phone-app-naijagram" class="phone-screen hidden space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-900 leading-none">NaijaGram</h4>
+                                    <span class="text-[9px] text-rose-500 font-extrabold uppercase">FCT Trending</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full text-[10px] font-bold border border-rose-200">
+                                <i class="fa-solid fa-users text-[9px]"></i> <span id="socialFollowersCount">2.4k</span> Clout
+                            </div>
+                        </div>
+
+                        <!-- Compose Post Box -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 space-y-2">
+                            <div class="flex gap-2 items-center">
+                                <div class="w-7 h-7 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <input type="text" id="socialPostInput" placeholder="Drop hot gist, flaunt wealth, or lament traffic..." class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-rose-500">
+                            </div>
+                            <div class="flex flex-wrap gap-1">
+                                <button onclick="PhoneApp.usePostTemplate('flaunt')" class="text-[9px] px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded-full">💸 Flaunt Wealth</button>
+                                <button onclick="PhoneApp.usePostTemplate('traffic')" class="text-[9px] px-2 py-0.5 bg-yellow-100 text-yellow-800 font-bold rounded-full">🚗 Danfo Rant</button>
+                                <button onclick="PhoneApp.usePostTemplate('wuse2')" class="text-[9px] px-2 py-0.5 bg-purple-100 text-purple-800 font-bold rounded-full">🥂 Wuse 2 Night</button>
+                            </div>
+                            <button onclick="PhoneApp.publishSocialPost()" class="w-full py-1.5 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-xl text-xs font-bold shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane text-[10px]"></i> Post Update
+                            </button>
+                        </div>
+
+                        <!-- Trending Hashtags Pill Bar -->
+                        <div class="flex gap-1 overflow-x-auto py-1 text-[10px] font-bold no-scrollbar">
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-200">#AbujaBigBoys</span>
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-200">#DanfoRushHour</span>
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-200">#SapaTears</span>
+                            <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 whitespace-nowrap cursor-pointer hover:bg-slate-200">#OwambeSaturday</span>
+                        </div>
+
+                        <!-- Live Social Media Feed -->
+                        <div id="socialFeedList" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-0.5">
+                            <!-- Populated dynamically via phone.js -->
+                        </div>
+                    </div>
+
+                    <!-- APP: NAIJACONNECT (ACTUAL CONNECTIONS & CONTACTS) -->
+                    <div id="phone-app-contacts" class="phone-screen hidden space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-900 leading-none">NaijaConnect</h4>
+                                    <span class="text-[9px] text-indigo-600 font-extrabold uppercase">VIP Network & Hookups</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" id="networkTierPill">VIP Tier</span>
+                        </div>
+
+                        <p class="text-[10px] text-slate-500 leading-snug">Call your network for favors, send gifts to boost rapport, or get hooked up with high-paying gigs.</p>
+
+                        <!-- Contact List Cards -->
+                        <div id="contactsListContainer" class="space-y-2 max-h-[360px] overflow-y-auto pr-0.5">
+                            <!-- Populated dynamically via phone.js -->
                         </div>
                     </div>
 

@@ -238,50 +238,83 @@ const World3D = {
 
     addLuxurySUV(parentGroup, x, z) {
         const car = new THREE.Group();
-        car.position.set(x, 0.12, z);
-        car.rotation.y = Math.PI / 12;
+        car.position.set(x, 0.14, z);
+        car.rotation.y = Math.PI / 10;
 
-        // SUV Body (Deep Metallic Obsidian Black)
-        const bodyGeo = new THREE.BoxGeometry(1.6, 0.85, 3.2);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.2, metalness: 0.85 });
-        const body = new THREE.Mesh(bodyGeo, bodyMat);
-        body.position.y = 0.55;
-        body.castShadow = true;
-        car.add(body);
+        // 1. Lower Chassis & Wheels Base
+        const chassisMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.2, metalness: 0.9 });
+        const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.55, 3.4), chassisMat);
+        lowerBody.position.y = 0.45;
+        lowerBody.castShadow = true;
+        car.add(lowerBody);
 
-        // Cabin Roof & Dark Tinted Windows
-        const cabinGeo = new THREE.BoxGeometry(1.4, 0.65, 1.8);
-        const cabinMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1, metalness: 0.9 });
-        const cabin = new THREE.Mesh(cabinGeo, cabinMat);
-        cabin.position.set(0, 1.2, -0.15);
+        // Hood / Bonnet (Sloped forward)
+        const hoodGeo = new THREE.BoxGeometry(1.55, 0.25, 1.2);
+        const hood = new THREE.Mesh(hoodGeo, chassisMat);
+        hood.position.set(0, 0.72, 1.0);
+        hood.castShadow = true;
+        car.add(hood);
+
+        // 2. Aerodynamic Cabin Greenhouse (Tinted Glass)
+        const cabinMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.05, metalness: 0.95 });
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.65, 1.9), cabinMat);
+        cabin.position.set(0, 1.1, -0.25);
         cabin.castShadow = true;
         car.add(cabin);
 
-        // Headlights LED Strip
-        const headLightMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xe0f2fe, emissiveIntensity: 1.0 });
-        const headLeft = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, 0.05), headLightMat);
-        headLeft.position.set(-0.55, 0.6, 1.62);
+        // Windshield (Angled forward glass)
+        const windMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.7 });
+        const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.55, 0.1), windMat);
+        windshield.rotation.x = -Math.PI / 5;
+        windshield.position.set(0, 0.95, 0.65);
+        car.add(windshield);
+
+        // Chrome Luxury Front Grille
+        const grilleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
+        const grille = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.3, 0.06), grilleMat);
+        grille.position.set(0, 0.45, 1.72);
+        car.add(grille);
+
+        // Modern Slim LED Projector Headlights
+        const headLightMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xbae6fd, emissiveIntensity: 1.4 });
+        const headLeft = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.06), headLightMat);
+        headLeft.position.set(-0.55, 0.52, 1.71);
         car.add(headLeft);
 
-        const headRight = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, 0.05), headLightMat);
-        headRight.position.set(0.55, 0.6, 1.62);
+        const headRight = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.06), headLightMat);
+        headRight.position.set(0.55, 0.52, 1.71);
         car.add(headRight);
 
-        // Wheels
-        const wheelGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.2, 16);
-        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
+        // Red LED Rear Lightbar
+        const tailMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, emissive: 0xef4444, emissiveIntensity: 1.2 });
+        const tailBar = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.08, 0.06), tailMat);
+        tailBar.position.set(0, 0.62, -1.71);
+        car.add(tailBar);
+
+        // 3. Multi-Spoke Alloy Wheels & Rubber Tires
+        const tireMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9, roughness: 0.15 });
+
         const wheelPositions = [
-            [-0.85, 0.26, 0.95],
-            [0.85, 0.26, 0.95],
-            [-0.85, 0.26, -0.95],
-            [0.85, 0.26, -0.95]
+            [-0.86, 0.3, 0.95],
+            [0.86, 0.3, 0.95],
+            [-0.86, 0.3, -0.95],
+            [0.86, 0.3, -0.95]
         ];
         wheelPositions.forEach(pos => {
-            const w = new THREE.Mesh(wheelGeo, wheelMat);
-            w.rotation.z = Math.PI / 2;
-            w.position.set(...pos);
-            w.castShadow = true;
-            car.add(w);
+            const wGroup = new THREE.Group();
+            wGroup.position.set(...pos);
+
+            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 20), tireMat);
+            tire.rotation.z = Math.PI / 2;
+            tire.castShadow = true;
+            wGroup.add(tire);
+
+            const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.21, 16), rimMat);
+            rim.rotation.z = Math.PI / 2;
+            wGroup.add(rim);
+
+            car.add(wGroup);
         });
 
         parentGroup.add(car);
@@ -434,24 +467,41 @@ const World3D = {
         woodWing.castShadow = true;
         h.add(woodWing);
 
-        // 2. Second Floor Cantilever Master Balcony
-        const balcGeo = new THREE.BoxGeometry(3.6, 0.2, 1.6);
+        // Modern Floor-to-Ceiling Windows
+        const winMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
+        const winGround = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.2, 0.08), winMat);
+        winGround.position.set(-1.4, 1.2, 2.15);
+        h.add(winGround);
+
+        // Solid Mahogany Entrance Door
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.5 });
+        const door = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.3, 0.1), doorMat);
+        door.position.set(0.6, 1.15, 2.15);
+        h.add(door);
+
+        // Warm Entrance Sconce Light
+        const sconce = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), new THREE.MeshStandardMaterial({ color: 0xfde047, emissive: 0xfde047, emissiveIntensity: 1.0 }));
+        sconce.position.set(1.3, 2.0, 2.2);
+        h.add(sconce);
+
+        // 2. Second Floor Cantilever Balcony (Cleanly attached to wall)
+        const balcGeo = new THREE.BoxGeometry(2.4, 0.16, 1.0);
         const balcMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
         const balc = new THREE.Mesh(balcGeo, balcMat);
-        balc.position.set(-0.8, 2.8, 2.7);
+        balc.position.set(-1.4, 2.8, 2.4);
         balc.castShadow = true;
         h.add(balc);
 
         // Balcony Glass Railing
-        const railGeo = new THREE.PlaneGeometry(3.5, 0.8);
+        const railGeo = new THREE.PlaneGeometry(2.3, 0.75);
         const railMat = new THREE.MeshStandardMaterial({
             color: 0x38bdf8,
             transparent: true,
-            opacity: 0.6,
+            opacity: 0.65,
             roughness: 0.1
         });
         const railing = new THREE.Mesh(railGeo, railMat);
-        railing.position.set(-0.8, 3.3, 3.48);
+        railing.position.set(-1.4, 3.25, 2.88);
         h.add(railing);
 
         // 3. Sparkling Turquoise Infinity Swimming Pool
@@ -507,22 +557,30 @@ const World3D = {
         }
 
         const personaGroup = new THREE.Group();
-        personaGroup.position.set(0.6, 0, 3.8); // Prominent front & center on red carpet
-        personaGroup.rotation.y = -Math.PI / 16;
+        personaGroup.position.set(0.5, 0, 5.0); // Front and center on grand driveway plaza, 100% free of architectural overlap
+        personaGroup.rotation.y = -Math.PI / 18;
 
-        // Executive Platform & Soft Contact Shadow
-        const shadowGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.02, 24);
+        // Executive Arrival Podium & Soft Contact Shadow
+        const shadowGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.02, 32);
         const shadowMat = new THREE.MeshBasicMaterial({ color: 0x09090b, transparent: true, opacity: 0.35 });
         const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
         shadowMesh.position.y = 0.01;
         personaGroup.add(shadowMesh);
 
-        // Pedestal Disc
-        const pedGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.04, 24);
-        const pedMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 });
+        // Polished Marble & Gold Inset Pedestal Disc
+        const pedGeo = new THREE.CylinderGeometry(1.0, 1.05, 0.06, 32);
+        const pedMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.15 });
         const pedMesh = new THREE.Mesh(pedGeo, pedMat);
-        pedMesh.position.y = 0.02;
+        pedMesh.position.y = 0.03;
         personaGroup.add(pedMesh);
+
+        // Gold Trim Ring
+        const ringGeo = new THREE.TorusGeometry(1.02, 0.03, 12, 32);
+        const ringMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.06;
+        personaGroup.add(ring);
 
         // Determine Character Sprite Image
         let charId = cfg.characterId || 'tunde';
@@ -547,13 +605,15 @@ const World3D = {
             const spriteMat = new THREE.SpriteMaterial({
                 map: texture,
                 transparent: true,
-                alphaTest: 0.08
+                alphaTest: 0.05,
+                depthTest: true
             });
 
             const sprite = new THREE.Sprite(spriteMat);
             // Proportional portrait aspect ratio (380x768 -> 1:2)
-            sprite.scale.set(1.85, 3.7, 1.0);
-            sprite.position.set(0, 1.85, 0);
+            sprite.scale.set(2.0, 4.0, 1.0);
+            sprite.position.set(0, 2.05, 0);
+            sprite.renderOrder = 999;
             personaGroup.add(sprite);
 
             if (this.renderer && this.scene && this.camera) {
