@@ -137,77 +137,21 @@ if (getAuthUserId()) {
             <div class="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-slate-100">
                 <div class="flex items-center gap-2">
                     <span id="stepBadge1" class="w-6 h-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">1</span>
-                    <span class="text-xs font-bold text-slate-800">Origin Quiz</span>
+                    <span class="text-xs font-bold text-slate-800">Character Studio</span>
                 </div>
-                <div class="h-0.5 flex-1 bg-slate-200 mx-2 sm:mx-3"></div>
+                <div class="h-0.5 flex-1 bg-slate-200 mx-3"></div>
                 <div class="flex items-center gap-2">
                     <span id="stepBadge2" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center">2</span>
-                    <span class="text-xs font-bold text-slate-500">Appearance</span>
-                </div>
-                <div class="h-0.5 flex-1 bg-slate-200 mx-2 sm:mx-3"></div>
-                <div class="flex items-center gap-2">
-                    <span id="stepBadge3" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-xs flex items-center justify-center">3</span>
-                    <span class="text-xs font-bold text-slate-500">Identity</span>
+                    <span class="text-xs font-bold text-slate-500">Account & Destiny</span>
                 </div>
             </div>
 
-            <!-- STEP 1: BACKGROUND ORIGIN QUIZ -->
-            <div id="wizardStep1" class="space-y-6">
-                <div>
-                    <h2 class="text-xl font-bold text-slate-900">How does your story in Abuja begin?</h2>
-                    <p class="text-xs text-slate-500 mt-1">Answer these questions to calculate your starting family background and wealth.</p>
-                </div>
-
-                <!-- Question 1 -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">1. Where were you raised?</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q1" value="rich" class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">Maitama luxury mansion with backup generators & diplomatic neighbors.</span>
-                        </label>
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q1" value="middle" checked class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">Gwarinpa Estate civil service family flat with steady salary life.</span>
-                        </label>
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q1" value="hustler" class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">Satellite town Kubwa face-me-I-face-you, grinding from scratch.</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Question 2 -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">2. What did your parents hand you on your 18th birthday?</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q2" value="rich" class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">Lexus SUV keys and a loaded bank account.</span>
-                        </label>
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q2" value="middle" checked class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">UniAbuja admission letter and a laptop for studies.</span>
-                        </label>
-                        <label class="flex items-center p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition">
-                            <input type="radio" name="quiz_q2" value="hustler" class="text-emerald-600 focus:ring-0 mr-3">
-                            <span class="text-xs font-medium text-slate-800">A pair of shoes, transport fare, and "God go help you".</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button onclick="goToWizardStep(2)" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
-                    Continue to Appearance & Face Customizer <i class="fa-solid fa-arrow-right ml-1"></i>
-                </button>
-            </div>
-
-            <!-- STEP 2: BITMOJI 3D CHARACTER STUDIO (HEAD TO FEET IN REAL TIME) -->
-            <!-- STEP 2: BITMOJI 3D CHARACTER STUDIO (CUSTOM NAME, FACE, THE FIT, KICKS) -->
-            <div id="wizardStep2" class="space-y-3.5 hidden">
+            <!-- STEP 1: BITMOJI 3D CHARACTER STUDIO (CUSTOM NAME, FACE, THE FIT, KICKS) -->
+            <div id="wizardStep1" class="space-y-3.5">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-lg sm:text-xl font-bold text-slate-900">Abuja 3D Character Studio</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Pick your face, dress your fit, and choose kicks in real time. Drag to rotate 360°!</p>
+                        <p class="text-xs text-slate-500 mt-0.5">Customize your character face, the fit, and kicks in real time. Drag to rotate 360°!</p>
                     </div>
                     <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                         Live 3D Customizer
@@ -387,38 +331,45 @@ if (getAuthUserId()) {
                     </div>
                 </div>
 
-                <!-- Navigation between steps -->
-                <div class="flex gap-3 pt-3 border-t border-slate-100">
-                    <button onclick="goToWizardStep(1)" class="w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95">
-                        Back
-                    </button>
-                    <button onclick="goToWizardStep(3)" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
-                        Next: Email & Account Setup <i class="fa-solid fa-arrow-right ml-1"></i>
+                <!-- Navigation to Step 2 -->
+                <div class="pt-3 border-t border-slate-100">
+                    <button onclick="goToWizardStep(2)" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <span>Next: Identity & Abuja Destiny</span> <i class="fa-solid fa-arrow-right ml-1"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- STEP 3: ACCOUNT & NAME SETUP -->
-            <div id="wizardStep3" class="space-y-4 hidden">
+            <!-- STEP 2: ACCOUNT & DESTINY ENGINE SETUP -->
+            <div id="wizardStep2" class="space-y-4 hidden">
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">Name Your Character</h2>
-                    <p class="text-xs text-slate-500 mt-1">Final step: Enter your credentials to enter Abuja.</p>
+                    <h2 class="text-xl font-bold text-slate-900">Enter the Federal Capital</h2>
+                    <p class="text-xs text-slate-500 mt-1">Pick your credentials and username to register your citizen ID.</p>
                 </div>
 
-                <div id="originSummaryBox" class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 font-medium">
-                    Calculating your background...
+                <!-- FCT DESTINY ENGINE BANNER -->
+                <div class="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-950 space-y-1.5">
+                    <div class="flex items-center gap-2 font-bold text-emerald-800">
+                        <i class="fa-solid fa-dice text-emerald-600 text-sm"></i>
+                        <span>FCT Destiny Engine Activated</span>
+                        <span class="text-[9px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full font-extrabold uppercase">Random Spawn</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed font-normal">
+                        No silver spoon shortcuts! The system randomly decides where you spawn (Kubwa, Lugbe, Nyanya, Mpape, Karu, or Gwarinpa), assigns your starter shelter, and provides realistic starting survival funds (₦8,500 – ₦22,000). Use your phone to hustle, work shifts, send peer transfers, and build your empire!
+                    </p>
                 </div>
 
                 <form id="wizardForm" onsubmit="submitCharacterRegistration(event)" class="space-y-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Character Full Name</label>
-                        <input type="text" id="wizFullName" required placeholder="e.g. Tunde Balogun or Zainab Aliyu" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600">
+                        <input type="text" id="wizFullName" required placeholder="e.g. Dapo Adeleke or Amina Bello" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600">
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
-                            <input type="text" id="wizUsername" required placeholder="username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                Username <span class="text-[10px] text-emerald-600 font-bold">(Used for phone chats & @transfers)</span>
+                            </label>
+                            <input type="text" id="wizUsername" required placeholder="e.g. dapo_abj" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-600">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">Gender</label>
@@ -440,11 +391,11 @@ if (getAuthUserId()) {
                     </div>
 
                     <div class="flex gap-3 pt-2">
-                        <button type="button" onclick="goToWizardStep(2)" class="w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95">
+                        <button type="button" onclick="goToWizardStep(1)" class="w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95">
                             Back
                         </button>
-                        <button type="submit" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
-                            Launch My Abuja Life
+                        <button type="submit" class="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-rocket text-xs"></i> Launch My Abuja Life
                         </button>
                     </div>
                 </form>
@@ -584,18 +535,17 @@ if (getAuthUserId()) {
         }
 
         function goToWizardStep(step) {
-            document.getElementById('wizardStep1').classList.add('hidden');
-            document.getElementById('wizardStep2').classList.add('hidden');
-            document.getElementById('wizardStep3').classList.add('hidden');
+            const step1 = document.getElementById('wizardStep1');
+            const step2 = document.getElementById('wizardStep2');
+            const badge1 = document.getElementById('stepBadge1');
+            const badge2 = document.getElementById('stepBadge2');
 
-            document.getElementById('stepBadge1').className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center " + (step >= 1 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600");
-            document.getElementById('stepBadge2').className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center " + (step >= 2 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600");
-            document.getElementById('stepBadge3').className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center " + (step >= 3 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600");
+            if (step === 1) {
+                if (step1) step1.classList.remove('hidden');
+                if (step2) step2.classList.add('hidden');
+                if (badge1) badge1.className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center bg-emerald-600 text-white";
+                if (badge2) badge2.className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center bg-slate-200 text-slate-600";
 
-            document.getElementById(`wizardStep${step}`).classList.remove('hidden');
-
-            if (step === 2) {
-                // Initialize or resize 3D Bitmoji Studio
                 setTimeout(() => {
                     const studioContainer = document.getElementById('bitmojiStudioContainer');
                     if (!window.avatarStudio && studioContainer) {
@@ -615,12 +565,20 @@ if (getAuthUserId()) {
                         window.avatarStudio.resize();
                     }
                 }, 60);
-            } else if (step === 3) {
-                calculateArchetypeSummary();
+            } else if (step === 2) {
+                if (step1) step1.classList.add('hidden');
+                if (step2) step2.classList.remove('hidden');
+                if (badge1) badge1.className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center bg-emerald-600 text-white";
+                if (badge2) badge2.className = "w-6 h-6 rounded-full font-bold text-xs flex items-center justify-center bg-emerald-600 text-white";
+
                 const studioInput = document.getElementById('charStudioNameInput');
                 const wizName = document.getElementById('wizFullName');
+                const wizUser = document.getElementById('wizUsername');
                 if (studioInput && studioInput.value && wizName) {
                     wizName.value = studioInput.value;
+                    if (wizUser && !wizUser.value) {
+                        wizUser.value = studioInput.value.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+                    }
                 }
             }
         }
@@ -694,38 +652,6 @@ if (getAuthUserId()) {
             });
         }
 
-        function calculateArchetypeSummary() {
-            const q1 = document.querySelector('input[name="quiz_q1"]:checked')?.value || 'middle';
-            const q2 = document.querySelector('input[name="quiz_q2"]:checked')?.value || 'middle';
-
-            let richCount = 0;
-            let hustlerCount = 0;
-            if (q1 === 'rich') richCount++;
-            if (q2 === 'rich') richCount++;
-            if (q1 === 'hustler') hustlerCount++;
-            if (q2 === 'hustler') hustlerCount++;
-
-            if (richCount >= 2) {
-                calculatedArchetype = 'rich';
-                document.getElementById('originSummaryBox').innerHTML = `
-                    <div class="font-bold text-emerald-800 text-xs mb-1"><i class="fa-solid fa-crown text-amber-500 mr-1"></i> Starting Class: Maitama Silver Spoon</div>
-                    <p class="text-[11px] text-emerald-700 leading-snug">You start in a luxury villa in Maitama with ₦10,000,000 net worth and a Lexus RX350 SUV!</p>
-                `;
-            } else if (hustlerCount >= 2) {
-                calculatedArchetype = 'hustler';
-                document.getElementById('originSummaryBox').innerHTML = `
-                    <div class="font-bold text-emerald-800 text-xs mb-1"><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Starting Class: Kubwa Grassroots Hustler</div>
-                    <p class="text-[11px] text-emerald-700 leading-snug">You start from the bottom in Kubwa with ₦20,000 cash and pure Nigerian determination to rise!</p>
-                `;
-            } else {
-                calculatedArchetype = 'middle';
-                document.getElementById('originSummaryBox').innerHTML = `
-                    <div class="font-bold text-emerald-800 text-xs mb-1"><i class="fa-solid fa-briefcase text-emerald-600 mr-1"></i> Starting Class: Gwarinpa Civil Service Strivers</div>
-                    <p class="text-[11px] text-emerald-700 leading-snug">You start in Gwarinpa Estate with a UniAbuja BSc degree, ₦470,000 net worth, and a Toyota Corolla Big Daddy.</p>
-                `;
-            }
-        }
-
         async function submitCharacterRegistration(e) {
             e.preventDefault();
             const data = new FormData();
@@ -735,7 +661,6 @@ if (getAuthUserId()) {
             data.append('email', document.getElementById('wizEmail').value);
             data.append('password', document.getElementById('wizPassword').value);
             data.append('gender', document.getElementById('wizGender').value);
-            data.append('archetype', calculatedArchetype);
 
             const cfg = window.avatarStudio ? window.avatarStudio.getConfig() : {
                 characterId: selectedCharacter,

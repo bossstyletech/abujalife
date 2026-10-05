@@ -2212,6 +2212,7 @@ const GameApp = {
 
     async sendPeerTransfer() {
         const id = document.getElementById('transferRecipientId')?.value;
+        const nameInput = document.getElementById('transferRecipientName')?.value || '';
         const amount = document.getElementById('transferAmountInput')?.value;
         const memo = document.getElementById('transferMemoInput')?.value || 'Transfer';
 
@@ -2221,7 +2222,15 @@ const GameApp = {
         }
 
         const formData = new FormData();
-        formData.append('recipient_id', id);
+        if (id) {
+            formData.append('recipient_id', id);
+        }
+        const usernameMatch = nameInput.match(/@([a-zA-Z0-9_]+)/);
+        if (usernameMatch) {
+            formData.append('recipient_username', usernameMatch[1]);
+        } else if (nameInput.trim() && !id) {
+            formData.append('recipient_username', nameInput.trim().replace(/^@/, ''));
+        }
         formData.append('amount', amount);
         formData.append('memo', memo);
 
@@ -2245,6 +2254,9 @@ const GameApp = {
 
                 this.notify(data.message, 'success');
                 await this.fetchCharacter();
+                if (window.PhoneApp && typeof window.PhoneApp.loadBankApp === 'function') {
+                    window.PhoneApp.loadBankApp();
+                }
             } else {
                 this.playSfx('loss');
                 this.notify(data.error || 'Transfer failed', 'error');

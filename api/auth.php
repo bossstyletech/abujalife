@@ -50,35 +50,71 @@ if ($action === 'register') {
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
 
-    // Archetype attributes
-    $startCash = 15000.00;
-    $startBank = 5000.00;
-    $startDistrict = 'Kubwa';
-    $startCred = 15;
-    $startIQ = 20;
-    $startEdu = 'SSCE';
-    $primaryCar = null;
-    $originMessage = "Arrived at Kubwa with ₦15,000 cash and pure grit. Time to conquer Abuja!";
+    // ====================================================
+    // FCT DESTINY ENGINE (Random Spawn & Humble Starting Funds)
+    // Players DO NOT choose starting wealth; the system decides!
+    // ====================================================
+    $spawnPool = [
+        [
+            'district' => 'Kubwa',
+            'shelter'  => 'Face-Me-I-Face-You Compound Room in Kubwa',
+            'archetype'=> 'grassroots'
+        ],
+        [
+            'district' => 'Lugbe',
+            'shelter'  => 'Rented Self-Con Apartment in Lugbe',
+            'archetype'=> 'strivers'
+        ],
+        [
+            'district' => 'Nyanya',
+            'shelter'  => 'Tenement Compound Room in Nyanya',
+            'archetype'=> 'hustler'
+        ],
+        [
+            'district' => 'Mpape',
+            'shelter'  => 'Artisan Quarters Flat in Mpape',
+            'archetype'=> 'grassroots'
+        ],
+        [
+            'district' => 'Karu',
+            'shelter'  => 'Shared Tenement Room in Karu',
+            'archetype'=> 'hustler'
+        ],
+        [
+            'district' => 'Gwarinpa',
+            'shelter'  => 'Boys Quarters (BQ) Room in Gwarinpa',
+            'archetype'=> 'strivers'
+        ],
+        [
+            'district' => 'Dutse',
+            'shelter'  => 'Starter Flat in Dutse Alhaji',
+            'archetype'=> 'grassroots'
+        ]
+    ];
 
-    if ($archetype === 'rich') {
-        $startCash = 1500000.00;
-        $startBank = 8500000.00;
-        $startDistrict = 'Maitama';
-        $startCred = 45;
-        $startIQ = 45;
-        $startEdu = 'BSc';
-        $primaryCar = 4; // Lexus RX 350
-        $originMessage = "Born with a silver spoon in Maitama! Your family connections gave you ₦10,000,000 and a Lexus SUV.";
-    } elseif ($archetype === 'middle') {
-        $startCash = 120000.00;
-        $startBank = 350000.00;
-        $startDistrict = 'Gwarinpa';
-        $startCred = 25;
-        $startIQ = 35;
-        $startEdu = 'BSc';
-        $primaryCar = 2; // Toyota Corolla Big Daddy
-        $originMessage = "Raised in a respectable civil servant home in Gwarinpa. You have a UniAbuja BSc and steady savings.";
-    }
+    $pickedSpawn   = $spawnPool[array_rand($spawnPool)];
+    $startDistrict = $pickedSpawn['district'];
+    $starterShelter = $pickedSpawn['shelter'];
+    $assignedArchetype = $pickedSpawn['archetype'];
+
+    // Realistic humble starter funds rolled by the system (₦8,500 - ₦22,000 cash, ₦2,500 - ₦6,000 bank)
+    $startCash = (float)mt_rand(8500, 22000);
+    $startBank = (float)mt_rand(2500, 6000);
+    $startCred = mt_rand(10, 18);
+    $startIQ   = mt_rand(20, 28);
+    $startEdu  = 'SSCE';
+    $primaryCar = null;
+
+    $starterHomeState = json_encode([
+        'shelter_name' => $starterShelter,
+        'power_mode' => 'nepa',
+        'inverter_battery' => 70,
+        'gen_fuel_liters' => 4,
+        'is_borehole_running' => true,
+        'cleanliness' => 85
+    ]);
+
+    $originMessage = "FCT Destiny rolled: You arrived in Abuja and spawned in {$startDistrict}! You settled into your {$starterShelter} with " . formatNaira($startCash) . " cash in hand. Build your legacy!";
 
     try {
         $pdo->beginTransaction();
@@ -90,13 +126,13 @@ if ($action === 'register') {
         $stmt = $pdo->prepare("
             INSERT INTO characters (
                 user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
-                cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id
+                cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
-            $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $archetype,
-            $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar
+            $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
+            $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
         ]);
         $charId = (int)$pdo->lastInsertId();
 

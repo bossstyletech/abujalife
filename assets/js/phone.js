@@ -152,178 +152,364 @@ const PhoneApp = {
         }
     },
 
-    // --- 3. WHATSAPP CHAT APP (NaijaChat & Status) ---
+    // --- 1.1 DIRECT ABUJAPAY PEER TRANSFER FROM PHONE ---
+    openDirectTransferModal(prefilledUsername = '') {
+        const modal = document.getElementById('peerTransferModal');
+        if (!modal) return;
+        const nameInput = document.getElementById('transferRecipientName');
+        const idInput = document.getElementById('transferRecipientId');
+        const amtInput = document.getElementById('transferAmountInput');
+        const formView = document.getElementById('transferFormView');
+        const recView = document.getElementById('transferReceiptView');
+
+        if (formView) formView.classList.remove('hidden');
+        if (recView) recView.classList.add('hidden');
+        if (nameInput) {
+            nameInput.value = prefilledUsername ? (prefilledUsername.startsWith('@') ? prefilledUsername : '@' + prefilledUsername) : '';
+            setTimeout(() => nameInput.focus(), 50);
+        }
+        if (idInput) idInput.value = '';
+        if (amtInput) amtInput.value = '';
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    },
+
+    // --- 3. WHATSAPP CHAT APP (NaijaChat Live Messaging & Status) ---
     currentChatTab: 'chats',
+    activeChatTarget: null,
 
     switchChatTab(tab) {
         this.currentChatTab = tab;
         const chatsList = document.getElementById('phoneChatList');
         const statusList = document.getElementById('phoneStatusList');
+        const searchBox = document.getElementById('phoneChatSearchInput')?.parentElement?.parentElement;
+        const activeBar = document.getElementById('phoneActiveCitizensBar')?.parentElement;
         const btnChats = document.getElementById('chatTabChats');
         const btnStatus = document.getElementById('chatTabStatus');
 
         if (tab === 'chats') {
             if (chatsList) chatsList.classList.remove('hidden');
             if (statusList) statusList.classList.add('hidden');
+            if (searchBox) searchBox.classList.remove('hidden');
+            if (activeBar) activeBar.classList.remove('hidden');
             if (btnChats) { btnChats.className = 'px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm'; }
             if (btnStatus) { btnStatus.className = 'px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800'; }
             this.loadChatApp();
         } else {
             if (chatsList) chatsList.classList.add('hidden');
             if (statusList) statusList.classList.remove('hidden');
+            if (searchBox) searchBox.classList.add('hidden');
+            if (activeBar) activeBar.classList.add('hidden');
             if (btnStatus) { btnStatus.className = 'px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm'; }
             if (btnChats) { btnChats.className = 'px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800'; }
             this.loadStatusApp();
         }
     },
 
-    loadChatApp() {
+    async loadChatApp() {
         const list = document.getElementById('phoneChatList');
+        const citizensBar = document.getElementById('phoneActiveCitizensBar');
         if (!list) return;
 
-        const chats = [
-            {
-                id: 'landlord',
-                name: "Alhaji Landlord",
-                avatar: "🏢",
-                msg: "Good day tenant. The compound borehole maintenance levy of ₦5,000 is due today.",
-                actionText: "Transfer ₦5,000",
-                choice: "pay",
-                declineText: "Ignore Message",
-                declineChoice: "ignore"
-            },
-            {
-                id: 'femi',
-                name: "Cousin Femi",
-                avatar: "🎒",
-                msg: "Egbon! Sapa hold me for UniAbuja hostel abeg send urgent 2k for food.",
-                actionText: "Send ₦2,000 (+Karma)",
-                choice: "send_2k",
-                declineText: "Reply 'Sapa Hold Me Too'",
-                declineChoice: "decline"
-            },
-            {
-                id: 'kunle_gig',
-                name: "Kunle (Tech Bro)",
-                avatar: "💻",
-                msg: "Yo! A foreign fintech client needs an emergency API bugfix tonight. Payout is ₦35,000. You in?",
-                actionText: "Accept Gig (+₦35k)",
-                choice: "accept_gig",
-                declineText: "Decline (Too tired)",
-                declineChoice: "decline"
-            },
-            {
-                id: 'shawarma',
-                name: "Banex Dispatch Rider",
-                avatar: "🛵",
-                msg: "Oga I don reach your estate security gate with your hot order. ₦2,500 cash on delivery.",
-                actionText: "Pay & Accept Food",
-                choice: "accept",
-                declineText: "Cancel Order",
-                declineChoice: "ignore"
-            }
-        ];
-
-        list.innerHTML = chats.map((c, i) => `
-            <div class="bg-slate-50 border border-slate-200/90 hover:bg-slate-100 p-3 rounded-2xl mb-2 transition">
-                <div class="flex justify-between items-center mb-1">
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-sm">${c.avatar}</span>
-                        <span class="font-extrabold text-xs text-slate-900">${c.name}</span>
-                    </div>
-                    <span class="text-[9px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">Online</span>
-                </div>
-                <p class="text-[11px] text-slate-600 mb-2.5 leading-snug">${c.msg}</p>
-                <div class="flex gap-1.5">
-                    <button onclick="PhoneApp.handleChatAction('${c.id}', '${c.choice}')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
-                        ${c.actionText}
-                    </button>
-                    <button onclick="PhoneApp.handleChatAction('${c.id}', '${c.declineChoice}')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
-                        ${c.declineText}
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    },
-
-    loadStatusApp() {
-        const list = document.getElementById('phoneStatusList');
-        if (!list) return;
-
-        const statuses = [
-            {
-                name: "Senator Bello",
-                avatar: "🏛️",
-                time: "24m ago",
-                caption: "National Assembly budget defense completed. Abuja modernization roadmap is clear! 🇳🇬",
-                media: "📜 Official Senate Resolution"
-            },
-            {
-                name: "Mama Ngozi",
-                avatar: "🏘️",
-                time: "1h ago",
-                caption: "Whoever turned on the water pump without washing their hands first in this compound should repent o!",
-                media: "🚰 Face-Me-I-Face-You Yard"
-            },
-            {
-                name: "Chioma Fashion",
-                avatar: "👗",
-                time: "2h ago",
-                caption: "Aso-Ebi deliveries ready for Saturday Owambe in Gwarinpa. No sleeping on style! ✨",
-                media: "🧵 Royal Senator Velvet Fabric"
-            },
-            {
-                name: "Danfo Conductor",
-                avatar: "🚐",
-                time: "3h ago",
-                caption: "Rain drop small, passenger start to cry because fare double. Buy umbrella make you trek then 😂",
-                media: "🌧️ Berger Overhead Bridge"
-            }
-        ];
-
-        list.innerHTML = statuses.map(s => `
-            <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-1.5">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full border-2 border-green-500 p-0.5 flex items-center justify-center text-sm bg-white">
-                        ${s.avatar}
-                    </div>
-                    <div>
-                        <h6 class="text-xs font-bold text-slate-900 leading-none">${s.name}</h6>
-                        <span class="text-[9px] text-slate-400">${s.time}</span>
-                    </div>
-                </div>
-                <div class="bg-slate-900 text-white p-2.5 rounded-xl text-[11px] font-medium leading-snug">
-                    <span class="text-[10px] text-emerald-400 block mb-0.5 font-bold">${s.media}</span>
-                    "${s.caption}"
-                </div>
-                <div class="flex justify-end gap-2 text-[10px] text-slate-400 pt-1">
-                    <button onclick="GameApp.notify('Sent flame reaction 🔥', 'success')" class="hover:text-slate-900">🔥 12</button>
-                    <button onclick="GameApp.notify('Sent clapping reaction 👏', 'success')" class="hover:text-slate-900">👏 8</button>
-                </div>
-            </div>
-        `).join('');
-    },
-
-    async handleChatAction(chatId, choice) {
-        const formData = new FormData();
-        formData.append('chat_type', chatId);
-        formData.append('choice', choice);
+        list.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing Abuja NaijaChat...</div>`;
 
         try {
-            const res = await fetch('api/phone.php?action=chat_action', { method: 'POST', body: formData });
+            const res = await fetch('api/phone.php?action=get_chat_threads');
+            const data = await res.json();
+            if (!data.success) {
+                list.innerHTML = `<p class="p-3 text-xs text-rose-500 text-center">Failed to load chats</p>`;
+                return;
+            }
+
+            // Render Active Citizens Horizontal Bar
+            if (citizensBar) {
+                const citizens = data.available_citizens || [];
+                if (citizens.length === 0) {
+                    citizensBar.innerHTML = `<span class="text-[10px] text-slate-400">No other citizens registered yet</span>`;
+                } else {
+                    citizensBar.innerHTML = citizens.map(c => `
+                        <button onclick="PhoneApp.openConversationWithUser('${c.raw_username}', '${(c.name || c.username).replace(/'/g, "\\'")}', '${c.avatar}')" class="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-slate-50 border border-slate-200 rounded-full shadow-sm text-slate-800 transition active:scale-95 group">
+                            <span class="w-4 h-4 rounded-full bg-emerald-100 text-emerald-800 text-[10px] flex items-center justify-center font-bold">@</span>
+                            <span class="font-bold text-[10px] text-slate-900 group-hover:text-emerald-700">${c.username}</span>
+                        </button>
+                    `).join('');
+                }
+            }
+
+            // Render Threads List
+            const userThreads = data.user_threads || [];
+            const npcThreads = data.npc_threads || [];
+
+            let html = '';
+
+            // Real User Threads
+            if (userThreads.length > 0) {
+                html += `<div class="text-[10px] font-bold text-slate-500 uppercase px-1 pt-1 tracking-wider">Citizen Conversations</div>`;
+                html += userThreads.map(t => `
+                    <div onclick="PhoneApp.openConversationWithUser('${t.raw_username}', '${(t.name || t.username).replace(/'/g, "\\'")}', '${t.avatar}')" class="bg-white border border-slate-200/90 hover:border-emerald-500 hover:bg-slate-50/80 p-2.5 rounded-2xl cursor-pointer transition active:scale-[0.99] shadow-sm flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="relative flex-shrink-0">
+                                <div class="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 overflow-hidden">
+                                    ${t.avatar && t.avatar.includes('/') ? `<img src="${t.avatar}" class="w-full h-full object-cover">` : (t.avatar || '👤')}
+                                </div>
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white absolute bottom-0 right-0"></span>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1">
+                                    <span class="font-extrabold text-xs text-slate-900 truncate">${t.name}</span>
+                                    <span class="text-[10px] text-emerald-600 font-bold">${t.username}</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 truncate leading-tight">${t.last_message}</p>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0 flex flex-col items-end">
+                            <span class="text-[9px] text-slate-400 font-medium">${t.time}</span>
+                            ${t.unread > 0 ? `<span class="mt-1 px-1.5 py-0.2 bg-emerald-600 text-white font-extrabold text-[9px] rounded-full">${t.unread}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Quest / NPC Contacts
+            if (npcThreads.length > 0) {
+                html += `<div class="text-[10px] font-bold text-slate-500 uppercase px-1 pt-2 tracking-wider">Abuja Contacts & Quests</div>`;
+                html += npcThreads.map(n => `
+                    <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-2xl transition space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-base">${n.avatar}</span>
+                                <div>
+                                    <h5 class="font-bold text-xs text-slate-900 leading-none">${n.name}</h5>
+                                    <span class="text-[9px] text-slate-400 font-mono">${n.district}</span>
+                                </div>
+                            </div>
+                            <span class="text-[9px] text-slate-400">${n.time}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-snug">${n.last_message}</p>
+                        <div class="pt-0.5">
+                            ${PhoneApp.renderNpcActions(n.id)}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            list.innerHTML = html || `<p class="p-4 text-center text-xs text-slate-400">No chats yet. Start one by typing a @username above!</p>`;
+
+        } catch(err) {
+            list.innerHTML = `<p class="p-3 text-xs text-rose-500 text-center">Connection error syncing messages.</p>`;
+        }
+    },
+
+    renderNpcActions(id) {
+        if (id === 'landlord') {
+            return `
+                <div class="flex gap-1.5">
+                    <button onclick="PhoneApp.handleChatAction('landlord', 'pay')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
+                        Transfer ₦5,000 Levy
+                    </button>
+                    <button onclick="PhoneApp.handleChatAction('landlord', 'ignore')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
+                        Leave on Read
+                    </button>
+                </div>
+            `;
+        }
+        if (id === 'kunle_gig') {
+            return `
+                <div class="flex gap-1.5">
+                    <button onclick="PhoneApp.handleChatAction('kunle_gig', 'accept_gig')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
+                        Accept Gig (+₦35k)
+                    </button>
+                    <button onclick="PhoneApp.handleChatAction('kunle_gig', 'decline')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
+                        Decline
+                    </button>
+                </div>
+            `;
+        }
+        if (id === 'femi') {
+            return `
+                <div class="flex gap-1.5">
+                    <button onclick="PhoneApp.handleChatAction('femi', 'send_2k')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
+                        Send ₦2,000 (+Karma)
+                    </button>
+                    <button onclick="PhoneApp.handleChatAction('femi', 'decline')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
+                        'Sapa Hold Me'
+                    </button>
+                </div>
+            `;
+        }
+        if (id === 'shawarma') {
+            return `
+                <div class="flex gap-1.5">
+                    <button onclick="PhoneApp.handleChatAction('shawarma', 'accept')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
+                        Pay ₦2,500 & Collect
+                    </button>
+                    <button onclick="PhoneApp.handleChatAction('shawarma', 'ignore')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
+                        Cancel
+                    </button>
+                </div>
+            `;
+        }
+        return '';
+    },
+
+    startChatFromInput() {
+        const input = document.getElementById('phoneChatSearchInput');
+        if (!input) return;
+        let val = input.value.trim();
+        if (!val) return;
+        val = val.replace(/^@/, '');
+        this.openConversationWithUser(val, '@' + val, '👤');
+        input.value = '';
+    },
+
+    async openConversationWithUser(username, name, avatar) {
+        const cleanUser = username.replace(/^@/, '');
+        this.activeChatTarget = { username: cleanUser, name: name || cleanUser, avatar: avatar || '👤' };
+
+        const mainView = document.getElementById('phoneChatMainView');
+        const convView = document.getElementById('phoneChatConversationView');
+        if (mainView) mainView.classList.add('hidden');
+        if (convView) convView.classList.remove('hidden');
+
+        const headerName = document.getElementById('convHeaderName');
+        const headerUser = document.getElementById('convHeaderUsername');
+        const headerAvatar = document.getElementById('convHeaderAvatar');
+
+        if (headerName) headerName.textContent = name || cleanUser;
+        if (headerUser) headerUser.textContent = '@' + cleanUser;
+        if (headerAvatar) {
+            headerAvatar.innerHTML = (avatar && avatar.includes('/'))
+                ? `<img src="${avatar}" class="w-full h-full object-cover">`
+                : (avatar || '👤');
+        }
+
+        const container = document.getElementById('phoneMessagesContainer');
+        if (container) {
+            container.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading conversation...</div>`;
+        }
+
+        try {
+            const res = await fetch(`api/phone.php?action=get_messages&username=${encodeURIComponent(cleanUser)}`);
             const data = await res.json();
             if (data.success) {
-                GameApp.playSfx('win');
-                GameApp.notify(data.message, 'success');
-                await GameApp.fetchCharacter();
-                this.loadChatApp();
+                if (data.contact) {
+                    this.activeChatTarget = {
+                        username: data.contact.raw_username || cleanUser,
+                        name: data.contact.full_name || cleanUser,
+                        avatar: data.contact.avatar || avatar
+                    };
+                    if (headerName) headerName.textContent = this.activeChatTarget.name;
+                    if (headerUser) headerUser.textContent = '@' + this.activeChatTarget.username;
+                }
+                this.renderMessages(data.messages || []);
             } else {
-                GameApp.playSfx('loss');
-                GameApp.notify(data.error || 'Failed to process message reply.', 'error');
+                if (container) container.innerHTML = `<p class="p-3 text-xs text-rose-500 text-center">${data.error || 'Failed to load messages'}</p>`;
             }
         } catch(e) {
-            GameApp.notify('Network error communicating on NaijaChat', 'error');
+            if (container) container.innerHTML = `<p class="p-3 text-xs text-slate-400 text-center">Start a new conversation with @${cleanUser}!</p>`;
         }
+    },
+
+    closeConversation() {
+        this.activeChatTarget = null;
+        const mainView = document.getElementById('phoneChatMainView');
+        const convView = document.getElementById('phoneChatConversationView');
+        if (convView) convView.classList.add('hidden');
+        if (mainView) mainView.classList.remove('hidden');
+        this.loadChatApp();
+    },
+
+    renderMessages(messages) {
+        const container = document.getElementById('phoneMessagesContainer');
+        if (!container) return;
+
+        if (messages.length === 0) {
+            container.innerHTML = `
+                <div class="h-full flex flex-col items-center justify-center text-center p-4 text-slate-400">
+                    <span class="text-2xl mb-1">💬</span>
+                    <p class="text-xs font-semibold">No messages yet with @${this.activeChatTarget?.username}</p>
+                    <span class="text-[10px]">Say hello or send funds!</span>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = messages.map(m => `
+            <div class="flex flex-col ${m.is_me ? 'items-end' : 'items-start'}">
+                <div class="max-w-[78%] px-3 py-2 rounded-2xl text-xs leading-snug shadow-sm ${
+                    m.is_me 
+                        ? 'bg-emerald-600 text-white rounded-br-none' 
+                        : 'bg-white border border-slate-200 text-slate-900 rounded-bl-none'
+                }">
+                    ${m.message}
+                </div>
+                <span class="text-[9px] text-slate-400 mt-0.5 px-1">${m.time || ''}</span>
+            </div>
+        `).join('');
+
+        container.scrollTop = container.scrollHeight;
+    },
+
+    async handleSendMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('phoneMsgInput');
+        if (!input || !this.activeChatTarget) return;
+
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+
+        const container = document.getElementById('phoneMessagesContainer');
+        if (container) {
+            const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            container.insertAdjacentHTML('beforeend', `
+                <div class="flex flex-col items-end animate-fade-in">
+                    <div class="max-w-[78%] px-3 py-2 rounded-2xl rounded-br-none text-xs leading-snug shadow-sm bg-emerald-600 text-white">
+                        ${text}
+                    </div>
+                    <span class="text-[9px] text-slate-400 mt-0.5 px-1">${timeNow}</span>
+                </div>
+            `);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        GameApp.playSfx('click');
+
+        const formData = new FormData();
+        formData.append('recipient_username', this.activeChatTarget.username);
+        formData.append('message', text);
+
+        try {
+            const res = await fetch('api/phone.php?action=send_message', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                if (data.auto_reply && container) {
+                    setTimeout(() => {
+                        GameApp.playSfx('win');
+                        container.insertAdjacentHTML('beforeend', `
+                            <div class="flex flex-col items-start animate-fade-in">
+                                <div class="max-w-[78%] px-3 py-2 rounded-2xl rounded-bl-none text-xs leading-snug shadow-sm bg-white border border-slate-200 text-slate-900">
+                                    ${data.auto_reply.message}
+                                </div>
+                                <span class="text-[9px] text-slate-400 mt-0.5 px-1">${data.auto_reply.time || 'Just now'}</span>
+                            </div>
+                        `);
+                        container.scrollTop = container.scrollHeight;
+                    }, 650);
+                }
+            } else {
+                GameApp.notify(data.error || 'Failed to deliver message', 'error');
+            }
+        } catch(err) {
+            GameApp.notify('Message delivery error', 'error');
+        }
+    },
+
+    openTransferToActiveContact() {
+        if (!this.activeChatTarget) return;
+        this.openDirectTransferModal('@' + this.activeChatTarget.username);
     },
 
     // --- 4. GAMES APP ---

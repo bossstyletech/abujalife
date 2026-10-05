@@ -1112,8 +1112,11 @@ if (!$char) {
                             </div>
                         </div>
                         <div class="space-y-2">
+                            <button onclick="PhoneApp.openDirectTransferModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
+                                <i class="fa-solid fa-paper-plane"></i> Send Money to @username
+                            </button>
                             <button onclick="PhoneApp.quickTransfer()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
-                                <i class="fa-solid fa-paper-plane text-emerald-600"></i> Quick Transfer Cash to Savings
+                                <i class="fa-solid fa-piggy-bank text-emerald-600"></i> Move Cash to Savings
                             </button>
                             <button onclick="PhoneApp.buyAirtime()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
                                 <i class="fa-solid fa-wifi text-blue-600"></i> Buy Airtime & Data VTU (₦1,000)
@@ -1203,28 +1206,107 @@ if (!$char) {
                         </div>
                     </div>
 
-                    <!-- APP: CHAT (NaijaChat - WhatsApp) -->
-                    <div id="phone-app-chat" class="phone-screen hidden space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                            <div class="flex items-center gap-2">
-                                <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
-                                <div>
-                                    <h4 class="font-bold text-xs text-slate-900 leading-none">NaijaChat</h4>
-                                    <span class="text-[9px] text-green-600 font-extrabold uppercase">WhatsApp Abuja</span>
+                    <!-- APP: CHAT (NaijaChat - WhatsApp & Peer Messaging) -->
+                    <div id="phone-app-chat" class="phone-screen hidden space-y-2.5">
+                        
+                        <!-- CHAT THREADS VIEW (List of chats) -->
+                        <div id="phoneChatMainView" class="space-y-2.5">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600 hover:text-slate-900 transition"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <div>
+                                        <h4 class="font-bold text-xs text-slate-900 leading-none">NaijaChat</h4>
+                                        <span class="text-[9px] text-green-600 font-extrabold uppercase">Live Citizen Messenger</span>
+                                    </div>
+                                </div>
+                                <!-- Tab Switcher -->
+                                <div class="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
+                                    <button id="chatTabChats" onclick="PhoneApp.switchChatTab('chats')" class="px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm">Chats</button>
+                                    <button id="chatTabStatus" onclick="PhoneApp.switchChatTab('status')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">Status</button>
                                 </div>
                             </div>
-                            <!-- Tab Switcher -->
-                            <div class="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
-                                <button id="chatTabChats" onclick="PhoneApp.switchChatTab('chats')" class="px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm">Chats</button>
-                                <button id="chatTabStatus" onclick="PhoneApp.switchChatTab('status')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">Status</button>
+
+                            <!-- Search & Start Chat by @username -->
+                            <div class="relative">
+                                <div class="flex gap-1.5">
+                                    <div class="relative flex-1">
+                                        <i class="fa-solid fa-at absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400"></i>
+                                        <input 
+                                            type="text" 
+                                            id="phoneChatSearchInput" 
+                                            placeholder="Type @username to chat..." 
+                                            onkeydown="if(event.key==='Enter') PhoneApp.startChatFromInput()"
+                                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-6 pr-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-green-600 focus:bg-white transition"
+                                        />
+                                    </div>
+                                    <button onclick="PhoneApp.startChatFromInput()" class="px-2.5 py-1.5 bg-green-600 hover:bg-green-500 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-sm">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
                             </div>
+
+                            <!-- Active Citizens Carousel / Quick Picks -->
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between text-[10px] font-bold text-slate-500">
+                                    <span>Active Citizens in Abuja:</span>
+                                    <span class="text-[9px] text-green-600">Tap to text</span>
+                                </div>
+                                <div id="phoneActiveCitizensBar" class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Chat Threads List -->
+                            <div id="phoneChatList" class="space-y-1.5 max-h-[290px] overflow-y-auto pr-0.5"></div>
+
+                            <!-- Status Updates List -->
+                            <div id="phoneStatusList" class="hidden space-y-2 max-h-[340px] overflow-y-auto pr-0.5"></div>
                         </div>
 
-                        <!-- Chat Threads List -->
-                        <div id="phoneChatList" class="space-y-2 max-h-[360px] overflow-y-auto pr-0.5"></div>
+                        <!-- CHAT CONVERSATION VIEW (Inside a specific thread) -->
+                        <div id="phoneChatConversationView" class="hidden flex flex-col h-[390px]">
+                            <!-- Conversation Header -->
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-1.5">
+                                <div class="flex items-center gap-2">
+                                    <button onclick="PhoneApp.closeConversation()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600 hover:text-slate-900 transition">
+                                        <i class="fa-solid fa-arrow-left"></i>
+                                    </button>
+                                    <div class="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center text-xs" id="convHeaderAvatar">
+                                        👤
+                                    </div>
+                                    <div class="leading-tight">
+                                        <h5 class="font-bold text-xs text-slate-900 truncate max-w-[110px]" id="convHeaderName">Citizen</h5>
+                                        <span class="text-[10px] text-green-600 font-semibold block" id="convHeaderUsername">@username</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="PhoneApp.openTransferToActiveContact()" title="Send Money via AbujaPay" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition active:scale-95">
+                                        <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> Send ₦
+                                    </button>
+                                </div>
+                            </div>
 
-                        <!-- Status Updates List -->
-                        <div id="phoneStatusList" class="hidden space-y-2 max-h-[360px] overflow-y-auto pr-0.5"></div>
+                            <!-- Messages History Box -->
+                            <div id="phoneMessagesContainer" class="flex-1 overflow-y-auto space-y-2 p-1 text-xs">
+                                <!-- Messages injected dynamically -->
+                            </div>
+
+                            <!-- Message Input Form -->
+                            <form onsubmit="PhoneApp.handleSendMessage(event)" class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center gap-1.5">
+                                <input 
+                                    type="text" 
+                                    id="phoneMsgInput" 
+                                    placeholder="Type message..." 
+                                    autocomplete="off"
+                                    required 
+                                    class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-green-600 focus:bg-white"
+                                />
+                                <button type="submit" class="w-8 h-8 rounded-xl bg-green-600 hover:bg-green-500 text-white flex items-center justify-center text-xs shadow-sm transition active:scale-95">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+
                     </div>
 
                     <!-- APP: GAMES (Arcade) -->
@@ -2000,8 +2082,8 @@ if (!$char) {
             <!-- Form -->
             <div id="transferFormView" class="space-y-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Recipient Citizen:</label>
-                    <input type="text" id="transferRecipientName" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Recipient Citizen (@username or Name):</label>
+                    <input type="text" id="transferRecipientName" placeholder="Type @username (e.g. @bossman)..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition">
                     <input type="hidden" id="transferRecipientId">
                 </div>
                 <div>

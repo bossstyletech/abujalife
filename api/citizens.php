@@ -137,11 +137,34 @@ if ($action === 'profile') {
 // ----------------------------------------------------
 if ($action === 'transfer') {
     $citizenId = (int)($_POST['recipient_id'] ?? 0);
+    $recipientUsername = trim(cleanInput($_POST['recipient_username'] ?? ''));
+    if (!empty($recipientUsername)) {
+        $recipientUsername = ltrim($recipientUsername, '@');
+    }
     $amount    = (float)($_POST['amount'] ?? 0);
     $memo      = trim(cleanInput($_POST['memo'] ?? 'Transfer from Abuja citizen'));
 
     if ($amount <= 0) {
         jsonResponse(['success' => false, 'error' => 'Enter a valid amount to send.'], 400);
+    }
+
+    // Resolve recipient by username or character ID
+    $recipient = null;
+    if ($citizenId > 0) {
+        $stmt = $pdo->prepare("SELECT c.id, c.full_name, u.username, u.id AS user_id FROM characters c JOIN users u ON c.user_id = u.id WHERE c.id = ?");
+        $stmt->execute([$citizenId]);
+        $recipient = $stmt->fetch();
+    } elseif (!empty($recipientUsername)) {
+        $stmt = $pdo->prepare("SELECT c.id, c.full_name, u.username, u.id AS user_id FROM characters c JOIN users u ON c.user_id = u.id WHERE LOWER(u.username) = LOWER(?) LIMIT 1");
+        $stmt->execute([$recipientUsername]);
+        $recipient = $stmt->fetch();
+        if ($recipient) {
+            $citizenId = (int)$recipient['id'];
+        }
+    }
+
+    if (!$recipient) {
+        jsonResponse(['success' => false, 'error' => 'Recipient citizen @' . ($recipientUsername ?: $citizenId) . ' not found.'], 404);
     }
 
     if ($citizenId === (int)$char['id']) {
@@ -156,14 +179,6 @@ if ($action === 'transfer') {
         $source = 'cash';
     } else {
         jsonResponse(['success' => false, 'error' => 'Insufficient funds in both bank and cash! Need ' . formatNaira($amount) . '.'], 400);
-    }
-
-    $stmt = $pdo->prepare("SELECT c.id, c.full_name, u.username FROM characters c JOIN users u ON c.user_id = u.id WHERE c.id = ?");
-    $stmt->execute([$citizenId]);
-    $recipient = $stmt->fetch();
-
-    if (!$recipient) {
-        jsonResponse(['success' => false, 'error' => 'Recipient citizen not found.'], 404);
     }
 
     try {

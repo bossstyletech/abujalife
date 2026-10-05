@@ -276,4 +276,320 @@ if ($action === 'microloan') {
     ]);
 }
 
+// ---------------------------------------------------------
+// 6. NAIJACHAT MESSAGING ENGINE (REAL CITIZENS & CONTACTS)
+// ---------------------------------------------------------
+if ($action === 'get_chat_threads') {
+    // 1. Fetch conversations with real registered users from user_messages
+    $stmt = $pdo->prepare("
+        SELECT 
+            CASE WHEN m.sender_id = :uid THEN m.recipient_id ELSE m.sender_id END AS other_user_id,
+            MAX(m.id) AS latest_msg_id,
+            SUM(CASE WHEN m.recipient_id = :uid AND m.is_read = 0 THEN 1 ELSE 0 END) AS unread_count
+        FROM user_messages m
+        WHERE m.sender_id = :uid OR m.recipient_id = :uid
+        GROUP BY other_user_id
+        ORDER BY latest_msg_id DESC
+    ");
+    $stmt->execute([':uid' => $userId]);
+    $threadRows = $stmt->fetchAll();
+
+    $userThreads = [];
+    foreach ($threadRows as $t) {
+        $otherUid = (int)$t['other_user_id'];
+        $uStmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.username, c.id AS character_id, c.full_name, c.district, c.avatar, c.outfit
+            FROM users u
+            LEFT JOIN characters c ON c.user_id = u.id
+            WHERE u.id = ?
+        ");
+        $uStmt->execute([$otherUid]);
+        $targetUser = $uStmt->fetch();
+        if (!$targetUser) continue;
+
+        // Fetch latest message details
+        $msgStmt = $pdo->prepare("SELECT message, created_at, sender_id FROM user_messages WHERE id = ?");
+        $msgStmt->execute([(int)$t['latest_msg_id']]);
+        $latestMsg = $msgStmt->fetch();
+
+        $timeStr = $latestMsg ? date('H:i', strtotime($latestMsg['created_at'])) : '';
+
+        $userThreads[] = [
+            'type'        => 'user',
+            'user_id'     => (int)$targetUser['user_id'],
+            'character_id'=> (int)($targetUser['character_id'] ?? 0),
+            'username'    => '@' . $targetUser['username'],
+            'raw_username'=> $targetUser['username'],
+            'name'        => $targetUser['full_name'] ?: $targetUser['username'],
+            'district'    => $targetUser['district'] ?? 'Abuja FCT',
+            'avatar'      => $targetUser['avatar'] ?? 'assets/img/characters/tunde/face.png',
+            'last_message'=> $latestMsg ? ($latestMsg['sender_id'] == $userId ? 'You: ' : '') . $latestMsg['message'] : 'Started conversation',
+            'time'        => $timeStr,
+            'unread'      => (int)$t['unread_count'],
+            'online'      => true
+        ];
+    }
+
+    // 2. Fetch available Abuja citizens to start new chats with
+    $citStmt = $pdo->prepare("
+        SELECT u.id AS user_id, u.username, c.id AS character_id, c.full_name, c.district, c.avatar, c.street_cred
+        FROM users u
+        JOIN characters c ON c.user_id = u.id
+        WHERE u.id != ? AND c.is_alive = 1
+        ORDER BY c.street_cred DESC, c.id DESC
+        LIMIT 10
+    ");
+    $citStmt->execute([$userId]);
+    $availableCitizens = array_map(function($c) {
+        return [
+            'user_id'     => (int)$c['user_id'],
+            'character_id'=> (int)$c['character_id'],
+            'username'    => '@' . $c['username'],
+            'raw_username'=> $c['username'],
+            'name'        => $c['full_name'],
+            'district'    => $c['district'],
+            'avatar'      => $c['avatar'] ?: 'assets/img/characters/tunde/face.png',
+            'street_cred' => (int)$c['street_cred']
+        ];
+    }, $citStmt->fetchAll());
+
+    // 3. Built-in interactive quest/NPC threads
+    $npcThreads = [
+        [
+            'type'        => 'npc',
+            'id'          => 'landlord',
+            'name'        => 'Alhaji Landlord',
+            'username'    => '@alhaji_landlord',
+            'raw_username'=> 'alhaji_landlord',
+            'avatar'      => '🏢',
+            'district'    => 'Compound Owner',
+            'last_message'=> 'Borehole maintenance levy ₦5,000 due.',
+            'time'        => 'Today',
+            'unread'      => 1,
+            'online'      => true
+        ],
+        [
+            'type'        => 'npc',
+            'id'          => 'kunle_gig',
+            'name'        => 'Kunle (Tech Bro)',
+            'username'    => '@kunle_tech',
+            'raw_username'=> 'kunle_tech',
+            'avatar'      => '💻',
+            'district'    => 'Wuse 2 Tech Hub',
+            'last_message'=> 'Emergency foreign client bugfix available. Payout: ₦35k.',
+            'time'        => '10m ago',
+            'unread'      => 1,
+            'online'      => true
+        ],
+        [
+            'type'        => 'npc',
+            'id'          => 'femi',
+            'name'        => 'Cousin Femi',
+            'username'    => '@femi_uniabuja',
+            'raw_username'=> 'femi_uniabuja',
+            'avatar'      => '🎒',
+            'district'    => 'UniAbuja Campus',
+            'last_message'=> 'Egbon urgent 2k abeg! Sapa dey catch me.',
+            'time'        => '1h ago',
+            'unread'      => 0,
+            'online'      => true
+        ],
+        [
+            'type'        => 'npc',
+            'id'          => 'shawarma',
+            'name'        => 'Banex Dispatch Rider',
+            'username'    => '@banex_rider',
+            'raw_username'=> 'banex_rider',
+            'avatar'      => '🛵',
+            'district'    => 'Banex Express Logistics',
+            'last_message'=> 'Oga I don reach your estate security gate.',
+            'time'        => '2h ago',
+            'unread'      => 0,
+            'online'      => false
+        ]
+    ];
+
+    jsonResponse([
+        'success'            => true,
+        'user_threads'       => $userThreads,
+        'npc_threads'        => $npcThreads,
+        'available_citizens' => $availableCitizens,
+        'my_username'        => '@' . ($char['username'] ?? '')
+    ]);
+}
+
+// ---------------------------------------------------------
+// 7. GET MESSAGES IN CONVERSATION THREAD
+// ---------------------------------------------------------
+if ($action === 'get_messages') {
+    $targetUsername = trim(cleanInput($_GET['username'] ?? $_POST['username'] ?? ''));
+    $targetUserId   = (int)($_GET['user_id'] ?? $_POST['user_id'] ?? 0);
+
+    if (!empty($targetUsername)) {
+        $targetUsername = ltrim($targetUsername, '@');
+        $uStmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.username, c.id AS character_id, c.full_name, c.district, c.avatar, c.cash, c.bank
+            FROM users u
+            LEFT JOIN characters c ON c.user_id = u.id
+            WHERE LOWER(u.username) = LOWER(?)
+            LIMIT 1
+        ");
+        $uStmt->execute([$targetUsername]);
+        $targetUser = $uStmt->fetch();
+        if ($targetUser) {
+            $targetUserId = (int)$targetUser['user_id'];
+        }
+    } elseif ($targetUserId > 0) {
+        $uStmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.username, c.id AS character_id, c.full_name, c.district, c.avatar, c.cash, c.bank
+            FROM users u
+            LEFT JOIN characters c ON c.user_id = u.id
+            WHERE u.id = ?
+            LIMIT 1
+        ");
+        $uStmt->execute([$targetUserId]);
+        $targetUser = $uStmt->fetch();
+    }
+
+    if (!$targetUser || $targetUserId <= 0) {
+        jsonResponse(['success' => false, 'error' => 'Citizen user not found.'], 404);
+    }
+
+    // Mark incoming messages as read
+    $markStmt = $pdo->prepare("UPDATE user_messages SET is_read = 1 WHERE sender_id = ? AND recipient_id = ?");
+    $markStmt->execute([$targetUserId, $userId]);
+
+    // Fetch conversation history
+    $msgStmt = $pdo->prepare("
+        SELECT id, sender_id, recipient_id, message, is_read, created_at
+        FROM user_messages
+        WHERE (sender_id = :uid AND recipient_id = :target)
+           OR (sender_id = :target AND recipient_id = :uid)
+        ORDER BY id ASC
+        LIMIT 60
+    ");
+    $msgStmt->execute([':uid' => $userId, ':target' => $targetUserId]);
+    $messages = array_map(function($m) use ($userId) {
+        return [
+            'id'         => (int)$m['id'],
+            'is_me'      => ((int)$m['sender_id'] === (int)$userId),
+            'message'    => $m['message'],
+            'time'       => date('h:i A', strtotime($m['created_at'])),
+            'date'       => date('M d', strtotime($m['created_at'])),
+            'is_read'    => (bool)$m['is_read']
+        ];
+    }, $msgStmt->fetchAll());
+
+    jsonResponse([
+        'success'      => true,
+        'contact'      => [
+            'user_id'      => (int)$targetUser['user_id'],
+            'character_id' => (int)($targetUser['character_id'] ?? 0),
+            'username'     => '@' . $targetUser['username'],
+            'raw_username' => $targetUser['username'],
+            'full_name'    => $targetUser['full_name'] ?: $targetUser['username'],
+            'district'     => $targetUser['district'] ?? 'Abuja FCT',
+            'avatar'       => $targetUser['avatar'] ?: 'assets/img/characters/tunde/face.png'
+        ],
+        'messages'     => $messages
+    ]);
+}
+
+// ---------------------------------------------------------
+// 8. SEND MESSAGE TO CITIZEN BY @USERNAME
+// ---------------------------------------------------------
+if ($action === 'send_message') {
+    $targetUsername = trim(cleanInput($_POST['recipient_username'] ?? ''));
+    $targetUserId   = (int)($_POST['recipient_id'] ?? 0);
+    $text           = trim(cleanInput($_POST['message'] ?? ''));
+
+    if (empty($text)) {
+        jsonResponse(['success' => false, 'error' => 'Message text cannot be empty!'], 400);
+    }
+
+    if (!empty($targetUsername)) {
+        $targetUsername = ltrim($targetUsername, '@');
+        $uStmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.username, c.full_name
+            FROM users u
+            LEFT JOIN characters c ON c.user_id = u.id
+            WHERE LOWER(u.username) = LOWER(?)
+            LIMIT 1
+        ");
+        $uStmt->execute([$targetUsername]);
+        $targetUser = $uStmt->fetch();
+        if ($targetUser) {
+            $targetUserId = (int)$targetUser['user_id'];
+        }
+    } elseif ($targetUserId > 0) {
+        $uStmt = $pdo->prepare("
+            SELECT u.id AS user_id, u.username, c.full_name
+            FROM users u
+            LEFT JOIN characters c ON c.user_id = u.id
+            WHERE u.id = ?
+            LIMIT 1
+        ");
+        $uStmt->execute([$targetUserId]);
+        $targetUser = $uStmt->fetch();
+    }
+
+    if (!$targetUser || $targetUserId <= 0) {
+        jsonResponse(['success' => false, 'error' => 'Recipient citizen @' . ($targetUsername ?: $targetUserId) . ' not found.'], 404);
+    }
+
+    if ($targetUserId === (int)$userId) {
+        jsonResponse(['success' => false, 'error' => 'You cannot text yourself!'], 400);
+    }
+
+    // Insert user message
+    $insStmt = $pdo->prepare("
+        INSERT INTO user_messages (sender_id, recipient_id, message, is_read, created_at)
+        VALUES (?, ?, ?, 0, datetime('now'))
+    ");
+    $insStmt->execute([$userId, $targetUserId, $text]);
+    $newMsgId = (int)$pdo->lastInsertId();
+
+    // Check if recipient is a system / automated NPC persona to provide dynamic replies
+    $reply = null;
+    $botReplies = [
+        'Safe! How Abuja dey treat you?',
+        'Omo hustle is real today o! Catch you around Wuse.',
+        'Abuja no be beans my brother! Stay focused.',
+        'Well received senior man! More blessings to your account.',
+        'Haha valid! Let us connect properly over cold Lacasera soon.',
+        'Nice one! Make sure you grind hard before NEPA take light.'
+    ];
+
+    // If it's a simulated peer citizen or demo account, send an authentic reply
+    $isDemoTarget = in_array(strtolower($targetUser['username']), ['bossman', 'chidi', 'zainab', 'emeka', 'farouk', 'blessing', 'ibrahim', 'segun', 'ngozi']);
+    if ($isDemoTarget) {
+        $replyText = $botReplies[array_rand($botReplies)];
+        $botIns = $pdo->prepare("
+            INSERT INTO user_messages (sender_id, recipient_id, message, is_read, created_at)
+            VALUES (?, ?, ?, 0, datetime('now', '+1 second'))
+        ");
+        $botIns->execute([$targetUserId, $userId, $replyText]);
+        $reply = [
+            'id'      => (int)$pdo->lastInsertId(),
+            'is_me'   => false,
+            'message' => $replyText,
+            'time'    => date('h:i A'),
+            'date'    => date('M d')
+        ];
+    }
+
+    jsonResponse([
+        'success' => true,
+        'message_sent' => [
+            'id'      => $newMsgId,
+            'is_me'   => true,
+            'message' => $text,
+            'time'    => date('h:i A'),
+            'date'    => date('M d')
+        ],
+        'auto_reply' => $reply
+    ]);
+}
+
 jsonResponse(['success' => false, 'error' => 'Invalid phone action.'], 400);
+
