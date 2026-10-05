@@ -17,3 +17,6 @@ desktop.ini
 # Archive packages
 *.zip
 
+# Local SQLite databases
+*.sqlite
+

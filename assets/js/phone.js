@@ -46,6 +46,7 @@ const PhoneApp = {
         if (appName === 'contacts') this.loadContactsApp();
         if (appName === 'bank') this.loadBankApp();
         if (appName === 'chat') this.loadChatApp();
+        if (appName === 'chowdeck') this.loadChowdeckApp();
         if (appName === 'wardrobe') this.loadWardrobeApp();
     },
 
@@ -57,8 +58,12 @@ const PhoneApp = {
     // --- 1. ABUJAPAY (BANKING APP) ---
     loadBankApp() {
         const char = GameApp.character || {};
-        document.getElementById('phoneBankBalance').textContent = GameApp.formatNaira(char.bank);
-        document.getElementById('phoneCashBalance').textContent = GameApp.formatNaira(char.cash);
+        const bankEl = document.getElementById('phoneBankBalance');
+        const cashEl = document.getElementById('phoneCashBalance');
+        const loanEl = document.getElementById('phoneLoanBalance');
+        if (bankEl) bankEl.textContent = GameApp.formatNaira(char.bank);
+        if (cashEl) cashEl.textContent = GameApp.formatNaira(char.cash);
+        if (loanEl) loanEl.textContent = GameApp.formatNaira(char.loan_balance || 0);
     },
 
     async quickTransfer() {
@@ -82,19 +87,246 @@ const PhoneApp = {
     async buyAirtime() {
         const cost = 1000;
         const char = GameApp.character || {};
-        if ((float = Number(char.cash)) < cost) {
-            alert("Insufficient cash for airtime recharge!");
+        if (Number(char.cash) < cost) {
+            GameApp.notify("Insufficient cash on hand for airtime recharge!", 'error');
             return;
         }
 
         const formData = new FormData();
         formData.append('amount', cost);
-        // Deduct via lifestyle / bank
-        GameApp.notify("Airtime VTU recharge successful! ₦1,000 + 5GB Data credited.", 'success');
+        try {
+            await fetch('api/bank.php?action=deposit', { method: 'POST', body: formData });
+        } catch(e){}
+        if (char.cash !== undefined) {
+            char.cash = Math.max(0, Number(char.cash) - cost);
+        }
+        GameApp.notify("Airtime VTU recharge successful! ₦1,000 + 5GB Data credited to MTN 5G line.", 'success');
         GameApp.playSfx('win');
+        await GameApp.fetchCharacter();
+        this.loadBankApp();
     },
 
-    // --- 2. GAMES APP ---
+    async applyMicroloan() {
+        const confirmed = confirm("AbujaPay Instant Microloan\nBorrow ₦10,000 emergency cash at 5% interest (Repay ₦10,500)?\nZero collateral required.");
+        if (!confirmed) return;
+
+        const formData = new FormData();
+        formData.append('amount', 10000);
+        try {
+            const res = await fetch('api/phone.php?action=microloan', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                GameApp.playSfx('money');
+                GameApp.notify(data.message, 'success');
+                await GameApp.fetchCharacter();
+                this.loadBankApp();
+            } else {
+                GameApp.notify(data.error || 'Loan application declined.', 'error');
+            }
+        } catch(e) {
+            GameApp.notify('Network error processing microloan', 'error');
+        }
+    },
+
+    // --- 2. CHOWDECK FOOD DELIVERY APP ---
+    loadChowdeckApp() {
+        // App is statically rendered in HTML; buttons link to orderFood
+    },
+
+    async orderFood(itemKey) {
+        const formData = new FormData();
+        formData.append('item', itemKey);
+        try {
+            const res = await fetch('api/phone.php?action=order_food', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                GameApp.playSfx('win');
+                GameApp.notify(data.message, 'success');
+                await GameApp.fetchCharacter();
+            } else {
+                GameApp.playSfx('loss');
+                GameApp.notify(data.error || 'Failed to complete order.', 'error');
+            }
+        } catch(e) {
+            GameApp.notify('Chowdeck delivery network error', 'error');
+        }
+    },
+
+    // --- 3. WHATSAPP CHAT APP (NaijaChat & Status) ---
+    currentChatTab: 'chats',
+
+    switchChatTab(tab) {
+        this.currentChatTab = tab;
+        const chatsList = document.getElementById('phoneChatList');
+        const statusList = document.getElementById('phoneStatusList');
+        const btnChats = document.getElementById('chatTabChats');
+        const btnStatus = document.getElementById('chatTabStatus');
+
+        if (tab === 'chats') {
+            if (chatsList) chatsList.classList.remove('hidden');
+            if (statusList) statusList.classList.add('hidden');
+            if (btnChats) { btnChats.className = 'px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm'; }
+            if (btnStatus) { btnStatus.className = 'px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800'; }
+            this.loadChatApp();
+        } else {
+            if (chatsList) chatsList.classList.add('hidden');
+            if (statusList) statusList.classList.remove('hidden');
+            if (btnStatus) { btnStatus.className = 'px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm'; }
+            if (btnChats) { btnChats.className = 'px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800'; }
+            this.loadStatusApp();
+        }
+    },
+
+    loadChatApp() {
+        const list = document.getElementById('phoneChatList');
+        if (!list) return;
+
+        const chats = [
+            {
+                id: 'landlord',
+                name: "Alhaji Landlord",
+                avatar: "🏢",
+                msg: "Good day tenant. The compound borehole maintenance levy of ₦5,000 is due today.",
+                actionText: "Transfer ₦5,000",
+                choice: "pay",
+                declineText: "Ignore Message",
+                declineChoice: "ignore"
+            },
+            {
+                id: 'femi',
+                name: "Cousin Femi",
+                avatar: "🎒",
+                msg: "Egbon! Sapa hold me for UniAbuja hostel abeg send urgent 2k for food.",
+                actionText: "Send ₦2,000 (+Karma)",
+                choice: "send_2k",
+                declineText: "Reply 'Sapa Hold Me Too'",
+                declineChoice: "decline"
+            },
+            {
+                id: 'kunle_gig',
+                name: "Kunle (Tech Bro)",
+                avatar: "💻",
+                msg: "Yo! A foreign fintech client needs an emergency API bugfix tonight. Payout is ₦35,000. You in?",
+                actionText: "Accept Gig (+₦35k)",
+                choice: "accept_gig",
+                declineText: "Decline (Too tired)",
+                declineChoice: "decline"
+            },
+            {
+                id: 'shawarma',
+                name: "Banex Dispatch Rider",
+                avatar: "🛵",
+                msg: "Oga I don reach your estate security gate with your hot order. ₦2,500 cash on delivery.",
+                actionText: "Pay & Accept Food",
+                choice: "accept",
+                declineText: "Cancel Order",
+                declineChoice: "ignore"
+            }
+        ];
+
+        list.innerHTML = chats.map((c, i) => `
+            <div class="bg-slate-50 border border-slate-200/90 hover:bg-slate-100 p-3 rounded-2xl mb-2 transition">
+                <div class="flex justify-between items-center mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-sm">${c.avatar}</span>
+                        <span class="font-extrabold text-xs text-slate-900">${c.name}</span>
+                    </div>
+                    <span class="text-[9px] text-green-600 font-bold bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200">Online</span>
+                </div>
+                <p class="text-[11px] text-slate-600 mb-2.5 leading-snug">${c.msg}</p>
+                <div class="flex gap-1.5">
+                    <button onclick="PhoneApp.handleChatAction('${c.id}', '${c.choice}')" class="flex-1 py-1 px-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-[10px] font-bold shadow-sm transition active:scale-95 text-center">
+                        ${c.actionText}
+                    </button>
+                    <button onclick="PhoneApp.handleChatAction('${c.id}', '${c.declineChoice}')" class="py-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-[10px] font-bold transition active:scale-95">
+                        ${c.declineText}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    loadStatusApp() {
+        const list = document.getElementById('phoneStatusList');
+        if (!list) return;
+
+        const statuses = [
+            {
+                name: "Senator Bello",
+                avatar: "🏛️",
+                time: "24m ago",
+                caption: "National Assembly budget defense completed. Abuja modernization roadmap is clear! 🇳🇬",
+                media: "📜 Official Senate Resolution"
+            },
+            {
+                name: "Mama Ngozi",
+                avatar: "🏘️",
+                time: "1h ago",
+                caption: "Whoever turned on the water pump without washing their hands first in this compound should repent o!",
+                media: "🚰 Face-Me-I-Face-You Yard"
+            },
+            {
+                name: "Chioma Fashion",
+                avatar: "👗",
+                time: "2h ago",
+                caption: "Aso-Ebi deliveries ready for Saturday Owambe in Gwarinpa. No sleeping on style! ✨",
+                media: "🧵 Royal Senator Velvet Fabric"
+            },
+            {
+                name: "Danfo Conductor",
+                avatar: "🚐",
+                time: "3h ago",
+                caption: "Rain drop small, passenger start to cry because fare double. Buy umbrella make you trek then 😂",
+                media: "🌧️ Berger Overhead Bridge"
+            }
+        ];
+
+        list.innerHTML = statuses.map(s => `
+            <div class="bg-slate-50 border border-slate-200 p-3 rounded-2xl space-y-1.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full border-2 border-green-500 p-0.5 flex items-center justify-center text-sm bg-white">
+                        ${s.avatar}
+                    </div>
+                    <div>
+                        <h6 class="text-xs font-bold text-slate-900 leading-none">${s.name}</h6>
+                        <span class="text-[9px] text-slate-400">${s.time}</span>
+                    </div>
+                </div>
+                <div class="bg-slate-900 text-white p-2.5 rounded-xl text-[11px] font-medium leading-snug">
+                    <span class="text-[10px] text-emerald-400 block mb-0.5 font-bold">${s.media}</span>
+                    "${s.caption}"
+                </div>
+                <div class="flex justify-end gap-2 text-[10px] text-slate-400 pt-1">
+                    <button onclick="GameApp.notify('Sent flame reaction 🔥', 'success')" class="hover:text-slate-900">🔥 12</button>
+                    <button onclick="GameApp.notify('Sent clapping reaction 👏', 'success')" class="hover:text-slate-900">👏 8</button>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    async handleChatAction(chatId, choice) {
+        const formData = new FormData();
+        formData.append('chat_type', chatId);
+        formData.append('choice', choice);
+
+        try {
+            const res = await fetch('api/phone.php?action=chat_action', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                GameApp.playSfx('win');
+                GameApp.notify(data.message, 'success');
+                await GameApp.fetchCharacter();
+                this.loadChatApp();
+            } else {
+                GameApp.playSfx('loss');
+                GameApp.notify(data.error || 'Failed to process message reply.', 'error');
+            }
+        } catch(e) {
+            GameApp.notify('Network error communicating on NaijaChat', 'error');
+        }
+    },
+
+    // --- 4. GAMES APP ---
     playTrivia() {
         const questions = [
             { q: "What is the official slogan of Abuja?", options: ["Centre of Excellence", "Centre of Unity", "Seat of Power"], ans: 1 },
@@ -112,8 +344,7 @@ const PhoneApp = {
         if (selectedIdx === item.ans) {
             GameApp.playSfx('win');
             alert("Correct! You won ₦5,000 trivia bonus!");
-            // Award cash bonus
-            fetch('api/bank.php?action=withdraw', { method: 'POST' }); // or direct notify
+            fetch('api/bank.php?action=withdraw', { method: 'POST' });
             GameApp.notify("Trivia Champion! +₦5,000 added.", 'success');
         } else {
             GameApp.playSfx('loss');
@@ -151,66 +382,7 @@ const PhoneApp = {
         }
     },
 
-    // --- 3. WHATSAPP CHAT APP ---
-    loadChatApp() {
-        const list = document.getElementById('phoneChatList');
-        if (!list) return;
-
-        const chats = [
-            {
-                name: "Landlord (Alhaji Garki)",
-                msg: "Good day tenant. Please renew your water maintenance levy.",
-                actionText: "Transfer ₦3,000",
-                replyAction: () => this.handleChatBill(3000, "Paid water maintenance levy.")
-            },
-            {
-                name: "Cousin Femi",
-                msg: "Egbon! Billing hold me for school abeg send urgent 2k.",
-                actionText: "Send ₦2,000",
-                replyAction: () => this.handleChatBill(2000, "Sent ₦2,000 to cousin Femi. Good karma unlocked!")
-            },
-            {
-                name: "Banex Dispatch Rider",
-                msg: "Oga I don reach your gate with the hot shawarma.",
-                actionText: "Accept Delivery",
-                replyAction: () => {
-                    GameApp.playSfx('win');
-                    GameApp.notify("Received hot shawarma! Happiness +10%.", 'success');
-                }
-            }
-        ];
-
-        list.innerHTML = chats.map((c, i) => `
-            <div class="bg-slate-100 hover:bg-slate-200/80 p-3 rounded-2xl mb-2 transition">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="font-bold text-xs text-slate-900">${c.name}</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold">Online</span>
-                </div>
-                <p class="text-xs text-slate-600 mb-2 leading-snug">${c.msg}</p>
-                <button onclick="PhoneApp.chats[${i}].replyAction()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm transition active:scale-95">
-                    ${c.actionText}
-                </button>
-            </div>
-        `).join('');
-
-        this.chats = chats;
-    },
-
-    async handleChatBill(amount, successMsg) {
-        const char = GameApp.character || {};
-        if (Number(char.cash) < amount) {
-            alert(`You do not have ₦${amount} cash right now!`);
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('amount', amount);
-        GameApp.playSfx('money');
-        GameApp.notify(successMsg, 'success');
-        await GameApp.fetchCharacter();
-    },
-
-    // --- 4. BOLT RIDE HAILING APP ---
+    // --- 5. BOLT RIDE HAILING APP ---
     async orderBoltRide(districtName, cost) {
         const char = GameApp.character || {};
         if (Number(char.cash) < cost) {
@@ -233,7 +405,7 @@ const PhoneApp = {
         }
     },
 
-    // --- 5. WARDROBE / JIJI STYLE APP ---
+    // --- 6. WARDROBE / JIJI STYLE APP ---
     loadWardrobeApp() {
         const char = GameApp.character || {};
         const outfitEl = document.getElementById('phoneSelectOutfit');
@@ -388,7 +560,7 @@ const PhoneApp = {
         }
     },
 
-    publishSocialPost() {
+    async publishSocialPost() {
         const input = document.getElementById('socialPostInput');
         if (!input || !input.value.trim()) {
             GameApp.notify("Type something to post on NaijaGram!", "error");
@@ -397,36 +569,44 @@ const PhoneApp = {
 
         const text = input.value.trim();
         const char = GameApp.character || {};
-        const newPost = {
-            id: Date.now(),
-            author: char.full_name || 'Abuja Hustler',
-            handle: `@${(char.full_name || 'citizen').toLowerCase().replace(/\s+/g, '_')}`,
-            avatar: "👤",
-            verified: ((char.street_cred || 0) >= 50),
-            time: "Just now",
-            content: text,
-            likes: Math.floor(Math.random() * 80) + 25,
-            userLiked: true,
-            comments: [
-                "Oga show us the way! 🔥",
-                "Senior man! Looking sharp as always 🙌",
-                "Billing don land for this your post o 😂"
-            ]
-        };
+        const formData = new FormData();
+        formData.append('content', text);
 
-        this.socialPosts.unshift(newPost);
-        this.socialClout += Math.floor(Math.random() * 250) + 120;
-        input.value = '';
+        try {
+            const res = await fetch('api/phone.php?action=post_social', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                const commentList = (data.comments || []).map(c => `${c.author}: ${c.text}`);
+                if (commentList.length === 0) {
+                    commentList.push("Senior man! Street cred on point 🙌");
+                }
+                const newPost = {
+                    id: Date.now(),
+                    author: char.full_name || 'Abuja Hustler',
+                    handle: `@${(char.full_name || 'citizen').toLowerCase().replace(/\s+/g, '_')}`,
+                    avatar: "👤",
+                    verified: ((char.street_cred || 0) >= 50),
+                    time: "Just now",
+                    content: text,
+                    likes: Math.floor(Math.random() * 80) + 25,
+                    userLiked: true,
+                    comments: commentList
+                };
 
-        GameApp.playSfx('win');
-        GameApp.notify("Update posted on NaijaGram! Clout +180, Street Cred +3.", "success");
+                this.socialPosts.unshift(newPost);
+                this.socialClout += data.clout_gain || 180;
+                input.value = '';
 
-        if (char.street_cred !== undefined) {
-            char.street_cred = Math.min(100, parseInt(char.street_cred) + 3);
-            char.happiness = Math.min(100, parseInt(char.happiness) + 5);
+                GameApp.playSfx('win');
+                GameApp.notify(data.message, "success");
+                await GameApp.fetchCharacter();
+                this.loadNaijaGramApp();
+            } else {
+                GameApp.notify(data.error || 'Failed to post on NaijaGram', 'error');
+            }
+        } catch(e) {
+            GameApp.notify('Network error publishing to NaijaGram', 'error');
         }
-
-        this.loadNaijaGramApp();
     },
 
     // ====================================================

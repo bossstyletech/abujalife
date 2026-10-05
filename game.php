@@ -876,13 +876,23 @@ if (!$char) {
         </div>
     </div>
 
+    <!-- Floating Phone Quick-Launcher Button (Always Accessible on Mobile & Desktop) -->
+    <button onclick="PhoneApp.toggle()" title="Open Abuja Smartphone" class="fixed bottom-5 right-5 z-40 h-12 px-4 rounded-2xl bg-slate-900/90 hover:bg-slate-900 text-white font-extrabold text-xs shadow-2xl flex items-center gap-2.5 border border-slate-700/80 active:scale-95 transition-all group backdrop-blur-md">
+        <div class="relative">
+            <i class="fa-solid fa-mobile-screen-button text-sm text-emerald-400 group-hover:scale-110 transition"></i>
+            <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500"></span>
+        </div>
+        <span class="hidden sm:inline font-bold">AbujaPhone</span>
+    </button>
+
     <!-- ========================================================
          5. INTERACTIVE IN-GAME SMARTPHONE MODAL
          (AbujaPhone Pro)
          ======================================================== -->
-    <div id="phoneWidgetModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div id="phoneWidgetModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4 z-50">
         <!-- Phone Device Frame -->
-        <div class="bg-slate-900 border-4 border-slate-800 rounded-[44px] max-w-[340px] w-full h-[620px] shadow-2xl relative p-3 flex flex-col overflow-hidden animate-fade-up">
+        <div class="bg-slate-900 border-4 border-slate-800 rounded-[44px] max-w-[360px] w-full max-h-[92vh] h-[640px] shadow-2xl relative p-3 flex flex-col overflow-hidden animate-fade-up">
             
             <!-- Dynamic Island / Speaker Notch -->
             <div class="absolute top-4 left-1/2 -translate-x-1/2 w-24 h-5 bg-black rounded-full z-20 flex items-center justify-center">
@@ -945,6 +955,14 @@ if (!$char) {
                                 <span class="text-[10px] font-bold text-slate-700 mt-1">NaijaChat</span>
                             </button>
 
+                            <!-- Chowdeck Food Delivery -->
+                            <button onclick="PhoneApp.openApp('chowdeck')" class="flex flex-col items-center group">
+                                <div class="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
+                                    <i class="fa-solid fa-burger"></i>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-700 mt-1">Chowdeck</span>
+                            </button>
+
                             <!-- Bolt Rides -->
                             <button onclick="PhoneApp.openApp('rides')" class="flex flex-col items-center group">
                                 <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-lg shadow-md group-hover:scale-105 transition">
@@ -968,13 +986,21 @@ if (!$char) {
                                 </div>
                                 <span class="text-[10px] font-bold text-slate-700 mt-1">Arcade</span>
                             </button>
+                        </div>
 
-                            <!-- Close Phone -->
-                            <button onclick="PhoneApp.toggle()" class="flex flex-col items-center group">
-                                <div class="w-12 h-12 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center text-lg shadow-sm group-hover:scale-105 transition">
-                                    <i class="fa-solid fa-power-off"></i>
+                        <!-- System Widget / Quick Status Bar -->
+                        <div class="mt-4 bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-xl bg-slate-800 text-white flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-tower-broadcast"></i>
                                 </div>
-                                <span class="text-[10px] font-bold text-slate-700 mt-1">Lock</span>
+                                <div>
+                                    <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold block">Abuja Network</span>
+                                    <span class="text-xs font-bold text-slate-800">MTN 5G • Ultra</span>
+                                </div>
+                            </div>
+                            <button onclick="PhoneApp.toggle()" class="px-2.5 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-[10px] font-bold text-slate-700 transition">
+                                <i class="fa-solid fa-lock mr-1"></i> Lock
                             </button>
                         </div>
                     </div>
@@ -1053,19 +1079,128 @@ if (!$char) {
                             <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
                             <h4 class="font-bold text-sm text-slate-900">AbujaPay Mobile</h4>
                         </div>
-                        <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-md">
-                            <span class="text-[10px] text-emerald-100 font-semibold uppercase block">Savings Balance</span>
+                        <div class="bg-gradient-to-br from-emerald-600 to-teal-800 text-white p-4 rounded-2xl shadow-md">
+                            <span class="text-[10px] text-emerald-100 font-semibold uppercase block">Bank Savings Balance</span>
                             <span id="phoneBankBalance" class="text-xl font-extrabold font-mono block">₦0.00</span>
-                            <span class="text-[10px] text-emerald-200 mt-2 block">Cash on Hand: <strong id="phoneCashBalance">₦0.00</strong></span>
+                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-emerald-500/40 text-[10px]">
+                                <span>Cash in Pocket: <strong id="phoneCashBalance">₦0.00</strong></span>
+                                <span>Debt: <strong id="phoneLoanBalance" class="text-rose-200">₦0.00</strong></span>
+                            </div>
                         </div>
                         <div class="space-y-2">
-                            <button onclick="PhoneApp.quickTransfer()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-paper-plane text-emerald-600"></i> Quick Transfer to Savings
+                            <button onclick="PhoneApp.quickTransfer()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                                <i class="fa-solid fa-paper-plane text-emerald-600"></i> Quick Transfer Cash to Savings
                             </button>
-                            <button onclick="PhoneApp.buyAirtime()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-wifi text-blue-600"></i> Buy Airtime & Data (₦1,000)
+                            <button onclick="PhoneApp.buyAirtime()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                                <i class="fa-solid fa-wifi text-blue-600"></i> Buy Airtime & Data VTU (₦1,000)
+                            </button>
+                            <button onclick="PhoneApp.applyMicroloan()" class="w-full py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition active:scale-95">
+                                <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i> Emergency Sapa Microloan (₦10,000)
                             </button>
                         </div>
+                    </div>
+
+                    <!-- APP: CHOWDECK (FOOD DELIVERY) -->
+                    <div id="phone-app-chowdeck" class="phone-screen hidden space-y-3">
+                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                            <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-900 leading-none">Chowdeck Abuja</h4>
+                                <span class="text-[9px] text-orange-500 font-extrabold uppercase">Instant Meal Delivery</span>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-500">Order hot food delivered straight to your location to boost energy and happiness.</p>
+                        
+                        <div class="space-y-2 max-h-[360px] overflow-y-auto pr-0.5">
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl">🥤</span>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-900">Cold Lacasera & Gala</h5>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">+15% Energy • +5% Happy</span>
+                                    </div>
+                                </div>
+                                <button onclick="PhoneApp.orderFood('lacasera_gala')" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                                    ₦600
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl">🌯</span>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-900">Banex Double Shawarma</h5>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">+30% Energy • +15% Happy</span>
+                                    </div>
+                                </div>
+                                <button onclick="PhoneApp.orderFood('shawarma')" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                                    ₦2,500
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl">🍲</span>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-900">Buka Amala & Gbegiri</h5>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">+45% Energy • +12% Happy</span>
+                                    </div>
+                                </div>
+                                <button onclick="PhoneApp.orderFood('amala')" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                                    ₦2,200
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl">🥩</span>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-900">Maitama VIP Beef Suya</h5>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">+35% Energy • +25% Happy</span>
+                                    </div>
+                                </div>
+                                <button onclick="PhoneApp.orderFood('suya_pack')" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                                    ₦4,500
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="text-xl">🍗</span>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-900">Smoky Party Jollof</h5>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">+50% Energy • +20% Happy</span>
+                                    </div>
+                                </div>
+                                <button onclick="PhoneApp.orderFood('jollof_party')" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl transition active:scale-95">
+                                    ₦3,800
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- APP: CHAT (NaijaChat - WhatsApp) -->
+                    <div id="phone-app-chat" class="phone-screen hidden space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
+                                <div>
+                                    <h4 class="font-bold text-xs text-slate-900 leading-none">NaijaChat</h4>
+                                    <span class="text-[9px] text-green-600 font-extrabold uppercase">WhatsApp Abuja</span>
+                                </div>
+                            </div>
+                            <!-- Tab Switcher -->
+                            <div class="flex bg-slate-100 p-0.5 rounded-lg text-[10px] font-bold">
+                                <button id="chatTabChats" onclick="PhoneApp.switchChatTab('chats')" class="px-2 py-0.5 rounded-md bg-white text-slate-800 shadow-sm">Chats</button>
+                                <button id="chatTabStatus" onclick="PhoneApp.switchChatTab('status')" class="px-2 py-0.5 rounded-md text-slate-500 hover:text-slate-800">Status</button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Threads List -->
+                        <div id="phoneChatList" class="space-y-2 max-h-[360px] overflow-y-auto pr-0.5"></div>
+
+                        <!-- Status Updates List -->
+                        <div id="phoneStatusList" class="hidden space-y-2 max-h-[360px] overflow-y-auto pr-0.5"></div>
                     </div>
 
                     <!-- APP: GAMES (Arcade) -->
@@ -1088,15 +1223,6 @@ if (!$char) {
                                 <p class="text-[10px] text-slate-500">Stake ₦2,000 to win ₦4,000 on high/low.</p>
                             </div>
                         </button>
-                    </div>
-
-                    <!-- APP: CHAT (NaijaChat) -->
-                    <div id="phone-app-chat" class="phone-screen hidden space-y-3">
-                        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
-                            <button onclick="PhoneApp.goHome()" class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs text-slate-600"><i class="fa-solid fa-arrow-left"></i></button>
-                            <h4 class="font-bold text-sm text-slate-900">NaijaChat (WhatsApp)</h4>
-                        </div>
-                        <div id="phoneChatList" class="space-y-2"></div>
                     </div>
 
                     <!-- APP: RIDES (Bolt) -->

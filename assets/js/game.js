@@ -1621,7 +1621,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Action failed', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     lastmaEventData: null,
@@ -1643,7 +1643,7 @@ const GameApp = {
             } else {
                 this.notify('Checkpoint cleared! No violations detected. Safe travels!', 'success');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async resolveLastma(choice) {
@@ -1662,7 +1662,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Failed', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async takeOkadaRide() {
@@ -1677,7 +1677,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async buyFromHawker(item) {
@@ -1693,7 +1693,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async visitSuyaSpot() {
@@ -1708,7 +1708,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async dealWithAgbero(choice) {
@@ -1724,7 +1724,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     // ====================================================
@@ -1748,7 +1748,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async attendReligiousService(type) {
@@ -1765,7 +1765,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async ajoAction(action2) {
@@ -1783,7 +1783,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     async nepaAction(action2) {
@@ -1800,7 +1800,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     // ====================================================
@@ -1825,7 +1825,7 @@ const GameApp = {
             } else {
                 this.notify(data.error || 'Error', 'error');
             }
-        } catch(e) { this.notify('Connection error', 'error'); }
+        } catch(e) { console.error('Street action failure:', e); this.notify(e.message || 'Action could not be completed', 'error'); }
     },
 
     checkSapaStatus() {
