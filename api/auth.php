@@ -111,10 +111,12 @@ if ($action === 'register') {
 
         $_SESSION['user_id'] = $userId;
         $_SESSION['username'] = $username;
+        $remToken = issueRememberToken($userId);
 
         jsonResponse([
             'success' => true,
             'message' => 'Character created! Welcome to Abuja Life.',
+            'token' => $remToken,
             'redirect' => 'game.php'
         ]);
     } catch (Exception $e) {
@@ -141,10 +143,12 @@ if ($action === 'login') {
 
     $_SESSION['user_id'] = (int)$user['id'];
     $_SESSION['username'] = $user['username'];
+    $remToken = issueRememberToken((int)$user['id']);
 
     jsonResponse([
         'success' => true,
         'message' => 'Login successful! Entering Abuja...',
+        'token' => $remToken,
         'redirect' => 'game.php'
     ]);
 }
@@ -229,10 +233,12 @@ if ($action === 'guest') {
 
         $_SESSION['user_id'] = $userId;
         $_SESSION['username'] = $username;
+        $remToken = issueRememberToken($userId);
 
         jsonResponse([
             'success' => true,
             'message' => 'Guest account created! Enjoy Abuja.',
+            'token' => $remToken,
             'redirect' => 'game.php'
         ]);
     } catch (Exception $e) {
@@ -242,6 +248,12 @@ if ($action === 'guest') {
 }
 
 if ($action === 'logout') {
+    if (!empty($_SESSION['user_id'])) {
+        try {
+            $pdo->prepare("UPDATE users SET remember_token = NULL WHERE id = ?")->execute([(int)$_SESSION['user_id']]);
+        } catch (Exception $e) {}
+    }
+    setcookie('abuja_remember_token', '', time() - 42000, '/');
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();

@@ -4,7 +4,20 @@
  * Supports Railway MySQL, standard MySQL, with automatic SQLite zero-config fallback.
  */
 
+// ----------------------------------------------------
+// Persistent Session Configuration (1 Year Duration - Never Logged Out)
+// ----------------------------------------------------
+@ini_set('session.gc_maxlifetime', '31536000');
+@ini_set('session.cookie_lifetime', '31536000');
 if (session_status() === PHP_SESSION_NONE) {
+    if (!headers_sent()) {
+        session_set_cookie_params([
+            'lifetime' => 31536000,
+            'path' => '/',
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
     session_start();
 }
 
@@ -151,7 +164,43 @@ function formatNaira($amount) {
 }
 
 function getAuthUserId() {
-    return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
+    if (!empty($_SESSION['user_id'])) {
+        return (int)$_SESSION['user_id'];
+    }
+
+    // Auto-restore session from persistent remember token cookie
+    if (!empty($_COOKIE['abuja_remember_token'])) {
+        try {
+            $pdo = getDbConnection();
+            $stmt = $pdo->prepare("SELECT id, username FROM users WHERE remember_token = ? LIMIT 1");
+            $stmt->execute([$_COOKIE['abuja_remember_token']]);
+            $user = $stmt->fetch();
+            if ($user) {
+                $_SESSION['user_id'] = (int)$user['id'];
+                $_SESSION['username'] = $user['username'];
+                return (int)$user['id'];
+            }
+        } catch (Exception $e) {
+            // Ignore error and fall through
+        }
+    }
+
+    return null;
+}
+
+function issueRememberToken($userId) {
+    try {
+        $token = bin2hex(random_bytes(32));
+        $pdo = getDbConnection();
+        $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
+        $stmt->execute([$token, $userId]);
+        if (!headers_sent()) {
+            setcookie('abuja_remember_token', $token, time() + 31536000, '/', '', false, true);
+        }
+        return $token;
+    } catch (Exception $e) {
+        return null;
+    }
 }
 
 function requireAuth() {

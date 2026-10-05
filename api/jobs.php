@@ -88,13 +88,57 @@ if ($action === 'start_shift') {
         jsonResponse(['success' => false, 'error' => "You are too exhausted to work this shift! Required energy: {$energyCost}%. Take a nap or rest."], 400);
     }
 
+    $shiftDuration = 480; // 8 real-time minutes (480 seconds)
+    $now = time();
+    $shiftData = [
+        'job_id' => (int)$job['id'],
+        'started_at' => $now,
+        'duration' => $shiftDuration,
+        'energy_cost' => $energyCost,
+        'base_salary' => (float)$job['daily_salary']
+    ];
+
+    $stmtSaveShift = $pdo->prepare("UPDATE characters SET active_shift = ? WHERE id = ?");
+    $stmtSaveShift->execute([json_encode($shiftData), $char['id']]);
+
     jsonResponse([
         'success' => true,
         'job' => $job,
-        'shift_duration_seconds' => 45,
+        'shift_duration_seconds' => $shiftDuration,
+        'started_at' => $now,
         'energy_cost' => $energyCost,
         'base_salary' => (float)$job['daily_salary']
     ]);
+}
+
+if ($action === 'get_active_shift') {
+    if (!empty($char['active_shift'])) {
+        $s = json_decode($char['active_shift'], true);
+        if (is_array($s) && isset($s['started_at'])) {
+            $now = time();
+            $elapsed = max(0, $now - (int)$s['started_at']);
+            $duration = (int)($s['duration'] ?? 480);
+            $remaining = max(0, $duration - $elapsed);
+            $jobId = (int)($s['job_id'] ?? $char['current_job_id']);
+
+            $stmtJob = $pdo->prepare("SELECT * FROM jobs WHERE id = ?");
+            $stmtJob->execute([$jobId]);
+            $job = $stmtJob->fetch();
+
+            jsonResponse([
+                'success' => true,
+                'has_active_shift' => true,
+                'job' => $job,
+                'shift' => $s,
+                'started_at' => (int)$s['started_at'],
+                'elapsed_seconds' => $elapsed,
+                'remaining_seconds' => $remaining,
+                'duration' => $duration,
+                'is_completed' => ($elapsed >= $duration)
+            ]);
+        }
+    }
+    jsonResponse(['success' => true, 'has_active_shift' => false]);
 }
 
 if ($action === 'finish_shift') {
@@ -125,12 +169,13 @@ if ($action === 'finish_shift') {
             time_of_day = 'Evening', 
             intelligence = intelligence + 1,
             street_cred = street_cred + 2,
-            happiness = CASE WHEN happiness + 5 > 100 THEN 100 ELSE happiness + 5 END
+            happiness = CASE WHEN happiness + 5 > 100 THEN 100 ELSE happiness + 5 END,
+            active_shift = NULL
         WHERE id = ?
     ");
     $stmtUpdate->execute([$finalPay, $energyCost, $energyCost, $char['id']]);
 
-    $logMsg = "Completed full 8-hour workday as {$job['title']}. Salary: " . formatNaira($baseSalary);
+    $logMsg = "Completed full 8-minute workday as {$job['title']}. Base Salary: " . formatNaira($baseSalary);
     if ($tips > 0) $logMsg .= " + Tips: " . formatNaira($tips);
     if ($bonuses > 0) $logMsg .= " + Performance: " . formatNaira($bonuses);
     if ($penalties > 0) $logMsg .= " - Deductions: " . formatNaira($penalties);
@@ -139,7 +184,7 @@ if ($action === 'finish_shift') {
 
     jsonResponse([
         'success' => true,
-        'message' => "Shift officially closed! Net pay of " . formatNaira($finalPay) . " credited.",
+        'message' => "Shift officially closed! Net take-home pay of " . formatNaira($finalPay) . " credited.",
         'final_pay' => $finalPay,
         'character' => getUserCharacter($userId)
     ]);
@@ -164,7 +209,8 @@ if ($action === 'abandon_shift') {
             energy = CASE WHEN energy - ? < 0 THEN 0 ELSE energy - ? END, 
             street_cred = CASE WHEN street_cred - 12 < 0 THEN 0 ELSE street_cred - 12 END,
             happiness = CASE WHEN happiness - 15 < 0 THEN 0 ELSE happiness - 15 END,
-            time_of_day = 'Evening'
+            time_of_day = 'Evening',
+            active_shift = NULL
         WHERE id = ?
     ");
     $stmtUpdate->execute([$partialSalary, $energyCost, $energyCost, $char['id']]);

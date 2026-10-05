@@ -68,15 +68,24 @@ if (!$char) {
             </div>
 
             <!-- Header Quick Actions -->
-            <div class="flex items-center gap-2">
-                <button onclick="GameApp.openWardrobeModal()" title="Customize Bitmoji Avatar" class="h-9 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition active:scale-95">
-                    <i class="fa-solid fa-shirt text-xs"></i> <span class="hidden sm:inline">Wardrobe</span>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <button onclick="GameApp.openCitizenFinder()" title="Abuja Citizens Directory & Finder" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-users text-sky-400 text-xs"></i> <span class="hidden md:inline">Citizens</span>
                 </button>
-                <button onclick="PhoneApp.toggle()" title="Open Abuja Smartphone" class="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition active:scale-95">
-                    <i class="fa-solid fa-mobile-screen-button text-xs"></i> <span class="hidden sm:inline">Phone</span>
+                <button onclick="GameApp.openNetworkTroublesModal()" id="headerNetworkPill" title="Cellular Network & ISP Status" class="h-9 px-2.5 sm:px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-1.5 border border-slate-200 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-signal text-emerald-600 text-[11px]" id="headerNetworkIcon"></i> <span id="headerNetworkText" class="hidden sm:inline">MTN 4G</span>
                 </button>
-                <button onclick="GameApp.advanceDay()" class="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95">
-                    <i class="fa-solid fa-forward-step text-[11px]"></i> <span>Next Day</span>
+                <button onclick="GameApp.openWardrobeModal()" title="Customize Bitmoji Avatar" class="h-9 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-shirt text-xs"></i> <span class="hidden md:inline">Wardrobe</span>
+                </button>
+                <button onclick="PhoneApp.toggle()" title="Open Abuja Smartphone" class="h-9 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-mobile-screen-button text-xs"></i> <span class="hidden md:inline">Phone</span>
+                </button>
+                <button onclick="GameApp.openStartNewLifeModal()" title="Start a Brand New Life in Abuja (Rebirth)" class="h-9 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center gap-1 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-rotate text-amber-600 text-xs"></i> <span class="hidden lg:inline">New Life</span>
+                </button>
+                <button onclick="GameApp.advanceDay()" class="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-forward-step text-[11px]"></i> <span class="hidden sm:inline">Next Day</span>
                 </button>
                 <button onclick="GameApp.logout()" title="Logout" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition active:scale-95">
                     <i class="fa-solid fa-power-off text-xs"></i>
@@ -112,20 +121,26 @@ if (!$char) {
                 </div>
 
                 <!-- 3D View Controls -->
-                <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/60 text-xs">
+                <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/60 text-xs">
                     <button id="btnViewWorkplace" onclick="World3D.toggleView('workplace')" class="px-3 py-1.5 rounded-xl font-bold bg-white text-slate-900 shadow-sm transition">
                         <i class="fa-solid fa-briefcase text-xs mr-1 text-emerald-600"></i> Workplace
                     </button>
                     <button id="btnViewHome" onclick="World3D.toggleView('home')" class="px-3 py-1.5 rounded-xl font-bold text-slate-600 hover:text-slate-900 transition">
                         <i class="fa-solid fa-house text-xs mr-1 text-teal-600"></i> Residence
                     </button>
-                    <button onclick="World3D.cycleAtmosphere()" class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Lighting (Day/Sunset/Night)">
+                    <button onclick="GameApp.openResidenceModal()" class="px-2.5 py-1.5 rounded-xl font-bold bg-teal-50 text-teal-800 hover:bg-teal-100 transition border border-teal-200 shadow-sm" title="Open Door & Enter Residence">
+                        <i class="fa-solid fa-door-open text-xs mr-1 text-teal-600"></i> Enter House
+                    </button>
+                    <button onclick="GameApp.openCommuteModal()" class="px-2.5 py-1.5 rounded-xl font-bold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition border border-emerald-200 shadow-sm" title="Commute from Estate to Work">
+                        <i class="fa-solid fa-person-walking text-xs mr-1 text-emerald-600"></i> Go to Work
+                    </button>
+                    <button onclick="World3D.cycleAtmosphere()" class="px-2 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Lighting (Day/Sunset/Night)">
                         <i class="fa-solid fa-sun text-xs text-amber-500"></i>
                     </button>
-                    <button id="btnAutoRotate" onclick="World3D.toggleAutoRotate()" class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Auto-Spin">
+                    <button id="btnAutoRotate" onclick="World3D.toggleAutoRotate()" class="px-2 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Toggle Auto-Spin">
                         <i class="fa-solid fa-play text-xs"></i>
                     </button>
-                    <button onclick="World3D.resetCamera()" class="px-2.5 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Reset View">
+                    <button onclick="World3D.resetCamera()" class="px-2 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition" title="Reset View">
                         <i class="fa-solid fa-rotate-left text-xs"></i>
                     </button>
                 </div>
@@ -166,41 +181,50 @@ if (!$char) {
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <!-- Action 1: Morning Breakfast & Shower -->
                 <button onclick="GameApp.doMorningRoutine()" class="p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl text-left transition active:scale-95 group">
                     <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
                         <i class="fa-solid fa-mug-saucer"></i>
                     </div>
                     <h4 class="font-bold text-xs text-slate-900 mb-0.5">Morning Routine</h4>
-                    <p class="text-[11px] text-slate-500 leading-snug">Hot shower & Nigerian breakfast. (+15 Energy, +5 Happiness)</p>
+                    <p class="text-[11px] text-slate-500 leading-snug">Hot shower & breakfast. (+15 Energy, +5 Happiness)</p>
                 </button>
 
                 <!-- Action 2: Go to Work / Commute -->
-                <button onclick="GameApp.goToWork()" class="p-4 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition active:scale-95 group">
+                <button onclick="GameApp.openCommuteModal()" class="p-4 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition active:scale-95 group">
                     <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
-                        <i class="fa-solid fa-briefcase"></i>
+                        <i class="fa-solid fa-door-open"></i>
                     </div>
-                    <h4 class="font-bold text-xs text-emerald-950 mb-0.5">Commute to Work</h4>
-                    <p class="text-[11px] text-emerald-800 leading-snug">Head to your workplace. Complete shift & collect daily pay.</p>
+                    <h4 class="font-bold text-xs text-emerald-950 mb-0.5">Go to Work</h4>
+                    <p class="text-[11px] text-emerald-800 leading-snug">Commute through estate gates. Start 8-min workday shift.</p>
                 </button>
 
-                <!-- Action 3: Run Street Hustle -->
+                <!-- Action 3: Enter Residence / House -->
+                <button onclick="GameApp.openResidenceModal()" class="p-4 bg-teal-50 hover:bg-teal-100/80 border border-teal-200 rounded-2xl text-left transition active:scale-95 group">
+                    <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-house-chimney-user"></i>
+                    </div>
+                    <h4 class="font-bold text-xs text-teal-950 mb-0.5">Enter Residence</h4>
+                    <p class="text-[11px] text-teal-800 leading-snug">Rest on bed, manage inverter/gen, resolve borehole issues.</p>
+                </button>
+
+                <!-- Action 4: Run Street Hustle -->
                 <button onclick="GameApp.switchTab('hustles')" class="p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl text-left transition active:scale-95 group">
                     <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
                     <h4 class="font-bold text-xs text-slate-900 mb-0.5">Side Hustles</h4>
-                    <p class="text-[11px] text-slate-500 leading-snug">POS business, gadget trade at Banex, or crypto arbitrage.</p>
+                    <p class="text-[11px] text-slate-500 leading-snug">POS business, Banex gadget flip, or P2P arbitrage.</p>
                 </button>
 
-                <!-- Action 4: Evening Sleep / Rest -->
-                <button onclick="GameApp.sleepRest()" class="p-4 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl text-left transition active:scale-95 group">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
-                        <i class="fa-solid fa-bed"></i>
+                <!-- Action 5: Street Fights & Grudges -->
+                <button onclick="GameApp.openStreetFight()" class="p-4 bg-rose-50 hover:bg-rose-100/80 border border-rose-200 rounded-2xl text-left transition active:scale-95 group">
+                    <div class="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm mb-2 group-hover:scale-105 transition">
+                        <i class="fa-solid fa-hand-fist"></i>
                     </div>
-                    <h4 class="font-bold text-xs text-slate-900 mb-0.5">Rest & Recharge</h4>
-                    <p class="text-[11px] text-slate-500 leading-snug">Sleep in your home. Recharges 100% energy for tomorrow.</p>
+                    <h4 class="font-bold text-xs text-rose-950 mb-0.5">Street Clash</h4>
+                    <p class="text-[11px] text-rose-800 leading-snug">Agbero face-off, street defense & box for cash/cred.</p>
                 </button>
             </div>
         </section>
@@ -1638,6 +1662,585 @@ if (!$char) {
             <button onclick="GameApp.closeShiftSummary()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95">
                 Collect Pay & Head Home (Evening)
             </button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         10. RESIDENCE & HOUSE MANAGEMENT MODAL ("Open Door & Enter")
+         ======================================================== -->
+    <div id="residenceModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-door-open"></i>
+                    </div>
+                    <div>
+                        <h3 id="residenceTitle" class="text-base font-extrabold text-slate-900 leading-tight">Welcome Home</h3>
+                        <span id="residenceSubtitle" class="text-xs text-slate-500 font-medium">Inside your Abuja residence</span>
+                    </div>
+                </div>
+                <button onclick="GameApp.closeResidenceModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Residence Stats & Power Strip -->
+            <div class="grid grid-cols-3 gap-2.5 text-center text-xs">
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Power Supply</span>
+                    <strong id="resPowerMode" class="text-slate-900 text-xs font-mono uppercase">AEDC / NEPA</strong>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Inverter Battery</span>
+                    <strong id="resInverterPct" class="text-emerald-700 text-xs font-mono">85% Charged</strong>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Generator Fuel</span>
+                    <strong id="resGenFuel" class="text-amber-700 text-xs font-mono">6 Liters</strong>
+                </div>
+            </div>
+
+            <!-- Residence Rooms & Interactions -->
+            <div class="space-y-2.5">
+                <span class="text-xs font-extrabold text-slate-700 block">Home Living & Utility Hub:</span>
+
+                <!-- Room 1: Master Bedroom (Rest) -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-bed"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-900">Master Bedroom</h4>
+                            <p class="text-[11px] text-slate-500">Rest on your mattress with AC or rechargeable fan (+40 Energy, +15 Health).</p>
+                        </div>
+                    </div>
+                    <button onclick="GameApp.manageResidence('rest')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition active:scale-95 shadow-sm whitespace-nowrap">
+                        Lie Down & Rest
+                    </button>
+                </div>
+
+                <!-- Room 2: Power & Generator Management -->
+                <div class="p-3.5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-600 text-xs"></i>
+                            <h4 class="font-bold text-xs text-amber-950">Power Grid & Generator Shed</h4>
+                        </div>
+                        <span class="text-[10px] font-bold text-amber-800">AEDC / Mikano Switcher</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                        <button onclick="GameApp.manageResidence('manage_power', 'nepa')" class="p-2 bg-white hover:bg-amber-100 border border-amber-200 text-slate-800 rounded-xl font-bold transition">
+                            🔌 NEPA Grid
+                        </button>
+                        <button onclick="GameApp.manageResidence('manage_power', 'inverter')" class="p-2 bg-white hover:bg-amber-100 border border-amber-200 text-slate-800 rounded-xl font-bold transition">
+                            🔋 Pure Inverter
+                        </button>
+                        <button onclick="GameApp.manageResidence('manage_power', 'generator')" class="p-2 bg-white hover:bg-amber-100 border border-amber-200 text-slate-800 rounded-xl font-bold transition">
+                            ⚙️ Pull Generator
+                        </button>
+                        <button onclick="GameApp.manageResidence('manage_power', 'buy_fuel')" class="p-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition">
+                            ⛽ Buy 10L Fuel (₦5k)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Room 3: Compound & Estate Neighbors -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-faucet-drip"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-900">Compound Yard & Borehole</h4>
+                            <p class="text-[11px] text-slate-500">Coordinate water pump roster & estate security dues (+5 Cred).</p>
+                        </div>
+                    </div>
+                    <button onclick="GameApp.manageResidence('compound_meet')" class="px-3.5 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 whitespace-nowrap">
+                        Estate Meeting
+                    </button>
+                </div>
+
+                <!-- Room 4: Terrace / Balcony / Skyline -->
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-umbrella-beach"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-900">Veranda & Skyline Balcony</h4>
+                            <p class="text-[11px] text-slate-500">Unwind with a cold drink overlooking Abuja hills (+30 Happiness).</p>
+                        </div>
+                    </div>
+                    <button onclick="GameApp.manageResidence('pool_balcony')" class="px-3.5 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 whitespace-nowrap">
+                        Chill on Balcony
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exit Door -->
+            <button onclick="GameApp.closeResidenceModal()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-person-walking-arrow-right"></i> Open Door & Step Outside to Abuja Streets
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         11. COMMUTE FROM RESIDENCE TO WORKPLACE MODAL
+         ======================================================== -->
+    <div id="commuteModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-person-walking"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">Step Out & Go to Work</h3>
+                        <span class="text-xs text-slate-500 font-medium">Estate gate security salute & morning transit</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('commuteModal').classList.add('hidden'); document.getElementById('commuteModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs text-emerald-950 flex items-center gap-2.5">
+                <i class="fa-solid fa-shield-halved text-emerald-600 text-base"></i>
+                <div>
+                    <span class="font-extrabold block">Security Gate Salute</span>
+                    <span class="text-emerald-800 text-[11px]">"Oga good morning sir! Safe journey as you head to Central Area!"</span>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-slate-700 block">Select Morning Transit Mode:</span>
+                
+                <button onclick="GameApp.commuteToWork('walk')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🚶</span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">Morning Trek / Walking</strong>
+                            <span class="text-[11px] text-slate-500">Free • Heavy sweat (-15 Energy)</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-700">₦0.00</span>
+                </button>
+
+                <button onclick="GameApp.commuteToWork('okada')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🏍️</span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">Okada Express</strong>
+                            <span class="text-[11px] text-slate-500">Weaves through go-slow (-5 Energy)</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-900">₦400.00</span>
+                </button>
+
+                <button onclick="GameApp.commuteToWork('danfo')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🚌</span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">Yellow Danfo Bus</strong>
+                            <span class="text-[11px] text-slate-500">Public rush to Secretariat (-8 Energy)</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-900">₦500.00</span>
+                </button>
+
+                <button onclick="GameApp.commuteToWork('bolt')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🚕</span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">Bolt AC Cab</strong>
+                            <span class="text-[11px] text-slate-500">Chilled AC & relaxed arrival (0 Energy loss)</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-slate-900">₦2,500.00</span>
+                </button>
+
+                <button onclick="GameApp.commuteToWork('car')" class="w-full p-3 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-lg">🚗</span>
+                        <div>
+                            <strong class="text-xs text-emerald-950 block">Drive Personal Garage Car</strong>
+                            <span class="text-[11px] text-emerald-800">Your vehicle (-2 Energy)</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-700">Garage</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         12. CITIZENS SOCIAL FINDER & DIRECTORY MODAL
+         ======================================================== -->
+    <div id="citizensFinderModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">Abuja Citizens Directory</h3>
+                        <span class="text-xs text-slate-500 font-medium">Find citizens by @username, district, or street reputation</span>
+                    </div>
+                </div>
+                <button onclick="GameApp.closeCitizenFinder()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+                    <input type="text" id="citizenSearchInput" onkeyup="if(event.key==='Enter') GameApp.searchCitizens()" placeholder="Search @username, character name, or district (e.g. @boss, Maitama)..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-slate-400">
+                </div>
+                <button onclick="GameApp.searchCitizens()" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-2xl transition active:scale-95 shadow-sm">
+                    Search
+                </button>
+            </div>
+
+            <!-- Citizen Cards Grid -->
+            <div id="citizensResultsList" class="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+                <!-- Dynamically populated via GameApp.searchCitizens() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         13. CITIZEN PROFILE DOSSIER MODAL
+         ======================================================== -->
+    <div id="citizenProfileModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div id="profAvatarBox" class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-2xl shadow-sm">
+                        👤
+                    </div>
+                    <div>
+                        <h3 id="profFullName" class="text-base font-extrabold text-slate-900 leading-tight">Abuja Citizen</h3>
+                        <span id="profUsername" class="text-xs font-mono font-bold text-purple-700">@citizen</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('citizenProfileModal').classList.add('hidden'); document.getElementById('citizenProfileModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Profile Overview Cards -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">District</span>
+                    <strong id="profDistrict" class="text-slate-900">Maitama</strong>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Net Worth</span>
+                    <strong id="profNetWorth" class="text-emerald-700 font-mono">₦0.00</strong>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Occupation</span>
+                    <strong id="profJob" class="text-slate-900">Civil Servant</strong>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">Street Cred</span>
+                    <strong id="profCred" class="text-amber-700 font-mono">50 ⭐</strong>
+                </div>
+            </div>
+
+            <!-- Residence & Vehicle -->
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs space-y-1.5">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Residence:</span>
+                    <strong id="profResidence" class="text-slate-800">Serviced Flat</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Primary Ride:</span>
+                    <strong id="profVehicle" class="text-slate-800">Mercedes-Benz G-Wagon</strong>
+                </div>
+            </div>
+
+            <!-- Interactive Actions with Citizen -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="GameApp.openPeerTransfer(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane text-xs"></i> Send Money
+                </button>
+                <button onclick="GameApp.challengeCitizen(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-dice text-xs text-amber-400"></i> Dice Challenge
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         14. PEER MONEY TRANSFER & e-RECEIPT MODAL
+         ======================================================== -->
+    <div id="peerTransferModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">AbujaPay Peer Transfer</h3>
+                        <span class="text-xs text-slate-500 font-medium">Instant wallet-to-wallet transfer</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('peerTransferModal').classList.add('hidden'); document.getElementById('peerTransferModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <div id="transferFormView" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Recipient Citizen:</label>
+                    <input type="text" id="transferRecipientName" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
+                    <input type="hidden" id="transferRecipientId">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Transfer Amount (₦):</label>
+                    <input type="number" id="transferAmountInput" placeholder="Enter amount (e.g. 10000)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-900">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Transfer Memo / Narration:</label>
+                    <input type="text" id="transferMemoInput" value="Abuja life transfer" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800">
+                </div>
+
+                <button onclick="GameApp.sendPeerTransfer()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-lock"></i> Authorize & Send Transfer
+                </button>
+            </div>
+
+            <!-- E-Receipt View -->
+            <div id="transferReceiptView" class="hidden space-y-3 text-center">
+                <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                    <h4 class="font-extrabold text-sm text-slate-900">Transfer Successful!</h4>
+                    <span class="text-[11px] text-slate-500 font-mono">AbujaPay Instant Central Switch</span>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-mono space-y-2 text-left">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Amount:</span>
+                        <strong id="recAmount" class="text-emerald-700 text-sm">₦0.00</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Beneficiary:</span>
+                        <strong id="recRecipient" class="text-slate-800">Recipient</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Reference:</span>
+                        <strong id="recRef" class="text-slate-600 text-[10px]">ABP-2026-X</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Status:</span>
+                        <span class="text-emerald-600 font-bold">COMPLETED</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('peerTransferModal').classList.add('hidden'); document.getElementById('peerTransferModal').classList.remove('flex');" class="w-full py-2.5 bg-slate-900 text-white font-bold rounded-2xl text-xs transition">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         15. STREET FIGHT & AGBERO CLASH MODAL
+         ======================================================== -->
+    <div id="streetFightModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-hand-fist"></i>
+                    </div>
+                    <div>
+                        <h3 id="fightTitle" class="text-base font-extrabold text-slate-900 leading-tight">Street Clash!</h3>
+                        <span id="fightSubtitle" class="text-xs text-rose-700 font-bold">Kubwa / Wuse Street Defense</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('streetFightModal').classList.add('hidden'); document.getElementById('streetFightModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Health Bars -->
+            <div class="space-y-3 bg-slate-50 border border-slate-200 rounded-2xl p-3.5">
+                <!-- Opponent HP -->
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span id="fightOppName" class="text-slate-900">Area Boy Opponent</span>
+                        <span id="fightOppHpText" class="text-rose-700 font-mono">80 HP</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="fightOppHpBar" class="bg-rose-600 h-full transition-all duration-300" style="width: 100%"></div>
+                    </div>
+                </div>
+                <!-- Player HP -->
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-slate-900">Your Health</span>
+                        <span id="fightPlayerHpText" class="text-emerald-700 font-mono">100 HP</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="fightPlayerHpBar" class="bg-emerald-600 h-full transition-all duration-300" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fight Action Log -->
+            <div id="streetFightLog" class="p-3 bg-slate-900 text-slate-200 rounded-2xl text-xs font-mono min-h-[60px] flex items-center">
+                Opponent stepped forward squaring his shoulders! Pick your combat action.
+            </div>
+
+            <!-- Combat Buttons -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="GameApp.doStreetFightAction('punch')" class="p-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+                    🥊 Heavy Cross Punch
+                </button>
+                <button onclick="GameApp.doStreetFightAction('dodge_counter')" class="p-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+                    🛡️ Slip & Counter
+                </button>
+                <button onclick="GameApp.doStreetFightAction('call_backup')" class="p-3 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+                    📢 Call Area Boys (25 Cred)
+                </button>
+                <button onclick="GameApp.doStreetFightAction('settle')" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 border border-slate-200">
+                    💵 Settle (₦2,000)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         16. NETWORK & ISP SIGNAL TROUBLESHOOTING MODAL
+         ======================================================== -->
+    <div id="networkTroublesModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-tower-cell"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">Telco Network Hub</h3>
+                        <span class="text-xs text-slate-500 font-medium">MTN / Airtel / Glo ISP Status in Abuja</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('networkTroublesModal').classList.add('hidden'); document.getElementById('networkTroublesModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Signal Indicator -->
+            <div id="netStatusBanner" class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-xs">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                <div>
+                    <strong id="netActiveProvider" class="text-emerald-950 block">Connected to MTN 4G LTE</strong>
+                    <span id="netStatusNote" class="text-emerald-800 text-[11px]">All banking apps & POS transactions smooth.</span>
+                </div>
+            </div>
+
+            <!-- Switcher & Troubleshooting Actions -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-slate-700 block">Switch Cellular SIM / Reset Tower:</span>
+                
+                <button onclick="GameApp.switchSim('MTN')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">SIM 1: MTN Nigeria</strong>
+                            <span class="text-[11px] text-slate-500">4G / 5G Broadband • Wuse / Maitama</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">Select</span>
+                </button>
+
+                <button onclick="GameApp.switchSim('Airtel')" class="w-full p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                        <div>
+                            <strong class="text-xs text-slate-900 block">SIM 2: Airtel FCT Express</strong>
+                            <span class="text-[11px] text-slate-500">Fast 5G • Reliable for POS float</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">Select</span>
+                </button>
+
+                <button onclick="GameApp.toggleAirplaneMode()" class="w-full p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plane"></i> Toggle Airplane Mode (Refresh IP Handshake)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         17. START A BRAND NEW LIFE MODAL (REBIRTH WITHOUT LOGOUT)
+         ======================================================== -->
+    <div id="startNewLifeModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl relative animate-fade-up space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-rotate"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 leading-tight">Start a Brand New Life</h3>
+                        <span class="text-xs text-slate-500 font-medium">Rebirth in Abuja without logging out</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('startNewLifeModal').classList.add('hidden'); document.getElementById('startNewLifeModal').classList.remove('flex');" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition active:scale-95">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed bg-amber-50 border border-amber-200 rounded-2xl p-3">
+                Want to reinvent yourself? Wipe your character's slate clean with a new name, district, and starting archetype. Your user account and login remain safe.
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">New Character Name:</label>
+                    <input type="text" id="newLifeName" placeholder="Enter new full name (e.g. Tunde Balogun)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Gender:</label>
+                        <select id="newLifeGender" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">District:</label>
+                        <select id="newLifeDistrict" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                            <option value="Kubwa">Kubwa (Grassroots)</option>
+                            <option value="Gwarinpa">Gwarinpa (Middle-class)</option>
+                            <option value="Wuse 2">Wuse 2 (Vibrant Hub)</option>
+                            <option value="Maitama">Maitama (Elite)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Starting Archetype:</label>
+                    <select id="newLifeArchetype" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900">
+                        <option value="hustler">Street Hustler (₦15k cash float, hungry grind)</option>
+                        <option value="middle">Middle-Class Professional (₦120k cash, Toyota Corolla)</option>
+                        <option value="rich">Abuja Aristocrat / Politician (₦1.5M cash, ₦8.5M bank, Mercedes G-Wagon)</option>
+                    </select>
+                </div>
+
+                <button onclick="GameApp.submitStartNewLife()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-sparkles"></i> Confirm Rebirth & Begin New Life
+                </button>
+            </div>
         </div>
     </div>
 

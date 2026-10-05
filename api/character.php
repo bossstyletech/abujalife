@@ -397,4 +397,239 @@ if ($action === 'update_looks') {
     ]);
 }
 
+// ----------------------------------------------------
+// RESIDENCE & HOUSE MANAGEMENT
+// ----------------------------------------------------
+if ($action === 'enter_residence') {
+    $prop = null;
+    if (!empty($char['primary_property_id'])) {
+        $stmtP = $pdo->prepare("SELECT * FROM properties WHERE id = ?");
+        $stmtP->execute([$char['primary_property_id']]);
+        $prop = $stmtP->fetch();
+    }
+
+    $homeName = $prop ? $prop['name'] : 'Face-Me-I-Face-You Compound';
+    $district = $prop ? $prop['district'] : ($char['district'] ?? 'Kubwa');
+    $tier = $prop ? ($prop['type'] ?? 'Serviced Apartment') : 'Grassroots Tenement';
+    $hasPool = in_array($district, ['Maitama', 'Asokoro', 'Wuse 2']) && !empty($prop);
+    $hasBalcony = !empty($prop);
+
+    $homeState = !empty($char['home_state']) ? json_decode($char['home_state'], true) : [];
+    if (!is_array($homeState) || empty($homeState)) {
+        $homeState = [
+            'power_mode' => 'nepa',
+            'inverter_battery' => 85,
+            'gen_fuel_liters' => 6,
+            'is_borehole_running' => true,
+            'cleanliness' => 90
+        ];
+    }
+
+    jsonResponse([
+        'success' => true,
+        'home_name' => $homeName,
+        'district' => $district,
+        'tier' => $tier,
+        'has_pool' => $hasPool,
+        'has_balcony' => $hasBalcony,
+        'home_state' => $homeState,
+        'character' => $char
+    ]);
+}
+
+if ($action === 'manage_residence') {
+    $subAction = cleanInput($_POST['sub_action'] ?? 'rest');
+    $homeState = !empty($char['home_state']) ? json_decode($char['home_state'], true) : [];
+    if (!is_array($homeState) || empty($homeState)) {
+        $homeState = [
+            'power_mode' => 'nepa',
+            'inverter_battery' => 85,
+            'gen_fuel_liters' => 6,
+            'is_borehole_running' => true,
+            'cleanliness' => 90
+        ];
+    }
+
+    $msg = '';
+    $deltas = ['cash' => 0, 'energy' => 0, 'happiness' => 0, 'health' => 0, 'cred' => 0];
+
+    if ($subAction === 'rest') {
+        $deltas['energy'] = 40;
+        $deltas['health'] = 15;
+        $deltas['happiness'] = 10;
+        $msg = "You laid down to rest in your bedroom. Energy restored (+40%) and fatigue washed away.";
+    } elseif ($subAction === 'manage_power') {
+        $mode = cleanInput($_POST['power_mode'] ?? 'nepa');
+        if ($mode === 'generator') {
+            if ($homeState['gen_fuel_liters'] <= 0) {
+                jsonResponse(['success' => false, 'error' => 'Generator fuel tank is dry! Buy ₦5,000 petrol first.'], 400);
+            }
+            $homeState['gen_fuel_liters'] = max(0, $homeState['gen_fuel_liters'] - 2);
+            $homeState['power_mode'] = 'generator';
+            $deltas['happiness'] = 10;
+            $msg = "Pulled the generator cord! Mikano roaring smoothly. 2 Liters consumed. AC & appliances powered!";
+        } elseif ($mode === 'inverter') {
+            if ($homeState['inverter_battery'] < 10) {
+                jsonResponse(['success' => false, 'error' => 'Inverter battery low! Connect to NEPA or gen to charge.'], 400);
+            }
+            $homeState['power_mode'] = 'inverter';
+            $homeState['inverter_battery'] = max(0, $homeState['inverter_battery'] - 10);
+            $deltas['happiness'] = 15;
+            $msg = "Switched to Pure Sine-Wave Inverter. Whispering quiet power and zero generator smoke!";
+        } elseif ($mode === 'buy_fuel') {
+            $cost = 5000;
+            if ((float)$char['cash'] < $cost) {
+                jsonResponse(['success' => false, 'error' => 'You need ₦5,000 cash for 10 Liters of petrol!'], 400);
+            }
+            $deltas['cash'] = -$cost;
+            $homeState['gen_fuel_liters'] = min(30, $homeState['gen_fuel_liters'] + 10);
+            $msg = "Purchased 10 Liters of fuel from nearby filling station. Generator tank replenished!";
+        } else {
+            $homeState['power_mode'] = 'nepa';
+            $homeState['inverter_battery'] = min(100, $homeState['inverter_battery'] + 15);
+            $msg = "Connected to AEDC / NEPA grid. Inverter batteries charging.";
+        }
+    } elseif ($subAction === 'compound_meet') {
+        $deltas['cred'] = 5;
+        $deltas['happiness'] = 5;
+        $msg = "Attended compound / estate security meeting. Settled water pump roster and earned neighbors' respect!";
+    } elseif ($subAction === 'pool_balcony') {
+        $deltas['happiness'] = 30;
+        $deltas['energy'] = 10;
+        $msg = "Relaxed on the terrace with a chilled drink overlooking the Abuja skyline. Peace of mind restored!";
+    }
+
+    $newCash = max(0, (float)$char['cash'] + $deltas['cash']);
+    $newEnergy = min(100, max(0, (int)$char['energy'] + $deltas['energy']));
+    $newHealth = min(100, max(0, (int)$char['health'] + $deltas['health']));
+    $newHappy  = min(100, max(0, (int)$char['happiness'] + $deltas['happiness']));
+    $newCred   = min(200, max(0, (int)$char['street_cred'] + $deltas['cred']));
+
+    $stmt = $pdo->prepare("
+        UPDATE characters 
+        SET cash = ?, energy = ?, health = ?, happiness = ?, street_cred = ?, home_state = ?
+        WHERE id = ?
+    ");
+    $stmt->execute([$newCash, $newEnergy, $newHealth, $newHappy, $newCred, json_encode($homeState), $char['id']]);
+
+    logActivity($char['id'], 'home_' . $subAction, $msg, $deltas['cash'], $deltas['energy'], $deltas['happiness']);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'home_state' => $homeState,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// COMMUTE FROM RESIDENCE TO WORKPLACE
+// ----------------------------------------------------
+if ($action === 'commute_to_work') {
+    $mode = cleanInput($_POST['mode'] ?? 'danfo');
+
+    $costs = [
+        'walk' => ['fare' => 0, 'energy' => -15, 'desc' => 'trekked through the morning heat'],
+        'okada' => ['fare' => 400, 'energy' => -5, 'desc' => 'hopped on an Okada dodging morning traffic'],
+        'danfo' => ['fare' => 500, 'energy' => -8, 'desc' => 'entered a yellow Danfo bus to Central Area'],
+        'bolt' => ['fare' => 2500, 'energy' => 0, 'desc' => 'took a smooth air-conditioned Bolt cab'],
+        'car' => ['fare' => 0, 'energy' => -2, 'desc' => 'drove your personal vehicle through the gates']
+    ];
+
+    if (!isset($costs[$mode])) $mode = 'danfo';
+    $spec = $costs[$mode];
+
+    if ($mode === 'car' && empty($char['primary_vehicle_id'])) {
+        jsonResponse(['success' => false, 'error' => 'You do not have a car in your garage yet! Take Danfo or Okada.'], 400);
+    }
+
+    if ((float)$char['cash'] < $spec['fare']) {
+        jsonResponse(['success' => false, 'error' => "Insufficient cash for commute! Fare is " . formatNaira($spec['fare']) . "."], 400);
+    }
+
+    $newCash = max(0, (float)$char['cash'] - $spec['fare']);
+    $newEnergy = max(5, (int)$char['energy'] + $spec['energy']);
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, energy = ? WHERE id = ?");
+    $stmt->execute([$newCash, $newEnergy, $char['id']]);
+
+    $gateSalute = "The estate security guard opened the gate with a salute: 'Oga safe journey!'. You {$spec['desc']} and arrived at your office building.";
+    logActivity($char['id'], 'commute', $gateSalute, -$spec['fare'], $spec['energy'], 0);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $gateSalute,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// START A NEW LIFE (CHARACTER REBIRTH WITHOUT LOGOUT)
+// ----------------------------------------------------
+if ($action === 'start_new_life') {
+    $newName = cleanInput($_POST['new_name'] ?? '');
+    $newGender = cleanInput($_POST['gender'] ?? 'Male');
+    $newArchetype = cleanInput($_POST['archetype'] ?? 'hustler');
+    $newDistrict = cleanInput($_POST['district'] ?? 'Kubwa');
+
+    if (empty($newName)) {
+        jsonResponse(['success' => false, 'error' => 'Please choose a name for your new life.'], 400);
+    }
+
+    // Default starter stats based on archetype
+    $startCash = 15000.00;
+    $startBank = 5000.00;
+    $startCred = 15;
+    $startIQ = 20;
+    $startCar = null;
+
+    if ($newArchetype === 'rich') {
+        $startCash = 1500000.00;
+        $startBank = 8500000.00;
+        $startDistrict = 'Maitama';
+        $startCred = 45;
+        $startIQ = 45;
+        $startCar = 4;
+    } elseif ($newArchetype === 'middle') {
+        $startCash = 120000.00;
+        $startBank = 350000.00;
+        $startDistrict = 'Gwarinpa';
+        $startCred = 25;
+        $startIQ = 35;
+        $startCar = 2;
+    }
+
+    $stmtReset = $pdo->prepare("
+        UPDATE characters
+        SET full_name = ?, gender = ?, archetype = ?, district = ?,
+            cash = ?, bank = ?, loan_balance = 0, street_cred = ?, intelligence = ?,
+            energy = 100, health = 100, happiness = 100, days_lived = 1, age = 18,
+            time_of_day = 'Morning', current_job_id = NULL, primary_property_id = NULL,
+            primary_vehicle_id = ?, active_shift = NULL, home_state = NULL
+        WHERE id = ?
+    ");
+    $stmtReset->execute([
+        $newName, $newGender, $newArchetype, $newDistrict,
+        $startCash, $startBank, $startCred, $startIQ,
+        $startCar, $char['id']
+    ]);
+
+    // Clear old properties and vehicles
+    $pdo->prepare("DELETE FROM character_properties WHERE character_id = ?")->execute([$char['id']]);
+    $pdo->prepare("DELETE FROM character_vehicles WHERE character_id = ?")->execute([$char['id']]);
+    if ($startCar) {
+        $pdo->prepare("INSERT INTO character_vehicles (character_id, vehicle_id) VALUES (?, ?)")->execute([$char['id'], $startCar]);
+    }
+
+    $rebirthMsg = "Started a brand new life in Abuja as $newName ($newArchetype) in $newDistrict! Old slate wiped clean.";
+    logActivity($char['id'], 'rebirth', $rebirthMsg, $startCash, 100, 100);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "Welcome to your new life, $newName! Clean start unlocked.",
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
 jsonResponse(['success' => false, 'error' => 'Invalid action.'], 400);
+

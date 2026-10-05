@@ -954,9 +954,170 @@ if ($action === 'flash_flood') {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 13. STREET_FIGHT – Street Fights, Agbero Clashes & Grudges
+// ─────────────────────────────────────────────────────────────────────────────
+if ($action === 'street_fight') {
+    $combatAction = cleanInput($_POST['combat_action'] ?? 'encounter');
+    $rivalName    = cleanInput($_POST['rival'] ?? 'Kubwa Street Agbero');
+
+    if ($combatAction === 'encounter') {
+        $opponents = [
+            ['name' => 'Berger Underbridge Agbero', 'hp' => 80, 'desc' => 'Demanding illegal bus stop territory levy!'],
+            ['name' => 'Kubwa Expressway Tout', 'hp' => 65, 'desc' => 'Tried to pickpocket your wallet in traffic!'],
+            ['name' => 'Wuse 2 Nightclub Bouncer Rival', 'hp' => 110, 'desc' => 'Blocked your VIP entry claiming your outfit is invalid!'],
+            ['name' => 'Garki Area Boy Leader', 'hp' => 90, 'desc' => 'Challenged your street authority in front of his crew!']
+        ];
+        $opp = $opponents[array_rand($opponents)];
+
+        jsonResponse([
+            'success'       => true,
+            'opponent_name' => $opp['name'],
+            'opponent_hp'   => $opp['hp'],
+            'opponent_desc' => $opp['desc'],
+            'player_hp'     => (int)$char['health'],
+            'message'       => "Street Clash! {$opp['name']} stepped up: \"{$opp['desc']}\""
+        ]);
+    }
+
+    $playerHp = (int)($_POST['player_hp'] ?? $char['health']);
+    $oppHp    = (int)($_POST['opp_hp'] ?? 80);
+
+    $msg = '';
+    $won = false;
+    $lootCash = 0;
+    $credChange = 0;
+    $healthDelta = 0;
+
+    if ($combatAction === 'punch') {
+        $damageDealt = mt_rand(22, 38) + round((int)$char['street_cred'] * 0.1);
+        $oppHp = max(0, $oppHp - $damageDealt);
+        if ($oppHp > 0) {
+            $damageTaken = mt_rand(10, 22);
+            $playerHp = max(5, $playerHp - $damageTaken);
+            $healthDelta = -$damageTaken;
+            $msg = "You threw a solid right cross dealing {$damageDealt} dmg! Opponent counter-punched for {$damageTaken} dmg.";
+        } else {
+            $won = true;
+        }
+    } elseif ($combatAction === 'dodge_counter') {
+        $success = (mt_rand(1, 100) <= 68);
+        if ($success) {
+            $damageDealt = mt_rand(35, 55);
+            $oppHp = max(0, $oppHp - $damageDealt);
+            $msg = "Clean slip & counter! You dodged his swing and landed a devastating liver hook for {$damageDealt} critical dmg!";
+            if ($oppHp <= 0) $won = true;
+        } else {
+            $damageTaken = mt_rand(18, 30);
+            $playerHp = max(5, $playerHp - $damageTaken);
+            $healthDelta = -$damageTaken;
+            $msg = "You slipped on the asphalt and got clipped for {$damageTaken} dmg!";
+        }
+    } elseif ($combatAction === 'call_backup') {
+        if ((int)$char['street_cred'] < 25) {
+            jsonResponse(['success' => false, 'error' => 'You need at least 25 Street Cred to have loyal area boys on speed dial!'], 400);
+        }
+        $oppHp = 0;
+        $won = true;
+        $msg = "You whistled for the local boys! 4 Abuja youth swarmed the street with sticks. Opponent fled in terror!";
+    } elseif ($combatAction === 'settle') {
+        $settleCost = 2000;
+        if ((float)$char['cash'] < $settleCost) {
+            jsonResponse(['success' => false, 'error' => 'You do not have ₦2,000 cash to settle! You must fight or dodge.'], 400);
+        }
+        $updatedChar = applyStatDeltas($char, ['cash' => -$settleCost, 'happiness' => -5], $pdo, $userId);
+        logActivity($char['id'], 'street_settle', "Settled street confrontation for " . formatNaira($settleCost) . " to avoid bloodshed.", -$settleCost, 0, -5);
+
+        jsonResponse([
+            'success'   => true,
+            'resolved'  => true,
+            'won'       => false,
+            'message'   => "You handed over " . formatNaira($settleCost) . " 'peace money'. Opponent laughed and let you pass safely.",
+            'character' => $updatedChar
+        ]);
+    }
+
+    if ($won) {
+        $lootCash = mt_rand(8000, 22000);
+        $credChange = 8;
+        $deltas = ['cash' => $lootCash, 'health' => $healthDelta, 'street_cred' => $credChange, 'happiness' => 10];
+        $updatedChar = applyStatDeltas($char, $deltas, $pdo, $userId);
+        $winMsg = "VICTORY ON THE STREET! Knocked out opponent! Looted " . formatNaira($lootCash) . " and gained +8 Street Cred!";
+        logActivity($char['id'], 'street_fight_won', $winMsg, $lootCash, 0, 10);
+
+        jsonResponse([
+            'success'     => true,
+            'resolved'    => true,
+            'won'         => true,
+            'loot_cash'   => $lootCash,
+            'cred_gain'   => $credChange,
+            'message'     => $winMsg,
+            'character'   => $updatedChar
+        ]);
+    } else {
+        $deltas = ['health' => $healthDelta];
+        $updatedChar = applyStatDeltas($char, $deltas, $pdo, $userId);
+
+        jsonResponse([
+            'success'     => true,
+            'resolved'    => false,
+            'won'         => false,
+            'player_hp'   => $playerHp,
+            'opp_hp'      => $oppHp,
+            'message'     => $msg,
+            'character'   => $updatedChar
+        ]);
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 14. NETWORK_TROUBLES – Telco ISP Signal Outages & Network Switching
+// ─────────────────────────────────────────────────────────────────────────────
+if ($action === 'network_troubles') {
+    $netAction = cleanInput($_POST['net_action'] ?? 'status');
+
+    if ($netAction === 'switch_sim') {
+        $newSim = cleanInput($_POST['sim'] ?? 'Airtel');
+        jsonResponse([
+            'success' => true,
+            'active_sim' => $newSim,
+            'signal_strength' => 95,
+            'status' => 'CONNECTED_5G',
+            'message' => "Switched data traffic to {$newSim} 5G network! Connection stabilized and POS active."
+        ]);
+    }
+
+    if ($netAction === 'airplane_mode') {
+        jsonResponse([
+            'success' => true,
+            'signal_strength' => 88,
+            'status' => 'CONNECTED',
+            'message' => "Toggled Airplane Mode! Cellular IP refreshed. Cellular tower handshake completed."
+        ]);
+    }
+
+    // Default status check (30% chance of temporary glitch)
+    $hasGlitch = (mt_rand(1, 100) <= 30);
+    $isps = [
+        ['name' => 'MTN Nigeria', 'status' => $hasGlitch ? 'FIBER_CUT_DELAY' : '4G_LTE', 'bars' => $hasGlitch ? 1 : 4],
+        ['name' => 'Airtel FCT', 'status' => '5G_HIGH_SPEED', 'bars' => 5],
+        ['name' => 'Glo Mega', 'status' => 'EDGE_SLOW', 'bars' => 2]
+    ];
+
+    jsonResponse([
+        'success'    => true,
+        'has_glitch' => $hasGlitch,
+        'isps'       => $isps,
+        'message'    => $hasGlitch 
+            ? "Network Warning: Subsea cable glitch slowing down Abuja data! Switch SIM or toggle airplane mode." 
+            : "All networks operating at normal bandwidth."
+    ]);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Fallthrough – unknown action
 // ─────────────────────────────────────────────────────────────────────────────
 jsonResponse([
     'success' => false,
-    'error'   => 'Unknown action. Valid actions: danfo_rush, lastma_checkpoint, okada_ride, goslow_hawker, agbero_encounter, ajo_contribution, market_haggle, owambe_party, religious_service, nepa_roulette, suya_spot, flash_flood.',
+    'error'   => 'Unknown action. Valid actions: danfo_rush, lastma_checkpoint, okada_ride, goslow_hawker, agbero_encounter, ajo_contribution, market_haggle, owambe_party, religious_service, nepa_roulette, suya_spot, flash_flood, street_fight, network_troubles.',
 ], 400);
+

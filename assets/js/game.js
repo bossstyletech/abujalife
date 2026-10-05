@@ -91,10 +91,12 @@ const GameApp = {
 
     async init() {
         await this.fetchCharacter();
-        this.switchTab('overview');
+        const savedTab = localStorage.getItem('abuja_active_tab') || 'overview';
+        this.switchTab(savedTab);
         this.checkForRandomEvent();
         this.checkWeather();
         this.calculateAgentFees();
+        this.checkActiveShift();
 
         // Initialize 3D Workplace & House World
         if (window.World3D) {
@@ -277,6 +279,7 @@ const GameApp = {
 
     switchTab(tabId) {
         this.activeTab = tabId;
+        try { localStorage.setItem('abuja_active_tab', tabId); } catch(e){}
 
         // Ensure parent hub button and subnav are synchronized
         const tabToHub = {
@@ -350,12 +353,13 @@ const GameApp = {
     },
 
     // ====================================================
-    // INTERACTIVE WORK SHIFT SIMULATOR ENGINE
+    // INTERACTIVE WORK SHIFT SIMULATOR ENGINE (8-10 REAL-TIME MINUTES)
     // ====================================================
     shiftState: {
         active: false,
         timer: null,
-        totalSeconds: 45, // 45 seconds real-time for full 8-hour workday
+        totalSeconds: 480, // 8 real-time minutes (480 seconds)
+        startedAtMs: 0,
         elapsed: 0,
         progress: 0,
         job: null,
@@ -369,14 +373,39 @@ const GameApp = {
         crisesTriggered: {}
     },
 
+    async checkActiveShift() {
+        try {
+            const res = await fetch('api/jobs.php?action=get_active_shift');
+            const data = await res.json();
+            if (data.success && data.has_active_shift && data.job) {
+                if (data.is_completed) {
+                    this.notify("Your 8-hour workday shift has completed! Collect your pay breakdown.", "success");
+                    this.startWorkShift(data.job, data.job.daily_salary, data.duration, data.duration, data.started_at);
+                    this.completeWorkShift();
+                } else {
+                    this.notify(`Resuming active shift (${Math.floor(data.remaining_seconds / 60)}m ${data.remaining_seconds % 60}s remaining)...`, "info");
+                    this.startWorkShift(data.job, data.job.daily_salary, data.elapsed_seconds, data.duration, data.started_at);
+                }
+            }
+        } catch(e) {}
+    },
+
     async goToWork() {
         if (!this.character || !this.character.current_job_id) {
             this.notify("You don't have a job yet! Apply in the Careers tab.", 'error');
+            this.switchTab('jobs');
+            return;
+        }
+
+        // If shift already in progress, bring up modal
+        if (this.shiftState.active) {
+            const modal = document.getElementById('workShiftModal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
             return;
         }
 
         try {
-            const res = await fetch('api/character.php?action=start_shift');
+            const res = await fetch('api/jobs.php?action=start_shift', { method: 'POST' });
             const data = await res.json();
             if (!data.success) {
                 this.playSfx('loss');
@@ -385,19 +414,23 @@ const GameApp = {
             }
 
             this.playSfx('click');
-            this.startWorkShift(data.job, data.base_salary);
+            this.startWorkShift(data.job, data.base_salary, 0, data.shift_duration_seconds || 480, data.started_at);
         } catch (e) {
             this.notify("Error connecting to workplace.", "error");
         }
     },
 
-    startWorkShift(job, baseSalary) {
+    startWorkShift(job, baseSalary, initialElapsed = 0, duration = 480, startedAtUnix = null) {
+        const startedMs = startedAtUnix ? (startedAtUnix * 1000) : (Date.now() - (initialElapsed * 1000));
+        const totalSecs = duration || 480;
+
         this.shiftState = {
             active: true,
             timer: null,
-            totalSeconds: 45,
-            elapsed: 0,
-            progress: 0,
+            totalSeconds: totalSecs,
+            startedAtMs: startedMs,
+            elapsed: initialElapsed,
+            progress: Math.min(100, Math.round((initialElapsed / totalSecs) * 100)),
             job: job,
             baseSalary: parseFloat(baseSalary || 0),
             tips: 0,
@@ -405,7 +438,7 @@ const GameApp = {
             penalties: 0,
             powerOn: true,
             isAtDesk: true,
-            bladderLevel: 10,
+            bladderLevel: Math.min(100, Math.round((initialElapsed / totalSecs) * 60)),
             crisesTriggered: {}
         };
 
@@ -416,7 +449,8 @@ const GameApp = {
             modal.classList.add('flex');
         }
 
-        document.getElementById('shiftJobTitle').textContent = job.title || 'Federal Ministry Officer';
+        const titleEl = document.getElementById('shiftJobTitle');
+        if (titleEl) titleEl.textContent = job.title || 'Federal Ministry Officer';
         this.updateShiftUI();
 
         // Start 1-second clock loop
@@ -429,15 +463,19 @@ const GameApp = {
 
         // If power is out, progress pauses until resolved!
         if (!this.shiftState.powerOn) {
-            document.getElementById('shiftStatusText').textContent = '⚡ BLACKOUT: Office computers dark. Turn on generator to resume work!';
+            const statusEl = document.getElementById('shiftStatusText');
+            if (statusEl) statusEl.textContent = '⚡ BLACKOUT: Office computers dark. Turn on generator to resume work!';
             return;
         }
 
-        this.shiftState.elapsed += 1;
+        // Exact real-time sync against startedAtMs
+        const now = Date.now();
+        const calculatedElapsed = Math.floor((now - this.shiftState.startedAtMs) / 1000);
+        this.shiftState.elapsed = Math.max(this.shiftState.elapsed + 1, calculatedElapsed);
         this.shiftState.progress = Math.min(100, Math.round((this.shiftState.elapsed / this.shiftState.totalSeconds) * 100));
 
-        // Gradual bladder pressure
-        this.shiftState.bladderLevel = Math.min(100, this.shiftState.bladderLevel + 2);
+        // Gradual bladder pressure over the 8 minutes
+        this.shiftState.bladderLevel = Math.min(100, this.shiftState.bladderLevel + 0.25);
 
         this.updateShiftUI();
 
@@ -683,9 +721,11 @@ const GameApp = {
 
     shiftDoWorkTask() {
         if (!this.shiftState.active || !this.shiftState.powerOn) return;
-        this.shiftState.elapsed += 2; // Speeds up progress
+        this.shiftState.startedAtMs -= 10000; // Fast forwards by 10 real seconds of hard work
+        this.shiftState.elapsed += 10;
+        this.shiftState.progress = Math.min(100, Math.round((this.shiftState.elapsed / this.shiftState.totalSeconds) * 100));
         this.playSfx('click');
-        this.notify("Typing vigorously! Shift accelerated by 2 seconds.", 'info');
+        this.notify("Typing vigorously! Hard work shaved 10s off the shift.", 'info');
         this.updateShiftUI();
     },
 
@@ -707,7 +747,7 @@ const GameApp = {
         const formData = new FormData();
         formData.append('progress', this.shiftState.progress);
 
-        fetch('api/character.php?action=abandon_shift', { method: 'POST', body: formData })
+        fetch('api/jobs.php?action=abandon_shift', { method: 'POST', body: formData })
             .then(res => res.json())
             .then(data => {
                 this.playSfx('loss');
@@ -731,7 +771,7 @@ const GameApp = {
         formData.append('penalties', s.penalties);
 
         try {
-            const res = await fetch('api/character.php?action=finish_shift', { method: 'POST', body: formData });
+            const res = await fetch('api/jobs.php?action=finish_shift', { method: 'POST', body: formData });
             const data = await res.json();
             if (data.success) {
                 this.playSfx('money');
@@ -1907,6 +1947,579 @@ const GameApp = {
             const monthsUntilDec = month < 12 ? 12 - month : 12;
             if (statusEl) statusEl.textContent = `December IJGB season coming in ${monthsUntilDec} month(s). Economy will inflate. Save up for the season!`;
             this.notify(`December season in ${monthsUntilDec} month(s). Save up!`, 'info');
+        }
+    },
+
+    // ====================================================
+    // RESIDENCE & HOUSE MANAGEMENT
+    // ====================================================
+    async openResidenceModal() {
+        try {
+            const res = await fetch('api/character.php?action=enter_residence');
+            const data = await res.json();
+            if (!data.success) {
+                this.notify(data.error || 'Could not enter residence.', 'error');
+                return;
+            }
+
+            const titleEl = document.getElementById('residenceTitle');
+            const subEl = document.getElementById('residenceSubtitle');
+            if (titleEl) titleEl.textContent = data.home_name || 'Your Residence';
+            if (subEl) subEl.textContent = `${data.district} • ${data.tier}`;
+            
+            const hs = data.home_state || {};
+            const pMode = (hs.power_mode || 'nepa').toUpperCase();
+            const pModeEl = document.getElementById('resPowerMode');
+            const invEl = document.getElementById('resInverterPct');
+            const genEl = document.getElementById('resGenFuel');
+            if (pModeEl) pModeEl.textContent = pMode === 'GENERATOR' ? '⚙️ MIKANO' : (pMode === 'INVERTER' ? '🔋 INVERTER' : '🔌 NEPA');
+            if (invEl) invEl.textContent = `${hs.inverter_battery || 85}% Charged`;
+            if (genEl) genEl.textContent = `${hs.gen_fuel_liters || 6} Liters`;
+
+            const modal = document.getElementById('residenceModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            this.playSfx('click');
+        } catch(e) {
+            this.notify('Error accessing residence.', 'error');
+        }
+    },
+
+    closeResidenceModal() {
+        const modal = document.getElementById('residenceModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    async manageResidence(subAction, extra = null) {
+        const formData = new FormData();
+        formData.append('sub_action', subAction);
+        if (extra) formData.append('power_mode', extra);
+
+        try {
+            const res = await fetch('api/character.php?action=manage_residence', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                this.notify(data.message, 'success');
+                const hs = data.home_state || {};
+                const pMode = (hs.power_mode || 'nepa').toUpperCase();
+                const pModeEl = document.getElementById('resPowerMode');
+                const invEl = document.getElementById('resInverterPct');
+                const genEl = document.getElementById('resGenFuel');
+                if (pModeEl) pModeEl.textContent = pMode === 'GENERATOR' ? '⚙️ MIKANO' : (pMode === 'INVERTER' ? '🔋 INVERTER' : '🔌 NEPA');
+                if (invEl) invEl.textContent = `${hs.inverter_battery || 85}% Charged`;
+                if (genEl) genEl.textContent = `${hs.gen_fuel_liters || 6} Liters`;
+                await this.fetchCharacter();
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Action failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Connection error', 'error');
+        }
+    },
+
+    // ====================================================
+    // COMMUTE TO WORK TRANSITION
+    // ====================================================
+    openCommuteModal() {
+        if (!this.character || !this.character.current_job_id) {
+            this.notify("You don't have a job yet! Apply in Careers first.", 'error');
+            this.switchTab('jobs');
+            return;
+        }
+        if (this.shiftState.active) {
+            const modal = document.getElementById('workShiftModal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            return;
+        }
+        const modal = document.getElementById('commuteModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    },
+
+    async commuteToWork(mode) {
+        const modal = document.getElementById('commuteModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        const formData = new FormData();
+        formData.append('mode', mode);
+
+        try {
+            const res = await fetch('api/character.php?action=commute_to_work', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('click');
+                this.notify(data.message, 'info');
+                await this.fetchCharacter();
+                // Clock into work shift
+                this.goToWork();
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Commute failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Commute connection error', 'error');
+        }
+    },
+
+    // ====================================================
+    // CITIZENS SOCIAL DIRECTORY & FINDER
+    // ====================================================
+    activeInspectedCitizen: null,
+
+    openCitizenFinder() {
+        const modal = document.getElementById('citizensFinderModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        this.searchCitizens('');
+    },
+
+    closeCitizenFinder() {
+        const modal = document.getElementById('citizensFinderModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    async searchCitizens(query = null) {
+        if (query === null) {
+            query = document.getElementById('citizenSearchInput')?.value || '';
+        }
+        try {
+            const res = await fetch(`api/citizens.php?action=search&q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            const listEl = document.getElementById('citizensResultsList');
+            if (!listEl || !data.success) return;
+
+            if (!data.citizens || data.citizens.length === 0) {
+                listEl.innerHTML = `<div class="p-8 text-center text-xs text-slate-400">No Abuja citizens found matching "${query}".</div>`;
+                return;
+            }
+
+            listEl.innerHTML = data.citizens.map(c => `
+                <div class="p-3.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">
+                            ${c.full_name ? c.full_name.charAt(0) : 'A'}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <strong class="text-xs text-slate-900">${c.full_name}</strong>
+                                <span class="text-[11px] font-mono font-bold text-purple-700">${c.username}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                                <span><i class="fa-solid fa-location-dot text-slate-400 mr-0.5"></i> ${c.district}</span>
+                                <span>•</span>
+                                <span><i class="fa-solid fa-briefcase text-slate-400 mr-0.5"></i> ${c.job_title}</span>
+                                <span>•</span>
+                                <span class="text-emerald-700 font-mono font-bold">${this.formatCompactNaira(c.net_worth)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 self-end sm:self-center">
+                        <button onclick="GameApp.viewCitizenProfile(${c.id})" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold text-[11px] rounded-xl transition">
+                            Profile
+                        </button>
+                        <button onclick="GameApp.openPeerTransfer({id: ${c.id}, full_name: '${c.full_name.replace(/'/g, "\\'")}', username: '${c.username}'})" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded-xl transition">
+                            Send ₦
+                        </button>
+                        <button onclick="GameApp.challengeCitizen({id: ${c.id}, username: '${c.username}'})" class="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-xl transition">
+                            🎲 Dice
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        } catch(e) {
+            console.error('Citizens search failed', e);
+        }
+    },
+
+    async viewCitizenProfile(citizenId) {
+        try {
+            const res = await fetch(`api/citizens.php?action=profile&id=${citizenId}`);
+            const data = await res.json();
+            if (!data.success) {
+                this.notify(data.error || 'Failed to load profile', 'error');
+                return;
+            }
+            const p = data.profile;
+            this.activeInspectedCitizen = p;
+
+            const nameEl = document.getElementById('profFullName');
+            const userEl = document.getElementById('profUsername');
+            const distEl = document.getElementById('profDistrict');
+            const netEl = document.getElementById('profNetWorth');
+            const jobEl = document.getElementById('profJob');
+            const credEl = document.getElementById('profCred');
+            const resEl = document.getElementById('profResidence');
+            const vehEl = document.getElementById('profVehicle');
+
+            if (nameEl) nameEl.textContent = p.full_name;
+            if (userEl) userEl.textContent = p.username;
+            if (distEl) distEl.textContent = p.district;
+            if (netEl) netEl.textContent = this.formatNaira(p.net_worth);
+            if (jobEl) jobEl.textContent = p.job_title;
+            if (credEl) credEl.textContent = `${p.street_cred} ⭐`;
+            if (resEl) resEl.textContent = p.residence;
+            if (vehEl) vehEl.textContent = p.vehicle;
+
+            const modal = document.getElementById('citizenProfileModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        } catch(e) {
+            this.notify('Profile load error', 'error');
+        }
+    },
+
+    openPeerTransfer(citizen) {
+        if (!citizen) return;
+        this.activeInspectedCitizen = citizen;
+        const recNameEl = document.getElementById('transferRecipientName');
+        const recIdEl = document.getElementById('transferRecipientId');
+        const amtEl = document.getElementById('transferAmountInput');
+
+        if (recNameEl) recNameEl.value = `${citizen.full_name || 'Citizen'} (${citizen.username})`;
+        if (recIdEl) recIdEl.value = citizen.id;
+        if (amtEl) amtEl.value = '';
+
+        const formView = document.getElementById('transferFormView');
+        const recView = document.getElementById('transferReceiptView');
+        if (formView) formView.classList.remove('hidden');
+        if (recView) recView.classList.add('hidden');
+
+        const modal = document.getElementById('peerTransferModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    },
+
+    async sendPeerTransfer() {
+        const id = document.getElementById('transferRecipientId')?.value;
+        const amount = document.getElementById('transferAmountInput')?.value;
+        const memo = document.getElementById('transferMemoInput')?.value || 'Transfer';
+
+        if (!amount || parseFloat(amount) <= 0) {
+            this.notify('Please enter a valid transfer amount.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('recipient_id', id);
+        formData.append('amount', amount);
+        formData.append('memo', memo);
+
+        try {
+            const res = await fetch('api/citizens.php?action=transfer', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('money');
+                const recAmt = document.getElementById('recAmount');
+                const recTo = document.getElementById('recRecipient');
+                const recRef = document.getElementById('recRef');
+
+                if (recAmt) recAmt.textContent = this.formatNaira(amount);
+                if (recTo) recTo.textContent = data.receipt?.recipient || 'Citizen';
+                if (recRef) recRef.textContent = data.receipt?.reference || 'ABP-2026-X';
+
+                const formView = document.getElementById('transferFormView');
+                const recView = document.getElementById('transferReceiptView');
+                if (formView) formView.classList.add('hidden');
+                if (recView) recView.classList.remove('hidden');
+
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Transfer failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Transfer network error', 'error');
+        }
+    },
+
+    async challengeCitizen(citizen) {
+        if (!citizen) return;
+        const formData = new FormData();
+        formData.append('citizen_id', citizen.id);
+
+        try {
+            const res = await fetch('api/citizens.php?action=challenge', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(data.won ? 'win' : 'loss');
+                alert(`🎲 STREET DICE CHALLENGE vs ${citizen.username}\n\nYour Roll: 🎲 ${data.player_roll}\nOpponent Roll: 🎲 ${data.opponent_roll}\n\nOutcome: ${data.message}`);
+                this.notify(data.message, data.won ? 'success' : 'error');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Challenge could not take place', 'error');
+            }
+        } catch(e) {
+            this.notify('Challenge connection error', 'error');
+        }
+    },
+
+    // ====================================================
+    // STREET FIGHT & AGBERO CLASH ENGINE
+    // ====================================================
+    streetFightState: {
+        oppHp: 80,
+        maxOppHp: 80,
+        playerHp: 100,
+        maxPlayerHp: 100,
+        opponentName: 'Area Boy'
+    },
+
+    async openStreetFight() {
+        const formData = new FormData();
+        formData.append('combat_action', 'encounter');
+
+        try {
+            const res = await fetch('api/street.php?action=street_fight', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!data.success) {
+                this.notify(data.error || 'No street clashes right now', 'info');
+                return;
+            }
+
+            const pHealth = this.character ? parseInt(this.character.health) : 100;
+            this.streetFightState = {
+                oppHp: data.opponent_hp,
+                maxOppHp: data.opponent_hp,
+                playerHp: pHealth,
+                maxPlayerHp: 100,
+                opponentName: data.opponent_name
+            };
+
+            const titleEl = document.getElementById('fightTitle');
+            const oppNameEl = document.getElementById('fightOppName');
+            const oppHpText = document.getElementById('fightOppHpText');
+            const oppHpBar = document.getElementById('fightOppHpBar');
+            const playerHpText = document.getElementById('fightPlayerHpText');
+            const playerHpBar = document.getElementById('fightPlayerHpBar');
+            const logEl = document.getElementById('streetFightLog');
+
+            if (titleEl) titleEl.textContent = `Street Clash vs ${data.opponent_name}`;
+            if (oppNameEl) oppNameEl.textContent = data.opponent_name;
+            if (oppHpText) oppHpText.textContent = `${data.opponent_hp} HP`;
+            if (oppHpBar) oppHpBar.style.width = '100%';
+            if (playerHpText) playerHpText.textContent = `${pHealth} HP`;
+            if (playerHpBar) playerHpBar.style.width = `${pHealth}%`;
+            if (logEl) logEl.textContent = data.message;
+
+            const modal = document.getElementById('streetFightModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            this.playSfx('click');
+        } catch(e) {
+            this.notify('Street confrontation failed to load', 'error');
+        }
+    },
+
+    async doStreetFightAction(action) {
+        const formData = new FormData();
+        formData.append('combat_action', action);
+        formData.append('player_hp', this.streetFightState.playerHp);
+        formData.append('opp_hp', this.streetFightState.oppHp);
+
+        try {
+            const res = await fetch('api/street.php?action=street_fight', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!data.success) {
+                this.notify(data.error || 'Action failed', 'error');
+                return;
+            }
+
+            const logEl = document.getElementById('streetFightLog');
+            if (logEl) logEl.textContent = data.message;
+
+            if (data.resolved) {
+                if (data.won) {
+                    this.playSfx('win');
+                    const oppHpBar = document.getElementById('fightOppHpBar');
+                    const oppHpText = document.getElementById('fightOppHpText');
+                    if (oppHpBar) oppHpBar.style.width = '0%';
+                    if (oppHpText) oppHpText.textContent = '0 HP (K.O.)';
+                    this.notify(data.message, 'success');
+                } else {
+                    this.playSfx('loss');
+                    this.notify(data.message, 'info');
+                }
+                await this.fetchCharacter();
+                setTimeout(() => {
+                    const modal = document.getElementById('streetFightModal');
+                    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+                }, 2000);
+            } else {
+                this.streetFightState.playerHp = data.player_hp;
+                this.streetFightState.oppHp = data.opp_hp;
+
+                const oppPct = Math.round((data.opp_hp / this.streetFightState.maxOppHp) * 100);
+                const oppHpBar = document.getElementById('fightOppHpBar');
+                const oppHpText = document.getElementById('fightOppHpText');
+                if (oppHpBar) oppHpBar.style.width = `${Math.max(0, oppPct)}%`;
+                if (oppHpText) oppHpText.textContent = `${data.opp_hp} HP`;
+
+                const playerPct = Math.min(100, Math.max(0, data.player_hp));
+                const playerHpBar = document.getElementById('fightPlayerHpBar');
+                const playerHpText = document.getElementById('fightPlayerHpText');
+                if (playerHpBar) playerHpBar.style.width = `${playerPct}%`;
+                if (playerHpText) playerHpText.textContent = `${data.player_hp} HP`;
+
+                this.playSfx('loss');
+                await this.fetchCharacter();
+            }
+        } catch(e) {
+            this.notify('Fight connection dropped', 'error');
+        }
+    },
+
+    // ====================================================
+    // NETWORK CONNECTION & ISP SIGNAL TROUBLESHOOTING
+    // ====================================================
+    async openNetworkTroublesModal() {
+        try {
+            const res = await fetch('api/street.php?action=network_troubles');
+            const data = await res.json();
+            if (data.success) {
+                const banner = document.getElementById('netStatusBanner');
+                const provEl = document.getElementById('netActiveProvider');
+                const noteEl = document.getElementById('netStatusNote');
+
+                if (data.has_glitch) {
+                    if (banner) banner.className = "p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-3 text-xs";
+                    if (provEl) provEl.textContent = "⚠️ Cellular Signal Outage (FCT)";
+                    if (noteEl) noteEl.textContent = data.message;
+                } else {
+                    if (banner) banner.className = "p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-xs";
+                    if (provEl) provEl.textContent = "Connected to MTN 4G LTE";
+                    if (noteEl) noteEl.textContent = "All banking apps & POS transactions running smooth.";
+                }
+            }
+            const modal = document.getElementById('networkTroublesModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        } catch(e) {
+            this.notify('Network diagnostics error', 'error');
+        }
+    },
+
+    async switchSim(simName) {
+        const formData = new FormData();
+        formData.append('net_action', 'switch_sim');
+        formData.append('sim', simName);
+
+        try {
+            const res = await fetch('api/street.php?action=network_troubles', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                const txt = document.getElementById('headerNetworkText');
+                const icn = document.getElementById('headerNetworkIcon');
+                const provEl = document.getElementById('netActiveProvider');
+                const noteEl = document.getElementById('netStatusNote');
+                const banner = document.getElementById('netStatusBanner');
+
+                if (txt) txt.textContent = `${simName} 5G`;
+                if (icn) icn.className = "fa-solid fa-signal text-emerald-600 text-[11px]";
+                if (banner) banner.className = "p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-xs";
+                if (provEl) provEl.textContent = `Connected to ${simName} 5G High Speed`;
+                if (noteEl) noteEl.textContent = data.message;
+                this.notify(data.message, 'success');
+            }
+        } catch(e) {
+            this.notify('SIM switch error', 'error');
+        }
+    },
+
+    async toggleAirplaneMode() {
+        const formData = new FormData();
+        formData.append('net_action', 'airplane_mode');
+
+        this.notify('✈️ Airplane mode toggled... cellular handshake refreshed.', 'info');
+        try {
+            const res = await fetch('api/street.php?action=network_troubles', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                const icn = document.getElementById('headerNetworkIcon');
+                if (icn) icn.className = "fa-solid fa-signal text-emerald-600 text-[11px]";
+                this.notify(data.message, 'success');
+            }
+        } catch(e) {
+            this.notify('Airplane toggle failed', 'error');
+        }
+    },
+
+    // ====================================================
+    // START A BRAND NEW LIFE (REBIRTH WITHOUT LOGOUT)
+    // ====================================================
+    openStartNewLifeModal() {
+        const modal = document.getElementById('startNewLifeModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    },
+
+    async submitStartNewLife() {
+        const name = document.getElementById('newLifeName')?.value?.trim();
+        const gender = document.getElementById('newLifeGender')?.value || 'Male';
+        const district = document.getElementById('newLifeDistrict')?.value || 'Kubwa';
+        const archetype = document.getElementById('newLifeArchetype')?.value || 'hustler';
+
+        if (!name) {
+            this.notify('Please choose a name for your new life.', 'error');
+            return;
+        }
+
+        const confirmed = confirm(`Are you sure you want to begin a NEW LIFE as ${name} in ${district}?\n\nThis will wipe your current character's slate clean with fresh funds for the new archetype. Your user login will stay active!`);
+        if (!confirmed) return;
+
+        const formData = new FormData();
+        formData.append('new_name', name);
+        formData.append('gender', gender);
+        formData.append('district', district);
+        formData.append('archetype', archetype);
+
+        try {
+            const res = await fetch('api/character.php?action=start_new_life', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('win');
+                const modal = document.getElementById('startNewLifeModal');
+                if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+                if (window.World3D) {
+                    World3D.updateScene();
+                }
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Rebirth failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Connection error during rebirth', 'error');
         }
     }
 };
