@@ -420,9 +420,403 @@ const GameApp = {
         }
     },
 
+    getJobProfile(job) {
+        const title = (job && job.title) ? job.title.toLowerCase() : '';
+        const cat = (job && job.category) ? job.category.toLowerCase() : '';
+
+        // 1. DRIVERS: Uber / Bolt Driver / Transport
+        if (title.includes('bolt') || title.includes('uber') || title.includes('driver') || cat.includes('transport')) {
+            return {
+                id: 'bolt',
+                title: job.title || 'Uber / Bolt Driver',
+                workplaceTagline: 'Airport Road ⇄ Maitama ⇄ Central Business District',
+                iconClass: 'fa-solid fa-car-side',
+                iconBg: 'bg-emerald-600',
+                normalStatus: '🚗 Driving on Abuja Expressways: Passenger on board...',
+                workActionText: 'Accelerate Route (+Speed)',
+                workActionIcon: 'fa-solid fa-gauge-high',
+                reliefActionText: 'Pitstop at Filling Station',
+                reliefActionIcon: 'fa-solid fa-gas-pump',
+                reliefStatusText: '⛽ Pulled over at Conoil Airport Road filling station for quick relief...',
+                workActionFeedback: 'Smooth acceleration along Airport Road! Shaved 10s off trip.',
+                envLabels: {
+                    powerOn: 'Road: Clear Highway 🟢',
+                    powerOff: 'Traffic: Go-Slow 🛑',
+                    bladderOk: 'Pitstop: OK',
+                    bladderFull: 'Bladder: 🚨 URGENT',
+                    bossNormal: 'Patrol: Road Clear 🛣️',
+                    bossAlert: 'VIO: Checkpoint Ahead 👮'
+                },
+                crises: {
+                    client: {
+                        icon: '🧳',
+                        title: 'Luggage Overload & VIP Passenger!',
+                        desc: 'A wealthy diplomat at Transcorp Hilton has four heavy suitcases and wants a rush trip to Nnamdi Azikiwe Airport.',
+                        options: [
+                            { label: '🤝 Help load trunk briskly with VIP courtesy', tip: '+₦4,500 tip', action: 'polite', tipAmt: 4500, msg: "Passenger beamed: 'Thank you my brother!' Handed you ₦4,500 cash tip." },
+                            { label: '⚡ Blast AC and take airport expressway toll', tip: '+₦3,000 tip', action: 'ac', tipAmt: 3000, msg: "Passenger enjoyed the chilled ride and left a 5-star ₦3,000 tip!" },
+                            { label: '🙄 Grumble about trunk weight and ask for cash', tip: 'Risk bad rating', action: 'grumble', penaltyAmt: 1500, msg: "Passenger gave a 1-star rating! Platform deducted ₦1,500 dispute fee." }
+                        ]
+                    },
+                    pee: {
+                        icon: '⛽',
+                        title: 'Urgent Pitstop along Umaru Musa Yar\'Adua Way!',
+                        desc: 'Your bladder is bursting from cold morning water! Ahead is an NNPC Mega Station.',
+                        options: [
+                            { label: '⛽ Pull over at NNPC Station restroom (5s)', action: 'go' },
+                            { label: '😣 Step on pedal and hold it to destination', action: 'hold' }
+                        ]
+                    },
+                    nepa: {
+                        icon: '🛑',
+                        title: 'Abuja Go-Slow & Traffic Gridlock!',
+                        desc: 'A broken-down cement truck has blocked the Garki Area 1 flyover. Trip progress is halted!',
+                        options: [
+                            { label: '🗺️ Take alternate inner-district service lane (+Skill bonus)', tip: '+₦2,500 surge', action: 'detour', bonusAmt: 2500, msg: "Expert navigation through backstreets! Traffic bypassed (+₦2,500 fare surge)." },
+                            { label: '⏳ Sit patiently in traffic and wait it out', tip: 'Slow crawl', action: 'wait', msg: "Waited in the slow crawl until lane cleared. Resuming trip." }
+                        ]
+                    },
+                    boss: {
+                        icon: '👮',
+                        title: 'VIO & Road Safety Checkpoint Ahead!',
+                        desc: 'VIO officers in black and white uniforms are waving cars to the curb with inspection batons.',
+                        options: [
+                            { label: '📄 Present valid driver licence & vehicle papers', tip: '+₦2,000 bonus', action: 'papers', bonusAmt: 2000, msg: "Officer saluted: 'Safe journey!' Clear passage without delay (+₦2,000 road safety bonus)." },
+                            { label: '😬 Argue that you are carrying a diplomat in a hurry', tip: 'Delay fine', action: 'argue', penaltyAmt: 2000, msg: "VIO delayed you with intensive vehicle check! ₦2,000 delay penalty incurred." }
+                        ]
+                    }
+                }
+            };
+        }
+
+        // 2. KEKE: Keke Napep Rider / Informal
+        if (title.includes('keke') || title.includes('napep') || title.includes('rider')) {
+            return {
+                id: 'keke',
+                title: job.title || 'Keke Napep Rider',
+                workplaceTagline: 'Kubwa ⇄ Dutse Alhaji ⇄ Berger Junction Shuttle',
+                iconClass: 'fa-solid fa-motorcycle',
+                iconBg: 'bg-amber-600',
+                normalStatus: '🛺 Commuting passengers between Kubwa and Berger Junction...',
+                workActionText: 'Manoeuvre Potholes (+Speed)',
+                workActionIcon: 'fa-solid fa-bolt',
+                reliefActionText: 'Stop at Motor Park Restroom',
+                reliefActionIcon: 'fa-solid fa-restroom',
+                reliefStatusText: '🚽 Relieving yourself behind the Kubwa motor park facilities...',
+                workActionFeedback: 'Dodged Kubwa expressway potholes with agility! Shaved 10s.',
+                envLabels: {
+                    powerOn: 'Engine: Humming ⚡',
+                    powerOff: 'Engine: Stalled ⚠️',
+                    bladderOk: 'Bladder: OK',
+                    bladderFull: 'Bladder: 🚨 BURSTING',
+                    bossNormal: 'Park Taskforce: Clear 🛵',
+                    bossAlert: 'Agbero: Demanding Ticket 🎫'
+                },
+                crises: {
+                    client: {
+                        icon: '👥',
+                        title: 'Market Rush at Dutse Junction!',
+                        desc: 'Five market women with heavy yam baskets fight to board your Keke at the roadside.',
+                        options: [
+                            { label: '🤝 Pack 3 passengers neatly and tie baskets securely', tip: '+₦3,000 fares', action: 'polite', tipAmt: 3000, msg: "Safe trip with grateful passengers! Collected full ₦3,000 fare & tip." },
+                            { label: '🏃 Squeeze 5 people inside (Overload hustle)', tip: '50/50: ₦5k OR fine', action: 'overload', tipAmt: 5000, penaltyAmt: 2000, msgSuccess: "Made record speed run! Collected ₦5,000 overload cash.", msgFail: "Taskforce caught you overloading! Fined ₦2,000." },
+                            { label: '🙅 Decline and wait for light single passengers', tip: 'Slow turnover', action: 'decline', penaltyAmt: 800, msg: "Lost passenger crowd. Delayed shift turnaround." }
+                        ]
+                    },
+                    pee: {
+                        icon: '🚽',
+                        title: 'Urgent Nature Call at Berger Underbridge!',
+                        desc: 'Bwari road dust and cold pure water has filled your bladder to the brim.',
+                        options: [
+                            { label: '🏃 Rush to motor park public restroom (5s)', action: 'go' },
+                            { label: '😣 Tighten belt and endure until end of route', action: 'hold' }
+                        ]
+                    },
+                    nepa: {
+                        icon: '🔧',
+                        title: 'Keke Tyre Puncture & Flat Tire!',
+                        desc: 'A sharp nail near Dutse market punctured your front tyre! Keke cannot move.',
+                        options: [
+                            { label: '🛞 Swap spare tyre with roadside vulcaniser (+Agility)', tip: '+₦1,500 bonus', action: 'fix', bonusAmt: 1500, msg: "Swift tyre swap! Back on the road under 2 minutes (+₦1,500 agility bonus)." },
+                            { label: '⏳ Push Keke to filling station manually', tip: 'Exhausting wait', action: 'wait', msg: "Exhausting push to the station. Resuming route slowly." }
+                        ]
+                    },
+                    boss: {
+                        icon: '🎫',
+                        title: 'NURTW Union Taskforce Encounter!',
+                        desc: 'Fierce union boys block your handlebars at Berger junction demanding today\'s motor park dues.',
+                        options: [
+                            { label: '🎫 Pay union daily ticket peacefully with respect', tip: '+₦1,200 peace bonus', action: 'pay', bonusAmt: 1200, msg: "Union boys issued green ticket: 'Oya chairman, pass!' Smooth operations (+₦1,200 peace bonus)." },
+                            { label: '🤬 Argue that you paid at Kubwa park earlier', tip: 'Risk mirror damage', action: 'argue', penaltyAmt: 1800, msg: "Union boys stripped your side mirror! Lost ₦1,800 resolving dispute." }
+                        ]
+                    }
+                }
+            };
+        }
+
+        // 3. TECHNICIAN: Banex Plaza Phone Technician / Trade
+        if (title.includes('banex') || title.includes('technician') || title.includes('phone') || cat.includes('trade')) {
+            return {
+                id: 'technician',
+                title: job.title || 'Banex Plaza Phone Technician',
+                workplaceTagline: 'Banex Plaza, Block B, Wuse 2 – Hardware & Flashing Desk',
+                iconClass: 'fa-solid fa-screwdriver-wrench',
+                iconBg: 'bg-blue-600',
+                normalStatus: '📱 At repair desk: Replacing OLED glass and diagnosing motherboard...',
+                workActionText: 'Solder Chip & Screen (+Speed)',
+                workActionIcon: 'fa-solid fa-microchip',
+                reliefActionText: 'Plaza Restroom Break',
+                reliefActionIcon: 'fa-solid fa-restroom',
+                reliefStatusText: '🚽 Visiting Banex Plaza Block B restroom...',
+                workActionFeedback: 'Clean soldering and heat gun work! Shaved 10s.',
+                envLabels: {
+                    powerOn: 'Plaza Power: ON ⚡',
+                    powerOff: 'Plaza Gen: OFF 🕯️',
+                    bladderOk: 'Bladder: OK',
+                    bladderFull: 'Bladder: 🚨 FULL',
+                    bossNormal: 'Plaza Shop: Steady 📱',
+                    bossAlert: 'Customer: Checking Work 👀'
+                },
+                crises: {
+                    client: {
+                        icon: '📱',
+                        title: 'Shattered iPhone 15 Pro Max Screen!',
+                        desc: 'A frantic customer in Wuse 2 needs an original OLED screen replacement within 30 minutes for an urgent flight.',
+                        options: [
+                            { label: '🔬 Install Grade-A original OLED screen with precision', tip: '+₦5,500 tip', action: 'polite', tipAmt: 5500, msg: "Screen tested 120Hz TrueTone perfectly! Customer tipped you ₦5,500 cash." },
+                            { label: '⚡ Offer quick glass lamination polish only', tip: '+₦3,000 tip', action: 'glass', tipAmt: 3000, msg: "Cost-effective repair completed! Earned ₦3,000 workmanship fee." },
+                            { label: '⚠️ Rush the screws and tear the face-ID flex cable', tip: 'Costly error', action: 'damage', penaltyAmt: 2500, msg: "Flex cable damaged! Had to pay ₦2,500 to replace delicate sensor." }
+                        ]
+                    },
+                    pee: {
+                        icon: '🚽',
+                        title: 'Banex Junction Suya Emergency!',
+                        desc: 'The spicy suya you ate during morning break is violently churning in your stomach.',
+                        options: [
+                            { label: '🏃 Lock repair counter and sprint to plaza restroom (5s)', action: 'go' },
+                            { label: '😣 Grip precision tweezers tightly and hold it', action: 'hold' }
+                        ]
+                    },
+                    nepa: {
+                        icon: '⚡',
+                        title: 'Banex Plaza Generator Cut!',
+                        desc: 'The central plaza generator tripped! Soldering iron and microscope turned pitch black.',
+                        options: [
+                            { label: '🔋 Switch to lithium backup inverter station (+Bonus)', tip: '+₦2,500 bonus', action: 'inverter', bonusAmt: 2500, msg: "Work never paused! Customer impressed by uninterrupted setup (+₦2,500 bonus)." },
+                            { label: '⏳ Step outside and wait with other shop technicians', tip: 'Wait in heat', action: 'wait', msg: "Waited outside until plaza engineer reset generator breaker." }
+                        ]
+                    },
+                    boss: {
+                        icon: '🧐',
+                        title: 'Pick-Up Inspection by Strict Customer!',
+                        desc: 'The customer returns with a magnifying glass inspecting the phone frame for any glue marks or scratches.',
+                        options: [
+                            { label: '✨ Clean frame with isopropyl alcohol & show TrueTone', tip: '+₦3,000 bonus', action: 'inspect', bonusAmt: 3000, msg: "Flawless finish! Customer rated 5-stars and added +₦3,000 bonus." },
+                            { label: '😬 Argue that old scratches were there before', tip: 'Discount given', action: 'argue', penaltyAmt: 1500, msg: "Customer demanded discount for cosmetic smudges (-₦1,500)." }
+                        ]
+                    }
+                }
+            };
+        }
+
+        // 4. TECH: Software Developer / Tech Lead / Tech
+        if (title.includes('developer') || title.includes('tech lead') || title.includes('software') || cat.includes('tech')) {
+            return {
+                id: 'tech',
+                title: job.title || 'Software Developer',
+                workplaceTagline: 'Abuja Tech Hub & Remote Workspace, Jabi Lake',
+                iconClass: 'fa-solid fa-laptop-code',
+                iconBg: 'bg-purple-600',
+                normalStatus: '💻 At developer station: Writing backend microservices and reviewing PRs...',
+                workActionText: 'Ship Code & Fix Bugs (+Speed)',
+                workActionIcon: 'fa-solid fa-code-commit',
+                reliefActionText: 'Hub Restroom & Coffee Break',
+                reliefActionIcon: 'fa-solid fa-mug-hot',
+                reliefStatusText: '☕ Grabbing espresso and using the tech hub washroom...',
+                workActionFeedback: 'Merged clean async pull request! Shaved 10s.',
+                envLabels: {
+                    powerOn: '5G Fiber: 450Mbps 📶',
+                    powerOff: 'ISP Line: Down 🔌',
+                    bladderOk: 'Bladder: OK',
+                    bladderFull: 'Bladder: 🚨 BURSTING',
+                    bossNormal: 'CI/CD: Passing 🟢',
+                    bossAlert: 'CTO: Code Review 👀'
+                },
+                crises: {
+                    client: {
+                        icon: '🚨',
+                        title: 'Production Outage – 502 Bad Gateway!',
+                        desc: 'Fintech checkout API is throwing 502 errors during high volume payday transactions.',
+                        options: [
+                            { label: '🛠️ Hotfix database connection leak and redeploy', tip: '+₦6,500 bounty', action: 'polite', tipAmt: 6500, msg: "Critical incident resolved in minutes! Leadership awarded ₦6,500 bug bounty." },
+                            { label: '🔄 Roll back Kubernetes pod to last stable build', tip: '+₦3,500 tip', action: 'rollback', tipAmt: 3500, msg: "System restored to green status. Safe execution (+₦3,500 bonus)." },
+                            { label: '🤷 Blame telecom network provider in Slack channel', tip: 'Query logged', action: 'blame', penaltyAmt: 2000, msg: "CTO discovered internal memory leak! Docked ₦2,000 for misdirection." }
+                        ]
+                    },
+                    pee: {
+                        icon: '🚽',
+                        title: 'Triple Espresso & Energy Drink Overload!',
+                        desc: 'Your third can of energy drink is taking its toll. You urgently need to visit the tech hub washroom.',
+                        options: [
+                            { label: '🏃 Step away from mechanical keyboard for quick bio break (5s)', action: 'go' },
+                            { label: '😣 Keep hacking through the sprint while wriggling', action: 'hold' }
+                        ]
+                    },
+                    nepa: {
+                        icon: '📶',
+                        title: 'Subsea Fiber Cut – Main ISP Offline!',
+                        desc: 'Office fiber connection dropped to zero KB/s. Git pushes and cloud deploys frozen.',
+                        options: [
+                            { label: '🛰️ Instantly failover to backup Starlink satellite dish (+Bonus)', tip: '+₦3,500 bonus', action: 'starlink', bonusAmt: 3500, msg: "Zero downtime achieved! Team applauded your proactive setup (+₦3,500 bonus)." },
+                            { label: '⏳ Sit back and wait for local ISP fiber splicing', tip: 'Idling', action: 'wait', msg: "Waited idly for ISP team to repair roadside junction box." }
+                        ]
+                    },
+                    boss: {
+                        icon: '💻',
+                        title: 'Surprise PR Architecture Review by CTO!',
+                        desc: 'The Chief Technology Officer hops on a screen share to scrutinize your system architecture.',
+                        options: [
+                            { label: '🚀 Present clean modular microservices with 95% test coverage', tip: '+₦4,500 bonus', action: 'show', bonusAmt: 4500, msg: "CTO impressed: 'Top-tier engineering!' Performance bonus +₦4,500 awarded." },
+                            { label: '😅 Explain hacky temporary patch with TODO comments', tip: 'Tech debt fine', action: 'excuse', penaltyAmt: 2000, msg: "Flagged technical debt. Tech lead logged ₦2,000 code review penalty." }
+                        ]
+                    }
+                }
+            };
+        }
+
+        // 5. CORPORATE: Bank Manager / Managing Director / Executive
+        if (title.includes('bank') || title.includes('director') || title.includes('executive') || cat.includes('corporate') || cat.includes('executive')) {
+            return {
+                id: 'corporate',
+                title: job.title || 'Corporate Executive',
+                workplaceTagline: 'Central Business District – Towers / Boardroom Suite',
+                iconClass: 'fa-solid fa-building-columns',
+                iconBg: 'bg-indigo-600',
+                normalStatus: '💼 In executive suite: Reviewing high-yield institutional portfolios...',
+                workActionText: 'Approve Deal & Wire Transfer (+Speed)',
+                workActionIcon: 'fa-solid fa-file-signature',
+                reliefActionText: 'Executive Washroom Break',
+                reliefActionIcon: 'fa-solid fa-restroom',
+                reliefStatusText: '🚽 Visiting the marble executive washroom suite...',
+                workActionFeedback: 'Cleared multi-million Naira syndicated financing memo! Shaved 10s.',
+                envLabels: {
+                    powerOn: 'Executive HVAC: 18°C ❄️',
+                    powerOff: 'HVAC: Generator Lag ⚠️',
+                    bladderOk: 'Bladder: OK',
+                    bladderFull: 'Bladder: 🚨 FULL',
+                    bossNormal: 'Portfolio: Healthy 💼',
+                    bossAlert: 'Board Chairman: Inspecting 👔'
+                },
+                crises: {
+                    client: {
+                        icon: '💎',
+                        title: 'High Net Worth HNI Investor Arrives!',
+                        desc: 'A prominent oil mogul arrives with private security, looking to place ₦100M in short-term treasury assets.',
+                        options: [
+                            { label: '🥂 Welcome to private lounge with bespoke portfolio strategy', tip: '+₦10,000 bonus', action: 'polite', tipAmt: 10000, msg: "Client executed ₦100M investment! Earned ₦10,000 executive commission." },
+                            { label: '📈 Structure corporate bond placement with 18% yield', tip: '+₦6,000 bonus', action: 'bond', tipAmt: 6000, msg: "Bond subscription approved. Client awarded ₦6,000 structuring fee." },
+                            { label: '⏳ Leave client waiting 30 minutes in conference room', tip: 'Lost deal', action: 'delay', penaltyAmt: 3000, msg: "Client left furious for a competitor bank! Penalised ₦3,000." }
+                        ]
+                    },
+                    pee: {
+                        icon: '🚽',
+                        title: 'Boardroom Coffee Marathon!',
+                        desc: 'Three hours of continuous executive meetings and double espresso cups. Nature calls.',
+                        options: [
+                            { label: '🏃 Excuse yourself politely to executive washroom (5s)', action: 'go' },
+                            { label: '😣 Maintain straight poker face during shareholder address', action: 'hold' }
+                        ]
+                    },
+                    nepa: {
+                        icon: '⚡',
+                        title: 'CBD Power Grid Fluctuation!',
+                        desc: 'Substation power flicker caused trading screens to flicker.',
+                        options: [
+                            { label: '⚡ Engage dual Caterpillar diesel generators instantly', tip: '+₦4,000 bonus', action: 'gen', bonusAmt: 4000, msg: "Flawless switchover! Trading floor remained 100% active (+₦4,000 bonus)." },
+                            { label: '⏳ Wait for automated building transfer switch', tip: 'Slow switch', action: 'wait', msg: "Brief 1-minute downtime until building systems stabilized." }
+                        ]
+                    },
+                    boss: {
+                        icon: '👔',
+                        title: 'Board Chairman Walk-in Audit!',
+                        desc: 'The Board Chairman arrives for unannounced quarterly revenue verification.',
+                        options: [
+                            { label: '📊 Present audited quarterly revenue achieving 140% of target', tip: '+₦8,000 bonus', action: 'present', bonusAmt: 8000, msg: "Chairman stood and shook hands: 'Exemplary leadership!' +₦8,000 bonus." },
+                            { label: '😬 Scramble for missing variance reconciliation sheets', tip: 'Audit query', action: 'excuse', penaltyAmt: 3500, msg: "Audit noted discrepancies. Docked ₦3,500 performance pay." }
+                        ]
+                    }
+                }
+            };
+        }
+
+        // 6. DEFAULT: Federal Secretariat / Ministry Officer / Politics
+        return {
+            id: 'civil_service',
+            title: job.title || 'Federal Ministry Officer',
+            workplaceTagline: 'Federal Secretariat Complex, Shehu Shagari Way',
+            iconClass: 'fa-solid fa-landmark',
+            iconBg: 'bg-emerald-600',
+            normalStatus: '🏛️ At registry desk: Minuting official dockets and gazette files...',
+            workActionText: 'Minute Memos & Stamp Files (+Speed)',
+            workActionIcon: 'fa-solid fa-stamp',
+            reliefActionText: 'Secretariat Restroom Break',
+            reliefActionIcon: 'fa-solid fa-restroom',
+            reliefStatusText: '🚽 Visiting the 3rd floor Secretariat restroom...',
+            workActionFeedback: 'Minuted official docket and stamped files! Shaved 10s.',
+            envLabels: {
+                powerOn: 'Secretariat Power: ON ⚡',
+                powerOff: 'Secretariat: Blackout 🕯️',
+                bladderOk: 'Bladder: OK',
+                bladderFull: 'Bladder: 🚨 FULL',
+                bossNormal: 'Permanent Sec: In Office 🏛️',
+                bossAlert: 'Director: At Your Desk 👀'
+            },
+            crises: {
+                client: {
+                    icon: '👤',
+                    title: 'VIP Procurement Contractor Walk-in!',
+                    desc: 'Alhaji Musa walks up to your desk demanding express tender clearance for his infrastructure company.',
+                    options: [
+                        { label: '🤝 Attend swiftly with civil service protocol', tip: '+₦3,500 tip', action: 'polite', tipAmt: 3500, msg: "Alhaji Musa smiled: 'You be good boy!' Handed you ₦3,500 tip." },
+                        { label: '😏 Request \'Kola Nut\' facilitation fee', tip: '50/50: ₦5k OR query', action: 'kola', tipAmt: 5000, penaltyAmt: 2000, msgSuccess: "Client slipped ₦5,000 kola nut cash into your drawer!", msgFail: "Client yelled and reported you to Director! ₦2,000 deducted." },
+                        { label: '⏳ Tell him the database server is currently slow', tip: 'Client grumbles', action: 'delay', penaltyAmt: 1000, msg: "Client grumbled and left. Customer feedback reduced." }
+                    ]
+                },
+                pee: {
+                    icon: '🚽',
+                    title: 'Secretariat Canteen Emergency!',
+                    desc: 'The spicy goat meat and jollof from the ministry canteen has your stomach churning intensely.',
+                    options: [
+                        { label: '🏃 Walk down corridor to 3rd floor restroom (5s)', action: 'go' },
+                        { label: '😣 Hold it like a patriot and keep stamping files', action: 'hold' }
+                    ]
+                },
+                nepa: {
+                    icon: '⚡',
+                    title: 'Secretariat Transformer Tripped!',
+                    desc: 'Power cut off! Computers went dark and ceiling fans halted across the ministry block.',
+                    options: [
+                        { label: '🔌 Engage backup Mikano generator with facilities officer', tip: '+₦2,500 bonus', action: 'generator', bonusAmt: 2500, msg: "Generator roaring! Power restored. Director gave +₦2,500 initiative bonus!" },
+                        { label: '🕯️ Sit quietly in the dim registry corridor', tip: 'Wait in dark', action: 'wait', msg: "Waited in the heat until central power returned." }
+                    ]
+                },
+                boss: {
+                    icon: '👔',
+                    title: 'Surprise Registry Inspection by Director!',
+                    desc: 'The Departmental Director is pacing down the aisle checking whose pending tray has backlogs.',
+                    options: [
+                        { label: '📂 Stand at attention with sorted dockets: \'Good afternoon, Sir!\'', tip: '+₦3,000 bonus', action: 'busy', bonusAmt: 3000, msg: "Director nodded: 'Very organized officer!' +₦3,000 performance bonus!" },
+                        { label: '📱 Caught scrolling WhatsApp behind open files', tip: 'Reprimand fine', action: 'caught', penaltyAmt: 2000, msg: "Director gave you a stern reprimand! ₦2,000 disciplinary deduction." }
+                    ]
+                }
+            }
+        };
+    },
+
     startWorkShift(job, baseSalary, initialElapsed = 0, duration = 480, startedAtUnix = null) {
         const startedMs = startedAtUnix ? (startedAtUnix * 1000) : (Date.now() - (initialElapsed * 1000));
         const totalSecs = duration || 480;
+        const profile = this.getJobProfile(job);
 
         this.shiftState = {
             active: true,
@@ -432,6 +826,7 @@ const GameApp = {
             elapsed: initialElapsed,
             progress: Math.min(100, Math.round((initialElapsed / totalSecs) * 100)),
             job: job,
+            profile: profile,
             baseSalary: parseFloat(baseSalary || 0),
             tips: 0,
             bonuses: 0,
@@ -449,8 +844,27 @@ const GameApp = {
             modal.classList.add('flex');
         }
 
+        // Apply Job Profile to Header, Tagline, and Icon
         const titleEl = document.getElementById('shiftJobTitle');
-        if (titleEl) titleEl.textContent = job.title || 'Federal Ministry Officer';
+        if (titleEl) titleEl.textContent = profile.title;
+        const taglineEl = document.getElementById('shiftWorkplaceTagline');
+        if (taglineEl) taglineEl.textContent = profile.workplaceTagline;
+        const iconEl = document.getElementById('shiftJobIcon');
+        if (iconEl) iconEl.className = profile.iconClass;
+        const iconWrapperEl = document.getElementById('shiftJobIconWrapper');
+        if (iconWrapperEl) iconWrapperEl.className = `w-10 h-10 rounded-2xl ${profile.iconBg} text-white flex items-center justify-center text-lg shadow-sm`;
+
+        // Apply Job Profile to Quick Action Buttons
+        const btnWorkText = document.getElementById('shiftBtnWorkText');
+        if (btnWorkText) btnWorkText.textContent = profile.workActionText;
+        const btnWorkIcon = document.getElementById('shiftBtnWorkIcon');
+        if (btnWorkIcon) btnWorkIcon.className = profile.workActionIcon;
+
+        const btnReliefText = document.getElementById('shiftBtnReliefText');
+        if (btnReliefText) btnReliefText.textContent = profile.reliefActionText;
+        const btnReliefIcon = document.getElementById('shiftBtnReliefIcon');
+        if (btnReliefIcon) btnReliefIcon.className = profile.reliefActionIcon;
+
         this.updateShiftUI();
 
         // Start 1-second clock loop
@@ -461,10 +875,16 @@ const GameApp = {
     tickWorkShift() {
         if (!this.shiftState.active) return;
 
-        // If power is out, progress pauses until resolved!
+        const profile = this.shiftState.profile || this.getJobProfile(this.shiftState.job);
+
+        // If power is out / route blocked, progress pauses until resolved!
         if (!this.shiftState.powerOn) {
             const statusEl = document.getElementById('shiftStatusText');
-            if (statusEl) statusEl.textContent = '⚡ BLACKOUT: Office computers dark. Turn on generator to resume work!';
+            if (statusEl) {
+                statusEl.textContent = (profile.id === 'bolt' || profile.id === 'keke')
+                    ? '🛑 GRIDLOCK: Vehicle stuck in traffic gridlock. Clear roadblock to resume trip!'
+                    : '⚡ BLACKOUT: Workplace systems halted. Restore power to resume!';
+            }
             return;
         }
 
@@ -482,25 +902,25 @@ const GameApp = {
         // Check Milestone Crises
         const p = this.shiftState.progress;
 
-        // 1. Client Walk-in Crisis at ~20%
+        // 1. Client Walk-in / Passenger at ~20%
         if (p >= 20 && !this.shiftState.crisesTriggered['client']) {
             this.shiftState.crisesTriggered['client'] = true;
             this.triggerShiftCrisis('client');
         }
 
-        // 2. Nature Calls (Pee / Stomach Rumbling) at ~45%
+        // 2. Nature Calls (Pee / Pitstop) at ~45%
         if (p >= 45 && !this.shiftState.crisesTriggered['pee']) {
             this.shiftState.crisesTriggered['pee'] = true;
             this.triggerShiftCrisis('pee');
         }
 
-        // 3. NEPA Blackout at ~68%
+        // 3. NEPA Blackout / Gridlock at ~68%
         if (p >= 68 && !this.shiftState.crisesTriggered['nepa']) {
             this.shiftState.crisesTriggered['nepa'] = true;
             this.triggerShiftCrisis('nepa');
         }
 
-        // 4. Oga Boss Patrol at ~85%
+        // 4. Oga Boss / VIO Inspection at ~85%
         if (p >= 85 && !this.shiftState.crisesTriggered['boss']) {
             this.shiftState.crisesTriggered['boss'] = true;
             this.triggerShiftCrisis('boss');
@@ -516,6 +936,7 @@ const GameApp = {
     updateShiftUI() {
         const s = this.shiftState;
         const p = s.progress;
+        const profile = s.profile || this.getJobProfile(s.job);
 
         // Virtual Clock Time (09:00 AM to 05:00 PM over 8 hours)
         const totalMinutes = Math.round((p / 100) * (8 * 60)); // 0 to 480 mins
@@ -525,44 +946,62 @@ const GameApp = {
         const ampm = hour >= 12 ? 'PM' : 'AM';
         const timeStr = `${String(hour12).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${ampm}`;
 
-        document.getElementById('shiftClockTime').textContent = timeStr;
-        document.getElementById('shiftTimeDisplay').textContent = `${s.elapsed}s / ${s.totalSeconds}s`;
-        document.getElementById('shiftProgressBar').style.width = `${p}%`;
-        document.getElementById('shiftPctText').textContent = `${p}%`;
+        const clockEl = document.getElementById('shiftClockTime');
+        if (clockEl) clockEl.textContent = timeStr;
+        const timeDispEl = document.getElementById('shiftTimeDisplay');
+        if (timeDispEl) timeDispEl.textContent = `${s.elapsed}s / ${s.totalSeconds}s`;
+        const barEl = document.getElementById('shiftProgressBar');
+        if (barEl) barEl.style.width = `${p}%`;
+        const pctEl = document.getElementById('shiftPctText');
+        if (pctEl) pctEl.textContent = `${p}%`;
+
+        // If normal status and not in custom relief or crisis, display profile normalStatus
+        const statusEl = document.getElementById('shiftStatusText');
+        if (statusEl && s.isAtDesk && s.powerOn) {
+            statusEl.textContent = profile.normalStatus;
+        }
 
         // Accumulated Pay
         const currentAccumulated = Math.max(0, Math.round((s.baseSalary * (p / 100)) + s.tips + s.bonuses - s.penalties));
-        document.getElementById('shiftAccPay').textContent = this.formatNaira(currentAccumulated);
+        const accPayEl = document.getElementById('shiftAccPay');
+        if (accPayEl) accPayEl.textContent = this.formatNaira(currentAccumulated);
 
-        // Environmental Indicators
+        // Environmental Indicators based on profile.envLabels
+        const envLabels = profile.envLabels || {};
         const envPower = document.getElementById('shiftEnvPower');
         const envPowerText = document.getElementById('shiftEnvPowerText');
-        if (s.powerOn) {
-            envPower.className = "p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-center gap-1.5";
-            envPowerText.textContent = "Power: ON";
-        } else {
-            envPower.className = "p-2.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
-            envPowerText.textContent = "Power: ⚡ OUT";
+        if (envPower && envPowerText) {
+            if (s.powerOn) {
+                envPower.className = "p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-center gap-1.5";
+                envPowerText.textContent = envLabels.powerOn || "Power: ON";
+            } else {
+                envPower.className = "p-2.5 rounded-2xl bg-rose-50 border border-rose-300 text-rose-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+                envPowerText.textContent = envLabels.powerOff || "Power: ⚡ OUT";
+            }
         }
 
         const envBladder = document.getElementById('shiftEnvBladder');
         const envBladderText = document.getElementById('shiftEnvBladderText');
-        if (s.bladderLevel >= 75) {
-            envBladder.className = "p-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
-            envBladderText.textContent = "Bladder: 🚨 FULL";
-        } else {
-            envBladder.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
-            envBladderText.textContent = "Bladder: OK";
+        if (envBladder && envBladderText) {
+            if (s.bladderLevel >= 75) {
+                envBladder.className = "p-2.5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+                envBladderText.textContent = envLabels.bladderFull || "Bladder: 🚨 FULL";
+            } else {
+                envBladder.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
+                envBladderText.textContent = envLabels.bladderOk || "Bladder: OK";
+            }
         }
 
         const envBoss = document.getElementById('shiftEnvBoss');
         const envBossText = document.getElementById('shiftEnvBossText');
-        if (s.crisesTriggered['boss'] && !s.bossCrisisResolved) {
-            envBoss.className = "p-2.5 rounded-2xl bg-purple-50 border border-purple-300 text-purple-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
-            envBossText.textContent = "Oga: AT DESK 👀";
-        } else {
-            envBoss.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
-            envBossText.textContent = "Oga: In Office";
+        if (envBoss && envBossText) {
+            if (s.crisesTriggered['boss'] && !s.bossCrisisResolved) {
+                envBoss.className = "p-2.5 rounded-2xl bg-purple-50 border border-purple-300 text-purple-900 font-bold flex items-center justify-center gap-1.5 animate-pulse";
+                envBossText.textContent = envLabels.bossAlert || "Inspection: ACTIVE 👀";
+            } else {
+                envBoss.className = "p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5";
+                envBossText.textContent = envLabels.bossNormal || "Supervision: Normal";
+            }
         }
     },
 
@@ -573,146 +1012,136 @@ const GameApp = {
         this.playSfx('click');
         crisisBox.classList.remove('hidden');
 
-        if (type === 'client') {
-            crisisBox.className = "rounded-2xl p-4 border bg-amber-50 border-amber-200 text-amber-950 animate-fade-up space-y-2.5";
-            crisisBox.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">👤</span>
-                    <div>
-                        <h4 class="font-extrabold text-xs text-amber-900">VIP Client Walk-in!</h4>
-                        <p class="text-[11px] text-amber-800">Alhaji Musa walks up to your desk demanding express tender clearance for his firm.</p>
-                    </div>
-                </div>
-                <div class="space-y-1.5 pt-1">
-                    <button onclick="GameApp.resolveShiftCrisis('client', 'polite')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
-                        <span>🤝 Attend respectfully & swiftly</span>
-                        <span class="text-[10px] text-emerald-700">+₦3,500 tip</span>
-                    </button>
-                    <button onclick="GameApp.resolveShiftCrisis('client', 'kola')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
-                        <span>😏 Request "Kola Nut" facilitation fee</span>
-                        <span class="text-[10px] text-amber-700">50/50: ₦5k OR reported!</span>
-                    </button>
-                    <button onclick="GameApp.resolveShiftCrisis('client', 'delay')" class="w-full py-2 px-3 bg-white hover:bg-amber-100 border border-amber-300 rounded-xl text-left font-bold text-xs text-amber-900 transition flex items-center justify-between">
-                        <span>⏳ Tell him system is down (Delay)</span>
-                        <span class="text-[10px] text-rose-700">Customer drama</span>
-                    </button>
-                </div>
-            `;
-        } else if (type === 'pee') {
-            crisisBox.className = "rounded-2xl p-4 border bg-sky-50 border-sky-200 text-sky-950 animate-fade-up space-y-2.5";
-            crisisBox.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">🚽</span>
-                    <div>
-                        <h4 class="font-extrabold text-xs text-sky-900">Nature is Calling Loudly!</h4>
-                        <p class="text-[11px] text-sky-800">Your stomach is rumbling from spicy breakfast street food! You desperately need the restroom.</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="GameApp.resolveShiftCrisis('pee', 'go')" class="py-2.5 px-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center">
-                        🏃 Rush to Restroom (5s)
-                    </button>
-                    <button onclick="GameApp.resolveShiftCrisis('pee', 'hold')" class="py-2.5 px-3 bg-white hover:bg-sky-100 border border-sky-300 text-sky-900 rounded-xl font-bold text-xs transition active:scale-95 text-center">
-                        😣 Hold It Like a Soldier
-                    </button>
-                </div>
-            `;
-        } else if (type === 'nepa') {
+        const profile = this.shiftState.profile || this.getJobProfile(this.shiftState.job);
+        const crisis = profile.crises && profile.crises[type];
+        if (!crisis) return;
+
+        if (type === 'nepa') {
             this.shiftState.powerOn = false;
-            crisisBox.className = "rounded-2xl p-4 border bg-rose-50 border-rose-300 text-rose-950 animate-fade-up space-y-2.5";
-            crisisBox.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">⚡</span>
-                    <div>
-                        <h4 class="font-extrabold text-xs text-rose-900">NEPA Blackout – Work Halted!</h4>
-                        <p class="text-[11px] text-rose-800">Power just went out! Desktops are dead and ACs turned off. Productivity frozen.</p>
-                    </div>
-                </div>
-                <div class="space-y-1.5 pt-1">
-                    <button onclick="GameApp.resolveShiftCrisis('nepa', 'generator')" class="w-full py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-gears"></i> Pull Mikano Generator Cord (+Boss Praise)
-                    </button>
-                    <button onclick="GameApp.resolveShiftCrisis('nepa', 'wait')" class="w-full py-2 px-3 bg-white hover:bg-rose-100 border border-rose-200 text-rose-900 rounded-xl font-bold text-xs transition active:scale-95 text-center">
-                        🕯️ Wait in Dark with Rechargeable Fan
-                    </button>
+        }
+
+        let bgClass = "bg-amber-50 border-amber-200 text-amber-950";
+        if (type === 'pee') bgClass = "bg-sky-50 border-sky-200 text-sky-950";
+        if (type === 'nepa') bgClass = "bg-rose-50 border-rose-300 text-rose-950";
+        if (type === 'boss') bgClass = "bg-purple-50 border-purple-200 text-purple-950";
+
+        crisisBox.className = `rounded-2xl p-4 border ${bgClass} animate-fade-up space-y-2.5`;
+
+        let optionsHtml = '';
+        if (type === 'pee') {
+            optionsHtml = `
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    ${crisis.options.map((opt, idx) => `
+                        <button onclick="GameApp.resolveShiftCrisis('${type}', ${idx})" class="py-2.5 px-3 ${idx === 0 ? 'bg-sky-600 hover:bg-sky-500 text-white' : 'bg-white hover:bg-sky-100 border border-sky-300 text-sky-900'} rounded-xl font-bold text-xs transition active:scale-95 text-center">
+                            ${opt.label}
+                        </button>
+                    `).join('')}
                 </div>
             `;
-        } else if (type === 'boss') {
-            crisisBox.className = "rounded-2xl p-4 border bg-purple-50 border-purple-200 text-purple-950 animate-fade-up space-y-2.5";
-            crisisBox.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xl">👔</span>
-                    <div>
-                        <h4 class="font-extrabold text-xs text-purple-900">Surprise Inspection by Oga!</h4>
-                        <p class="text-[11px] text-purple-800">The Managing Director is pacing down the aisle checking what everyone is doing.</p>
-                    </div>
-                </div>
-                <div class="pt-1">
-                    <button onclick="GameApp.resolveShiftCrisis('boss', 'busy')" class="w-full py-2.5 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-xs transition active:scale-95 text-center flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-keyboard"></i> Type Spreadsheets Furiously & Greet "Good afternoon Sir!"
-                    </button>
+        } else {
+            optionsHtml = `
+                <div class="space-y-1.5 pt-1">
+                    ${crisis.options.map((opt, idx) => `
+                        <button onclick="GameApp.resolveShiftCrisis('${type}', ${idx})" class="w-full py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left font-bold text-xs text-slate-800 transition flex items-center justify-between">
+                            <span>${opt.label}</span>
+                            ${opt.tip ? `<span class="text-[10px] text-emerald-700 font-bold">${opt.tip}</span>` : ''}
+                        </button>
+                    `).join('')}
                 </div>
             `;
         }
+
+        crisisBox.innerHTML = `
+            <div class="flex items-center gap-2">
+                <span class="text-xl">${crisis.icon}</span>
+                <div>
+                    <h4 class="font-extrabold text-xs text-slate-900">${crisis.title}</h4>
+                    <p class="text-[11px] text-slate-700">${crisis.desc}</p>
+                </div>
+            </div>
+            ${optionsHtml}
+        `;
     },
 
-    resolveShiftCrisis(type, choice) {
+    resolveShiftCrisis(type, optionIdx) {
         const crisisBox = document.getElementById('shiftCrisisCard');
         if (crisisBox) crisisBox.classList.add('hidden');
 
         const s = this.shiftState;
+        const profile = s.profile || this.getJobProfile(s.job);
+        const crisis = profile.crises && profile.crises[type];
+        const opt = (crisis && crisis.options) ? crisis.options[optionIdx] : null;
 
-        if (type === 'client') {
-            if (choice === 'polite') {
-                s.tips += 3500;
-                this.playSfx('money');
-                this.notify("Alhaji Musa smiled: 'You be good boy!' Handed you ₦3,500 tip.", 'success');
-            } else if (choice === 'kola') {
-                if (Math.random() > 0.45) {
-                    s.tips += 5000;
-                    this.playSfx('money');
-                    this.notify("Client slipped ₦5,000 kola nut cash into your drawer!", 'success');
-                } else {
-                    s.penalties += 2000;
-                    this.playSfx('loss');
-                    this.notify("Client yelled and reported you to Oga! ₦2,000 deducted from shift pay.", 'error');
-                }
-            } else {
-                s.penalties += 1000;
-                this.notify("Client grumbled loudly and walked out. Customer feedback score reduced.", 'info');
-            }
-        } else if (type === 'pee') {
-            if (choice === 'go') {
+        if (type === 'pee') {
+            if (optionIdx === 0) { // Go to restroom / pitstop
                 s.isAtDesk = false;
                 s.bladderLevel = 0;
-                document.getElementById('shiftStatusText').textContent = '🚽 In the restroom relieving yourself...';
-                this.notify("You dashed to the restroom. Huge relief! (+10 happiness).", 'info');
+                const statusEl = document.getElementById('shiftStatusText');
+                if (statusEl) statusEl.textContent = profile.reliefStatusText || '🚽 Relieving yourself...';
+                this.notify("Ah, huge relief! You're refreshed and ready to continue (+10 happiness).", 'info');
                 setTimeout(() => {
                     s.isAtDesk = true;
-                    document.getElementById('shiftStatusText').textContent = '💼 Normal Duties: Attending to office files...';
+                    const statusEl = document.getElementById('shiftStatusText');
+                    if (statusEl) statusEl.textContent = profile.normalStatus;
                 }, 4000);
             } else {
-                this.notify("You held it in painfully. Sweating profusely at your desk!", 'error');
+                this.notify("You gritted your teeth and held it in painfully. Sweating profusely!", 'error');
             }
         } else if (type === 'nepa') {
             s.powerOn = true;
-            if (choice === 'generator') {
-                s.bonuses += 2500;
-                this.playSfx('win');
-                this.notify("Generator roaring! Light restored. Oga gave you +₦2,500 initiative bonus!", 'success');
-            } else {
-                this.notify("Switched to rechargeable light. Working at half speed.", 'info');
+            if (opt) {
+                if (opt.bonusAmt) {
+                    s.bonuses += opt.bonusAmt;
+                    this.playSfx('win');
+                    this.notify(opt.msg || `Crisis handled! Bonus +₦${opt.bonusAmt.toLocaleString()}`, 'success');
+                } else {
+                    this.playSfx('click');
+                    this.notify(opt.msg || "Resumed work.", 'info');
+                }
             }
         } else if (type === 'boss') {
-            this.shiftState.bossCrisisResolved = true;
-            if (s.isAtDesk) {
-                s.bonuses += 3000;
-                this.playSfx('win');
-                this.notify("Oga nodded approvingly: 'Keep it up!' Performance bonus +₦3,000 unlocked!", 'success');
-            } else {
-                s.penalties += 2000;
-                this.playSfx('loss');
-                this.notify("Oga saw your empty desk: 'Where is this staff?!' ₦2,000 docked for absent desk.", 'error');
+            s.bossCrisisResolved = true;
+            if (opt) {
+                if (opt.bonusAmt) {
+                    if (s.isAtDesk) {
+                        s.bonuses += opt.bonusAmt;
+                        this.playSfx('win');
+                        this.notify(opt.msg || `Inspection passed! Bonus +₦${opt.bonusAmt.toLocaleString()}`, 'success');
+                    } else {
+                        s.penalties += 2000;
+                        this.playSfx('loss');
+                        this.notify("Inspector arrived while you were away from your station! ₦2,000 docked.", 'error');
+                    }
+                } else if (opt.penaltyAmt) {
+                    s.penalties += opt.penaltyAmt;
+                    this.playSfx('loss');
+                    this.notify(opt.msg || "Inspection query issued.", 'error');
+                }
+            }
+        } else if (type === 'client') {
+            if (opt) {
+                if (opt.tipAmt && !opt.penaltyAmt) {
+                    s.tips += opt.tipAmt;
+                    this.playSfx('money');
+                    this.notify(opt.msg || `Received tip of ₦${opt.tipAmt.toLocaleString()}!`, 'success');
+                } else if (opt.tipAmt && opt.penaltyAmt) {
+                    // 50/50 gamble
+                    if (Math.random() > 0.45) {
+                        s.tips += opt.tipAmt;
+                        this.playSfx('money');
+                        this.notify(opt.msgSuccess || `Success! Collected ₦${opt.tipAmt.toLocaleString()}`, 'success');
+                    } else {
+                        s.penalties += opt.penaltyAmt;
+                        this.playSfx('loss');
+                        this.notify(opt.msgFail || `Caught! Fined ₦${opt.penaltyAmt.toLocaleString()}`, 'error');
+                    }
+                } else if (opt.penaltyAmt) {
+                    s.penalties += opt.penaltyAmt;
+                    this.playSfx('loss');
+                    this.notify(opt.msg || "Lost revenue from dissatisfied customer.", 'error');
+                } else {
+                    this.notify(opt.msg || "Handled customer.", 'info');
+                }
             }
         }
 
@@ -725,17 +1154,20 @@ const GameApp = {
         this.shiftState.elapsed += 10;
         this.shiftState.progress = Math.min(100, Math.round((this.shiftState.elapsed / this.shiftState.totalSeconds) * 100));
         this.playSfx('click');
-        this.notify("Typing vigorously! Hard work shaved 10s off the shift.", 'info');
+        const msg = (this.shiftState.profile && this.shiftState.profile.workActionFeedback) 
+            ? this.shiftState.profile.workActionFeedback 
+            : "Working hard! Shaved 10s off the shift.";
+        this.notify(msg, 'info');
         this.updateShiftUI();
     },
 
     shiftGoBathroom() {
         if (!this.shiftState.active) return;
-        this.resolveShiftCrisis('pee', 'go');
+        this.resolveShiftCrisis('pee', 0);
     },
 
     abandonShiftPrompt() {
-        const confirmed = confirm("⚠️ ARE YOU SURE YOU WANT TO SNEAK OUT EARLY?\n\nOga and the security will catch you at the gate!\nYou will LOSE your daily salary and get issued a formal disciplinary query (-12 Street Cred)!");
+        const confirmed = confirm("⚠️ ARE YOU SURE YOU WANT TO SNEAK OUT EARLY?\n\nLeaving your post early means you will LOSE your daily salary and get issued a formal disciplinary query (-12 Street Cred)!");
         if (!confirmed) return;
 
         clearInterval(this.shiftState.timer);

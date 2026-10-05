@@ -1629,14 +1629,15 @@ if (!$char) {
             <!-- Shift Header -->
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm">
-                        <i class="fa-solid fa-briefcase"></i>
+                    <div id="shiftJobIconWrapper" class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm">
+                        <i id="shiftJobIcon" class="fa-solid fa-briefcase"></i>
                     </div>
                     <div>
                         <h3 id="shiftJobTitle" class="text-base font-extrabold text-slate-900 leading-tight">Federal Ministry Officer</h3>
-                        <span class="text-xs text-slate-500 font-mono font-bold flex items-center gap-1.5 mt-0.5">
+                        <p id="shiftWorkplaceTagline" class="text-[11px] text-emerald-700 font-bold leading-none mt-0.5">Civil Service Secretariat</p>
+                        <span class="text-xs text-slate-500 font-mono font-bold flex items-center gap-1.5 mt-1">
                             <span id="shiftPulseDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span id="shiftClockTime">09:00 AM</span> • <span id="shiftTimeDisplay">45s shift</span>
+                            <span id="shiftClockTime">09:00 AM</span> • <span id="shiftTimeDisplay">480s shift</span>
                         </span>
                     </div>
                 </div>
@@ -1657,39 +1658,39 @@ if (!$char) {
                     <div id="shiftProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between text-[10px] text-slate-400 font-mono">
-                    <span>09:00 AM (Clock In)</span>
-                    <span>01:00 PM (Lunch)</span>
-                    <span>05:00 PM (Clock Out)</span>
+                    <span>09:00 AM (Start Shift)</span>
+                    <span>01:00 PM (Midday)</span>
+                    <span>05:00 PM (Close Shift)</span>
                 </div>
             </div>
 
             <!-- Shift Environment & Vitals Indicators -->
             <div class="grid grid-cols-3 gap-2 text-center text-xs">
                 <div id="shiftEnvPower" class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 font-bold flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-bolt text-xs text-emerald-600"></i> <span id="shiftEnvPowerText">Power: ON</span>
+                    <i id="shiftEnvPowerIcon" class="fa-solid fa-bolt text-xs text-emerald-600"></i> <span id="shiftEnvPowerText">Power: ON</span>
                 </div>
                 <div id="shiftEnvBladder" class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-restroom text-xs text-sky-600"></i> <span id="shiftEnvBladderText">Bladder: OK</span>
+                    <i id="shiftEnvBladderIcon" class="fa-solid fa-restroom text-xs text-sky-600"></i> <span id="shiftEnvBladderText">Bladder: OK</span>
                 </div>
                 <div id="shiftEnvBoss" class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 font-bold flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-user-tie text-xs text-slate-600"></i> <span id="shiftEnvBossText">Oga: Busy</span>
+                    <i id="shiftEnvBossIcon" class="fa-solid fa-user-tie text-xs text-slate-600"></i> <span id="shiftEnvBossText">Oga: In Office</span>
                 </div>
             </div>
 
-            <!-- DYNAMIC MID-SHIFT CRISIS CARD (Client, NEPA, Pee/Bathroom, Boss Inspection) -->
+            <!-- DYNAMIC MID-SHIFT CRISIS CARD (Job-specific) -->
             <div id="shiftCrisisCard" class="hidden rounded-2xl p-4 border animate-fade-up space-y-3">
                 <!-- Dynamically populated via GameApp.triggerShiftCrisis() -->
             </div>
 
-            <!-- Routine Desktop Actions (Active when no blocking crisis) -->
+            <!-- Routine Job Actions (Active when no blocking crisis) -->
             <div id="shiftRoutineActions" class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
-                <span class="text-[11px] font-bold text-slate-700 block">Workplace Desk Quick Actions:</span>
+                <span id="shiftRoutineTitle" class="text-[11px] font-bold text-slate-700 block">Workplace Live Quick Actions:</span>
                 <div class="grid grid-cols-2 gap-2 text-xs">
-                    <button onclick="GameApp.shiftDoWorkTask()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-keyboard text-emerald-600"></i> Process Files (+Speed)
+                    <button id="shiftBtnWork" onclick="GameApp.shiftDoWorkTask()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i id="shiftBtnWorkIcon" class="fa-solid fa-keyboard text-emerald-600"></i> <span id="shiftBtnWorkText">Process Work (+Speed)</span>
                     </button>
-                    <button onclick="GameApp.shiftGoBathroom()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-person-running text-sky-600"></i> Use Restroom (Pee)
+                    <button id="shiftBtnRelief" onclick="GameApp.shiftGoBathroom()" class="py-2.5 px-3 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-800 transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i id="shiftBtnReliefIcon" class="fa-solid fa-person-running text-sky-600"></i> <span id="shiftBtnReliefText">Relieve Urge</span>
                     </button>
                 </div>
             </div>
