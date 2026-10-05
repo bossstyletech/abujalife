@@ -123,17 +123,47 @@ if ($action === 'register') {
         $stmt->execute([$username, $email, $hash]);
         $userId = (int)$pdo->lastInsertId();
 
-        $stmt = $pdo->prepare("
-            INSERT INTO characters (
-                user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
-                cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
-            $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
-        ]);
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO characters (
+                    user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
+                    cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
+                $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
+            ]);
+        } catch (Exception $colEx) {
+            // Self-heal: ensure column is added, or fallback insert
+            try {
+                $pdo->exec("ALTER TABLE characters ADD COLUMN home_state TEXT DEFAULT NULL");
+                $stmt = $pdo->prepare("
+                    INSERT INTO characters (
+                        user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
+                        cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([
+                    $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
+                    $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
+                ]);
+            } catch (Exception $fallbackEx) {
+                $stmt = $pdo->prepare("
+                    INSERT INTO characters (
+                        user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
+                        cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([
+                    $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
+                    $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar
+                ]);
+            }
+        }
         $charId = (int)$pdo->lastInsertId();
 
         if ($primaryCar) {

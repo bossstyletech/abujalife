@@ -90,6 +90,7 @@ function getDbConnection() {
         try {
             $pdo = new PDO($dsn . ";dbname=" . DB_NAME, DB_USER, DB_PASS, $options);
             if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
+            ensureDatabaseSchema($pdo, 'mysql');
             return $pdo;
         } catch (PDOException $e) {
             // If database 1049 (Unknown DB), try to create
@@ -104,6 +105,7 @@ function getDbConnection() {
                         $pdo->exec(file_get_contents($sqlFile));
                     }
                     if (!defined('DB_DRIVER')) define('DB_DRIVER', 'mysql');
+                    ensureDatabaseSchema($pdo, 'mysql');
                     return $pdo;
                 } catch (Exception $inner) {
                     // Fallback to SQLite
@@ -133,6 +135,7 @@ function getDbConnection() {
         }
 
         if (!defined('DB_DRIVER')) define('DB_DRIVER', 'sqlite');
+        ensureDatabaseSchema($pdo, 'sqlite');
         return $pdo;
     } catch (Exception $sqlEx) {
         http_response_code(500);
@@ -142,6 +145,101 @@ function getDbConnection() {
             'error' => 'Database initialization error: ' . $sqlEx->getMessage()
         ]);
         exit;
+    }
+}
+
+/**
+ * Self-healing automatic schema synchronizer
+ * Guarantees required columns (home_state, active_shift, remember_token) and tables exist
+ * across both SQLite and MySQL without manual intervention.
+ */
+function ensureDatabaseSchema($pdo, $driver = 'sqlite') {
+    static $migrated = false;
+    if ($migrated) return;
+    $migrated = true;
+
+    try {
+        if ($driver === 'sqlite') {
+            // 1. Check characters table columns
+            $cols = $pdo->query("PRAGMA table_info(characters)")->fetchAll();
+            $colNames = array_column($cols, 'name');
+            if (!empty($colNames)) {
+                if (!in_array('home_state', $colNames)) {
+                    $pdo->exec("ALTER TABLE characters ADD COLUMN home_state TEXT DEFAULT NULL");
+                }
+                if (!in_array('active_shift', $colNames)) {
+                    $pdo->exec("ALTER TABLE characters ADD COLUMN active_shift TEXT DEFAULT NULL");
+                }
+            }
+
+            // 2. Check users table columns
+            $uCols = $pdo->query("PRAGMA table_info(users)")->fetchAll();
+            $uColNames = array_column($uCols, 'name');
+            if (!empty($uColNames)) {
+                if (!in_array('remember_token', $uColNames)) {
+                    $pdo->exec("ALTER TABLE users ADD COLUMN remember_token TEXT DEFAULT NULL");
+                }
+            }
+
+            // 3. Ensure user_messages table exists
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS user_messages (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sender_id INTEGER NOT NULL,
+                    recipient_id INTEGER NOT NULL,
+                    message TEXT NOT NULL,
+                    is_read INTEGER DEFAULT 0,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE INDEX IF NOT EXISTS idx_msg_sender ON user_messages(sender_id);
+                CREATE INDEX IF NOT EXISTS idx_msg_recipient ON user_messages(recipient_id);
+            ");
+
+            // 4. Ensure citizen_transfers table exists
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS citizen_transfers (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    sender_id INTEGER NOT NULL,
+                    recipient_id INTEGER NOT NULL,
+                    amount REAL NOT NULL,
+                    note TEXT DEFAULT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            ");
+        } else {
+            // MySQL
+            try { $pdo->exec("ALTER TABLE `characters` ADD COLUMN `home_state` TEXT DEFAULT NULL"); } catch (Exception $e) {}
+            try { $pdo->exec("ALTER TABLE `characters` ADD COLUMN `active_shift` TEXT DEFAULT NULL"); } catch (Exception $e) {}
+            try { $pdo->exec("ALTER TABLE `users` ADD COLUMN `remember_token` VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
+
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS `user_messages` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `sender_id` INT NOT NULL,
+                    `recipient_id` INT NOT NULL,
+                    `message` TEXT NOT NULL,
+                    `is_read` TINYINT(1) DEFAULT 0,
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX `idx_msg_sender` (`sender_id`),
+                    INDEX `idx_msg_recipient` (`recipient_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS `citizen_transfers` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `sender_id` INT NOT NULL,
+                    `recipient_id` INT NOT NULL,
+                    `amount` DECIMAL(14, 2) NOT NULL,
+                    `note` VARCHAR(255) DEFAULT NULL,
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX `idx_trans_sender` (`sender_id`),
+                    INDEX `idx_trans_recipient` (`recipient_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+            ");
+        }
+    } catch (Exception $e) {
+        // Silently tolerate if tables/columns already exist
     }
 }
 

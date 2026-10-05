@@ -85,6 +85,8 @@ CREATE TABLE IF NOT EXISTS characters (
     education_level TEXT DEFAULT 'SSCE',
     primary_vehicle_id INTEGER NULL,
     primary_property_id INTEGER NULL,
+    home_state TEXT DEFAULT NULL,
+    active_shift TEXT DEFAULT NULL,
     jail_days INTEGER DEFAULT 0,
     is_alive INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -142,6 +144,28 @@ CREATE TABLE IF NOT EXISTS random_events (
     option_b_happiness INTEGER DEFAULT 0,
     option_b_cred INTEGER DEFAULT 0,
     option_b_msg TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    is_read INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (recipient_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS citizen_transfers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    note TEXT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES characters (id) ON DELETE CASCADE,
+    FOREIGN KEY (recipient_id) REFERENCES characters (id) ON DELETE CASCADE
 );
 
 -- SEED DATA

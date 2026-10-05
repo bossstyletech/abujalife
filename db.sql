@@ -123,6 +123,8 @@ CREATE TABLE `characters` (
     `education_level` VARCHAR(50) DEFAULT 'SSCE',
     `primary_vehicle_id` INT NULL,
     `primary_property_id` INT NULL,
+    `home_state` TEXT DEFAULT NULL,
+    `active_shift` TEXT DEFAULT NULL,
     `jail_days` INT DEFAULT 0,
     `is_alive` TINYINT(1) DEFAULT 1,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -192,6 +194,32 @@ CREATE TABLE `random_events` (
     `option_b_happiness` INT DEFAULT 0,
     `option_b_cred` INT DEFAULT 0,
     `option_b_msg` VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_messages` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `sender_id` INT NOT NULL,
+    `recipient_id` INT NOT NULL,
+    `message` TEXT NOT NULL,
+    `is_read` TINYINT(1) DEFAULT 0,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_msg_sender` (`sender_id`),
+    INDEX `idx_msg_recipient` (`recipient_id`),
+    CONSTRAINT `fk_msg_sender` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_msg_recipient` FOREIGN KEY (`recipient_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `citizen_transfers` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `sender_id` INT NOT NULL,
+    `recipient_id` INT NOT NULL,
+    `amount` DECIMAL(14, 2) NOT NULL,
+    `note` VARCHAR(255) DEFAULT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_transfer_sender` (`sender_id`),
+    INDEX `idx_transfer_recipient` (`recipient_id`),
+    CONSTRAINT `fk_transfer_sender` FOREIGN KEY (`sender_id`) REFERENCES `characters` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_transfer_recipient` FOREIGN KEY (`recipient_id`) REFERENCES `characters` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===================================================
