@@ -1097,6 +1097,9 @@ if (!$char) {
         <button id="mainnav-phone" onclick="GameApp.switchMainView('phone')" class="main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5">
             <i class="fa-solid fa-mobile-screen text-xs"></i> <span>Phone</span>
         </button>
+        <button id="mainnav-citizens" onclick="GameApp.openCitizenFinder()" class="main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-users text-xs"></i> <span>Citizens</span>
+        </button>
     </nav>
 
     <!-- Bottom Right Quick Keyboard Action Icon (Image 5 & 6) -->
@@ -2250,13 +2253,23 @@ if (!$char) {
             </div>
 
             <!-- Interactive Actions with Citizen -->
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="GameApp.openPeerTransfer(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-paper-plane text-xs"></i> Send Money
-                </button>
-                <button onclick="GameApp.challengeCitizen(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-dice text-xs text-amber-400"></i> Dice Challenge
-                </button>
+            <div class="space-y-2 pt-1">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="GameApp.chatWithProfileCitizen()" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-comment-dots text-xs"></i> Chat on Phone
+                    </button>
+                    <button onclick="GameApp.openPeerTransfer(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-money-bill-transfer text-xs"></i> Send Money
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="GameApp.hangoutWithProfileCitizen('drinks')" class="py-2.5 px-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-utensils text-xs"></i> Buy Suya & Relate
+                    </button>
+                    <button onclick="GameApp.challengeCitizen(GameApp.activeInspectedCitizen)" class="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-dice text-xs text-amber-400"></i> Street Challenge
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -2649,13 +2662,18 @@ if (!$char) {
 
             <div class="space-y-2 pt-1">
                 <button onclick="GameApp.chatWithMapCitizen()" class="w-full p-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-comment-dots"></i> Chat on NaijaConnect Phone
+                    <i class="fa-solid fa-comment-dots"></i> Chat on NaijaChat Phone
                 </button>
-                <button onclick="GameApp.transferToMapCitizen()" class="w-full p-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-money-bill-transfer"></i> Transfer Naira (OPay / Kuda)
-                </button>
-                <button onclick="GameApp.greetMapCitizen()" class="w-full p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-hand"></i> Greet / Salute ("How Far Chairman!")
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="GameApp.transferToMapCitizen()" class="p-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Send ₦
+                    </button>
+                    <button onclick="GameApp.hangoutWithMapCitizen()" class="p-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-utensils"></i> Buy Suya & Relate
+                    </button>
+                </div>
+                <button onclick="GameApp.greetMapCitizen()" class="w-full p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl text-xs transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-hand"></i> Salute ("How Far Chairman!")
                 </button>
             </div>
         </div>

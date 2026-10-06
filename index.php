@@ -17,8 +17,9 @@ if (getAuthUserId()) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <!-- Three.js 3D Engine for Bitmoji Character Customizer -->
+    <!-- Three.js 3D Engine & OrbitControls for Realtime 3D City & Avatars -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="assets/js/characters.js"></script>
     <script src="assets/js/avatar3d.js"></script>
     <style>
@@ -128,22 +129,22 @@ if (getAuthUserId()) {
     </div>
 
     <!-- =====================================================
-         2. FULL-SCREEN INTERACTIVE CANVAS ISOMETRIC MAP
+         2. FULL-SCREEN INTERACTIVE 3D ISOMETRIC ABUJA CITY MAP
          ===================================================== -->
-    <main id="mapViewport" class="flex-1 w-full h-full relative overflow-hidden select-none">
+    <main id="mapViewport" class="flex-1 w-full h-full relative overflow-hidden select-none bg-slate-900">
 
-        <!-- Pure Canvas Map — drawn in JS, no images, no HTML menus overlaid -->
-        <canvas id="abujaMapCanvas" class="absolute inset-0 w-full h-full" style="display:block;"></canvas>
+        <!-- Realtime 3D WebGL City Container — Zero quality loss on zoom -->
+        <div id="map3d-container" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing"></div>
 
-        <!-- Zoom controls — these float cleanly, NOT on top of a PNG -->
+        <!-- 3D Camera Controls (Zoom In / Out / Reset) -->
         <div class="absolute right-4 bottom-24 z-30 flex flex-col gap-2 pointer-events-auto">
-            <button onclick="AbujaMap.zoom(1.25)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
+            <button onclick="if(window.Map3D) Map3D.zoom(1.25)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition" title="Zoom In">
                 <i class="fa-solid fa-plus text-xs"></i>
             </button>
-            <button onclick="AbujaMap.zoom(0.8)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
+            <button onclick="if(window.Map3D) Map3D.zoom(0.8)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition" title="Zoom Out">
                 <i class="fa-solid fa-minus text-xs"></i>
             </button>
-            <button onclick="AbujaMap.resetView()" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
+            <button onclick="if(window.Map3D) Map3D.resetView()" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition" title="Reset View">
                 <i class="fa-solid fa-crosshairs text-xs"></i>
             </button>
         </div>
@@ -540,42 +541,30 @@ if (getAuthUserId()) {
         </div>
     </div>
 
-    <!-- Canvas Map Renderer -->
-    <script src="assets/js/abuja_map.js"></script>
+    <!-- Realtime Three.js 3D Map Engine -->
+    <script src="assets/js/map3d.js"></script>
 
     <script>
         // ─────────────────────────────────────────────────────────
-        // 1. Boot the Isometric Canvas Map
+        // 1. Boot the Realtime Three.js 3D Abuja City Map
         // ─────────────────────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('abujaMapCanvas');
-            if (!canvas) return;
-
-            AbujaMap.init(
-                canvas,
-                // Location pin clicked → show the preview card
-                (id, label) => { previewLocation(id); },
-                // Citizen badge clicked → show citizen card
-                (citizen) => { previewCitizen(citizen.username, '', '', ''); }
-            );
-
-            // Optionally fetch real registered citizens to show on map
-            fetch('api/citizens.php?action=search')
-                .then(r => r.json())
-                .then(d => {
-                    if (d.success && d.citizens) {
-                        AbujaMap.loadCitizens(d.citizens);
+            if (window.Map3D) {
+                Map3D.init(
+                    'map3d-container',
+                    // Landmark Pin clicked
+                    (id, name) => { previewLocation(id); },
+                    // Citizen clicked
+                    (citizen) => {
+                        previewCitizen(
+                            '@' + citizen.username,
+                            citizen.job || 'Abuja Resident',
+                            citizen.district || 'Abuja FCT',
+                            '₦5.8M'
+                        );
                     }
-                }).catch(() => {
-                    // Not logged in on landing page — just show demo citizens
-                    AbujaMap.loadCitizens([
-                        { username: '@aminu_fct' },
-                        { username: '@dapo_tech' },
-                        { username: '@zainab_fct' },
-                        { username: '@kunle_builds' },
-                        { username: '@ibrahim_wuse' },
-                    ]);
-                });
+                );
+            }
         });
 
 

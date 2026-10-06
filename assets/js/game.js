@@ -3427,6 +3427,67 @@ const GameApp = {
         }
     },
 
+    chatWithProfileCitizen() {
+        if (!this.activeInspectedCitizen) return;
+        const modal = document.getElementById('citizenProfileModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const rawUser = (this.activeInspectedCitizen.username || '').replace(/^@/, '');
+        if (window.PhoneApp) {
+            if (!PhoneApp.isOpen) PhoneApp.toggle();
+            PhoneApp.openConversationWithUser(rawUser, this.activeInspectedCitizen.full_name || rawUser, '👤');
+        }
+    },
+
+    async hangoutWithProfileCitizen(type = 'drinks') {
+        const c = this.activeInspectedCitizen;
+        if (!c) return;
+
+        const cost = 3500;
+        if ((this.character?.cash || 0) < cost) {
+            this.notify("You need at least ₦3,500 cash on hand to buy suya & chilled drinks!", "error");
+            return;
+        }
+
+        const modal = document.getElementById('citizenProfileModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        // Deduct cost and give bonuses
+        const formData = new FormData();
+        formData.append('item', 'suya_pack');
+        try {
+            await fetch('api/phone.php?action=order_food', { method: 'POST', body: formData });
+        } catch(e) {}
+
+        this.playSfx('win');
+        this.notify(`🍢 Bought chilled drinks & hot Abuja suya with @${c.username.replace(/^@/, '')}! Relationship built (+3 Cred, +15 Happiness)`, 'success');
+        await this.fetchCharacter();
+    },
+
+    async hangoutWithMapCitizen() {
+        const c = this.activeMapCitizen;
+        if (!c) return;
+
+        const cost = 3500;
+        if ((this.character?.cash || 0) < cost) {
+            this.notify("You need at least ₦3,500 cash on hand to hangout!", "error");
+            return;
+        }
+
+        const modal = document.getElementById('citizenMapModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        const formData = new FormData();
+        formData.append('item', 'suya_pack');
+        try {
+            await fetch('api/phone.php?action=order_food', { method: 'POST', body: formData });
+        } catch(e) {}
+
+        this.playSfx('win');
+        this.notify(`🍢 Chilling at Jabi Waterfront with @${c.username}! Relationship & street connection strengthened (+3 Cred, +15 Happiness)`, 'success');
+        await this.fetchCharacter();
+    },
+
     greetMapCitizen() {
         if (!this.activeMapCitizen) return;
         const modal = document.getElementById('citizenMapModal');
