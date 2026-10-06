@@ -329,7 +329,8 @@ if ($action === 'logout') {
             $pdo->prepare("UPDATE users SET remember_token = NULL WHERE id = ?")->execute([(int)$_SESSION['user_id']]);
         } catch (Exception $e) {}
     }
-    setcookie('abuja_remember_token', '', time() - 42000, '/');
+    @setcookie('abuja_remember_token', '', time() - 42000, '/');
+    @setcookie('abuja_user_id', '', time() - 42000, '/');
     $_SESSION = [];
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
@@ -340,6 +341,46 @@ if ($action === 'logout') {
     }
     session_destroy();
     jsonResponse(['success' => true, 'message' => 'Logged out successfully.', 'redirect' => 'index.php']);
+}
+
+if ($action === 'restore_session') {
+    $token = cleanInput($_POST['token'] ?? $_GET['token'] ?? $_COOKIE['abuja_remember_token'] ?? '');
+    $cUserId = (int)($_POST['user_id'] ?? $_COOKIE['abuja_user_id'] ?? 0);
+
+    $user = null;
+    if (!empty($token)) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE remember_token = ? LIMIT 1");
+            $stmt->execute([$token]);
+            $user = $stmt->fetch();
+        } catch (Exception $e) {}
+    }
+    if (!$user && $cUserId > 0) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+            $stmt->execute([$cUserId]);
+            $user = $stmt->fetch();
+        } catch (Exception $e) {}
+    }
+
+    if ($user) {
+        $_SESSION['user_id'] = (int)$user['id'];
+        $_SESSION['username'] = $user['username'];
+        $remToken = issueRememberToken((int)$user['id']);
+        $char = getUserCharacter((int)$user['id']);
+        jsonResponse([
+            'success' => true,
+            'message' => 'Session restored',
+            'token' => $remToken,
+            'user' => [
+                'id' => (int)$user['id'],
+                'username' => $user['username']
+            ],
+            'has_character' => !empty($char)
+        ]);
+    }
+
+    jsonResponse(['success' => false, 'error' => 'No active session token found'], 401);
 }
 
 if ($action === 'me') {

@@ -270,20 +270,47 @@ function getAuthUserId() {
         return (int)$_SESSION['user_id'];
     }
 
-    // Auto-restore session from persistent remember token cookie
-    if (!empty($_COOKIE['abuja_remember_token'])) {
+    $pdo = getDbConnection();
+
+    // 1. Check persistent remember token cookie
+    $token = $_COOKIE['abuja_remember_token'] ?? $_GET['token'] ?? $_POST['token'] ?? '';
+    if (empty($token) && !empty($_SERVER['HTTP_AUTHORIZATION'])) {
+        if (preg_match('/Bearer\s+(\S+)/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            $token = $matches[1];
+        }
+    }
+
+    if (!empty($token)) {
         try {
-            $pdo = getDbConnection();
             $stmt = $pdo->prepare("SELECT id, username FROM users WHERE remember_token = ? LIMIT 1");
-            $stmt->execute([$_COOKIE['abuja_remember_token']]);
+            $stmt->execute([$token]);
             $user = $stmt->fetch();
             if ($user) {
                 $_SESSION['user_id'] = (int)$user['id'];
                 $_SESSION['username'] = $user['username'];
+                if (!headers_sent()) {
+                    @setcookie('abuja_remember_token', $token, time() + 31536000, '/', '', false, true);
+                    @setcookie('abuja_user_id', (string)$user['id'], time() + 31536000, '/', '', false, false);
+                }
                 return (int)$user['id'];
             }
-        } catch (Exception $e) {
-            // Ignore error and fall through
+        } catch (Exception $e) {}
+    }
+
+    // 2. Check persistent user_id cookie fallback
+    if (!empty($_COOKIE['abuja_user_id'])) {
+        $cUserId = (int)$_COOKIE['abuja_user_id'];
+        if ($cUserId > 0) {
+            try {
+                $stmt = $pdo->prepare("SELECT id, username FROM users WHERE id = ? LIMIT 1");
+                $stmt->execute([$cUserId]);
+                $user = $stmt->fetch();
+                if ($user) {
+                    $_SESSION['user_id'] = (int)$user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    return (int)$user['id'];
+                }
+            } catch (Exception $e) {}
         }
     }
 
@@ -297,7 +324,8 @@ function issueRememberToken($userId) {
         $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
         $stmt->execute([$token, $userId]);
         if (!headers_sent()) {
-            setcookie('abuja_remember_token', $token, time() + 31536000, '/', '', false, true);
+            @setcookie('abuja_remember_token', $token, time() + 31536000, '/', '', false, true);
+            @setcookie('abuja_user_id', (string)$userId, time() + 31536000, '/', '', false, false);
         }
         return $token;
     } catch (Exception $e) {
