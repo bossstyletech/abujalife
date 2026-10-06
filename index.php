@@ -12,6 +12,26 @@ if (getAuthUserId()) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Abuja Life | Urban RPG Simulation</title>
+    <script>
+        // Keep a real account alive across browser/session-cookie loss. This runs
+        // before the login UI so a saved citizen returns straight to the city.
+        (async () => {
+            const token = localStorage.getItem('abuja_remember_token');
+            if (!token) return;
+            try {
+                const body = new FormData();
+                body.append('token', token);
+                const response = await fetch('api/auth.php?action=restore_session', { method: 'POST', body, credentials: 'same-origin' });
+                const data = await response.json();
+                if (data.success) {
+                    if (data.token) localStorage.setItem('abuja_remember_token', data.token);
+                    window.location.replace('game.php');
+                } else if (response.status === 401) {
+                    localStorage.removeItem('abuja_remember_token');
+                }
+            } catch (_) { /* The regular sign-in screen remains available offline. */ }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">

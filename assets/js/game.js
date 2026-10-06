@@ -116,13 +116,17 @@ const GameApp = {
             let res = await fetch('api/character.php?action=get', { headers });
             let data = await res.json();
             
-            if (!data.success && data.error === 'Unauthorized' && token) {
+            // A page refresh can arrive before PHP receives the remember-cookie.
+            // Restore from the durable browser token for any 401 response, not one
+            // particular backend error string.
+            if (!data.success && res.status === 401 && token) {
                 const restoreData = new FormData();
                 restoreData.append('token', token);
                 const restoreRes = await fetch('api/auth.php?action=restore_session', { method: 'POST', body: restoreData });
                 const restoreJson = await restoreRes.json();
                 
                 if (restoreJson.success) {
+                    if (restoreJson.token) localStorage.setItem('abuja_remember_token', restoreJson.token);
                     res = await fetch('api/character.php?action=get', { headers });
                     data = await res.json();
                 } else {
@@ -3413,6 +3417,27 @@ const GameApp = {
         if (window.PhoneApp) {
             if (!PhoneApp.isOpen) PhoneApp.toggle();
             PhoneApp.openConversationWithUser(this.activeMapCitizen.username, this.activeMapCitizen.name, '👤');
+        }
+    },
+
+    // Called from the live 3D city: a username label is a direct social entry point.
+    // Opening the existing chat screen keeps messages, transfers and contacts in one place.
+    openWorldCitizen(citizen) {
+        if (!citizen) return;
+        const username = String(citizen.username || '').replace(/^@/, '');
+        if (!username) return;
+        this.activeMapCitizen = {
+            name: citizen.full_name || username,
+            username,
+            job: citizen.job_title || 'Abuja Resident',
+            district: citizen.district || 'Abuja FCT',
+            cred: citizen.street_cred || 0
+        };
+        if (window.PhoneApp) {
+            if (!PhoneApp.isOpen) PhoneApp.toggle();
+            PhoneApp.openConversationWithUser(username, this.activeMapCitizen.name, citizen.avatar || '👤');
+        } else {
+            this.openCitizenFinder();
         }
     },
 
