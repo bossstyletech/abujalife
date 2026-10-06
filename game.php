@@ -2,13 +2,61 @@
 require_once __DIR__ . '/config.php';
 
 $userId = getAuthUserId();
-if (!$userId) {
-    header('Location: index.php');
-    exit;
-}
-$char = getUserCharacter($userId);
-if (!$char) {
-    header('Location: index.php');
+$char = $userId ? getUserCharacter($userId) : null;
+
+if (!$userId || !$char) {
+    // If server session/cookie was dropped, check localStorage before kicking to index.php
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Restoring Abuja Citizen Session...</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-slate-950 text-white flex items-center justify-center h-screen m-0 select-none">
+        <div class="text-center p-6 max-w-sm">
+            <div class="w-14 h-14 rounded-3xl bg-emerald-600/20 text-emerald-400 mx-auto flex items-center justify-center text-2xl mb-4 border border-emerald-500/30 animate-pulse">
+                👑
+            </div>
+            <h2 class="text-base font-extrabold text-white mb-1">Abuja Life</h2>
+            <p class="text-xs text-slate-400 mb-4" id="restoreStatus">Restoring your citizen session...</p>
+            <div class="w-32 h-1.5 bg-slate-800 rounded-full mx-auto overflow-hidden">
+                <div class="w-full h-full bg-emerald-500 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+        <script>
+        const token = localStorage.getItem('abuja_remember_token') || '';
+        const uid = localStorage.getItem('abuja_user_id') || '';
+        if (token || uid) {
+            fetch('api/auth.php?action=restore_session', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'token=' + encodeURIComponent(token) + '&user_id=' + encodeURIComponent(uid)
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    if (d.token) {
+                        localStorage.setItem('abuja_remember_token', d.token);
+                        document.cookie = "abuja_remember_token=" + d.token + "; path=/; max-age=315360000; SameSite=Lax";
+                    }
+                    if (d.user && d.user.id) {
+                        localStorage.setItem('abuja_user_id', d.user.id);
+                        document.cookie = "abuja_user_id=" + d.user.id + "; path=/; max-age=315360000; SameSite=Lax";
+                    }
+                    window.location.reload();
+                } else {
+                    localStorage.removeItem('abuja_remember_token');
+                    window.location.href = 'index.php';
+                }
+            }).catch(() => { window.location.href = 'index.php'; });
+        } else {
+            window.location.href = 'index.php';
+        }
+        </script>
+    </body>
+    </html>
+    <?php
     exit;
 }
 ?>
@@ -142,6 +190,22 @@ if (!$char) {
                             <button onclick="GameApp.toggleCleanScreen()" class="w-fit bg-white/90 hover:bg-white backdrop-blur-md border border-slate-200/80 rounded-full px-3 py-1 shadow text-[10px] font-bold text-slate-600 transition active:scale-95">
                                 <i class="fa-solid fa-chevron-up text-[9px] mr-1"></i> Clean screen
                             </button>
+                        </div>
+
+                        <!-- Bottom Center Venue Switcher Pill (Matching reference screenshot) -->
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 pointer-events-auto">
+                            <div class="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-full px-3 py-1.5 shadow-lg flex items-center gap-2 text-xs font-bold text-slate-800">
+                                <span id="world3dVenuePillText" class="flex items-center gap-1">🏠 Abuja Residence</span>
+                                <select onchange="if(window.World3D) World3D.switchVenue(this.value)" class="bg-transparent text-[11px] font-extrabold text-slate-700 outline-none cursor-pointer border-l border-slate-200 pl-1.5">
+                                    <option value="home">🏠 My Room</option>
+                                    <option value="gym">🏋️ i-Fitness Gym</option>
+                                    <option value="restaurant">🍲 Jabi Lake Grill</option>
+                                    <option value="banex">📱 Banex Tech Hub</option>
+                                    <option value="market">🛍️ Wuse Market</option>
+                                    <option value="mosque">🕌 National Mosque</option>
+                                    <option value="church">⛪ National Church</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -2625,6 +2689,21 @@ if (!$char) {
             <!-- Dynamic Activity Action Cards -->
             <div id="activityCardsContainer" class="space-y-3">
                 <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Citizens Present in this Venue -->
+            <div class="pt-3 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
+                        <span>👥</span> Citizens Present in this Venue
+                    </h4>
+                    <span class="text-[10px] text-emerald-600 font-extrabold flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online Now
+                    </span>
+                </div>
+                <div id="activityVenueCitizens" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    <!-- Dynamically populated with active citizens -->
+                </div>
             </div>
         </div>
     </div>

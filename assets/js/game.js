@@ -3346,11 +3346,67 @@ const GameApp = {
 
         container.innerHTML = html;
 
+        // Populate Venue Citizens
+        const venueCitizensEl = document.getElementById('activityVenueCitizens');
+        if (venueCitizensEl) {
+            venueCitizensEl.innerHTML = `<div class="p-3 text-center text-xs text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Loading citizens in this venue...</div>`;
+            fetch('api/citizens.php?action=search')
+                .then(r => r.json())
+                .then(d => {
+                    let list = (d.success && d.citizens && d.citizens.length > 0) ? d.citizens : [
+                        { username: 'priscil_mco', full_name: 'Priscilla M.', district: 'Maitama', job_title: 'Fitness Coach' },
+                        { username: 'kizbojstt', full_name: 'Kizito B.', district: 'Wuse 2', job_title: 'Tech Founder' },
+                        { username: 'greenfoot', full_name: 'David O.', district: 'Jabi', job_title: 'Runner' },
+                        { username: 'valteo', full_name: 'Valerie T.', district: 'CBD', job_title: 'Banker' },
+                        { username: 'Bisola', full_name: 'Bisola Ade', district: 'Asokoro', job_title: 'Diplomat' }
+                    ];
+                    venueCitizensEl.innerHTML = list.slice(0, 5).map(c => `
+                        <div class="p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/90 rounded-2xl flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center">
+                                    ${(c.full_name || 'C').charAt(0)}
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-bold text-xs text-slate-900">${c.full_name || c.username}</span>
+                                        <span class="text-[10px] font-mono text-emerald-700 font-bold">@${c.username.replace(/^@/, '')}</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500">${c.job_title || 'Abuja Resident'} • ${c.district || 'Abuja'}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="GameApp.openChatWithUsername('${c.username}')" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] rounded-lg shadow-xs transition" title="Chat on NaijaChat">
+                                    <i class="fa-solid fa-comment mr-0.5"></i> Chat
+                                </button>
+                                <button onclick="GameApp.openPeerTransfer({id: ${c.id || 0}, username: '${c.username}', full_name: '${(c.full_name || c.username).replace(/'/g, "\\'")}'})" class="px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[10px] rounded-lg shadow-xs transition" title="Send Money">
+                                    <i class="fa-solid fa-paper-plane mr-0.5"></i> Send ₦
+                                </button>
+                                <button onclick="GameApp.hangoutWithProfileCitizen('drinks')" class="px-2 py-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-[10px] rounded-lg shadow-xs transition" title="Relate / Buy Suya">
+                                    <i class="fa-solid fa-utensils"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                })
+                .catch(() => {
+                    venueCitizensEl.innerHTML = `<p class="p-2 text-xs text-slate-400 text-center">Active citizens roaming nearby.</p>`;
+                });
+        }
+
         const modal = document.getElementById('destActivityModal');
         if (modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             this.playSfx('click');
+        }
+    },
+
+    openChatWithUsername(username) {
+        const raw = username.replace(/^@/, '');
+        this.closeActivityModal();
+        if (window.PhoneApp) {
+            if (!PhoneApp.isOpen) PhoneApp.toggle();
+            PhoneApp.openConversationWithUser(raw, '@' + raw, '👤');
         }
     },
 

@@ -695,22 +695,43 @@ if ($action === 'interact_furniture') {
     $deltas = ['cash' => 0, 'energy' => 0, 'happiness' => 0, 'health' => 0, 'cred' => 0];
     $msg = '';
 
-    if ($itemId === 'bed' || $itemId === 'bed_orthopedic') {
+    if ($itemId === 'bed' || $itemId === 'bed_orthopedic' || $itemId === 'floor_mat') {
         $deltas['energy'] = 50;
         $deltas['health'] = 15;
         $deltas['happiness'] = 10;
-        $msg = "😴 You fell asleep on your bed and woke up energized and refreshed! (+50 Energy)";
-    } elseif ($itemId === 'fridge' || $itemId === 'fridge_haier') {
+        $msg = "😴 You slept peacefully on your bed and woke up energized and refreshed! (+50 Energy, +15 Health)";
+    } elseif ($itemId === 'bucket' || $itemId === 'bucket_red' || $itemId === 'bucket_blue') {
         $deltas['energy'] = 15;
         $deltas['health'] = 10;
         $deltas['happiness'] = 15;
-        $msg = "🍱 You opened the cooler/fridge and enjoyed delicious chilled chops! Hunger satisfied.";
+        $msg = "🚿 You took a refreshing bath with clean water from your bucket! Hygiene restored, feeling great. (+15 Energy, +15 Happiness)";
+    } elseif ($itemId === 'cooler' || $itemId === 'fridge' || $itemId === 'fridge_haier') {
+        $deltas['energy'] = 25;
+        $deltas['health'] = 10;
+        $deltas['happiness'] = 20;
+        $msg = "🍱 You opened the cooler and enjoyed delicious Abuja chow! Fullness and mood boosted. (+25 Energy, +20 Happiness)";
+    } elseif ($itemId === 'books') {
+        $deltas['energy'] = -5;
+        $deltas['happiness'] = 10;
+        $deltas['cred'] = 2;
+        $msg = "📚 You read and studied from your books on the shelf! Intelligence and street smarts boosted (+5 IQ, +2 Street Cred)";
+        try {
+            $pdo->prepare("UPDATE characters SET intelligence = intelligence + 5 WHERE id = ?")->execute([$char['id']]);
+        } catch(Exception $e) {}
+    } elseif ($itemId === 'radio') {
+        $deltas['happiness'] = 20;
+        $deltas['energy'] = 5;
+        $msg = "📻 You tuned in to Afrobeats on Wazobia FM! Chilling to sweet tunes in your crib. (+20 Happiness)";
+    } elseif ($itemId === 'chair') {
+        $deltas['energy'] = 10;
+        $deltas['happiness'] = 10;
+        $msg = "🪑 You sat down on your chair to relax, chill, and ponder your next big Abuja move. (+10 Happiness)";
     } elseif ($itemId === 'gas_cooker') {
         $deltas['energy'] = -5;
         $deltas['health'] = 15;
         $deltas['happiness'] = 25;
         $msg = "🍳 You cooked a hot plate of smoky Nigerian Party Jollof on your gas cooker! Super delicious.";
-    } elseif ($itemId === 'mac_workstation' || $itemId === 'laptop') {
+    } elseif ($itemId === 'mac_workstation' || $itemId === 'desk' || $itemId === 'laptop') {
         $payout = (float)mt_rand(18000, 36000);
         $deltas['cash'] = $payout;
         $deltas['energy'] = -15;

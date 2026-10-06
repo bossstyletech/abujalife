@@ -193,6 +193,7 @@ if ($action === 'register') {
             'success' => true,
             'message' => 'Character created! Welcome to Abuja Life.',
             'token' => $remToken,
+            'user_id' => $userId,
             'redirect' => 'game.php'
         ]);
     } catch (Exception $e) {
@@ -225,6 +226,7 @@ if ($action === 'login') {
         'success' => true,
         'message' => 'Login successful! Entering Abuja...',
         'token' => $remToken,
+        'user_id' => (int)$user['id'],
         'redirect' => 'game.php'
     ]);
 }
