@@ -1060,6 +1060,7 @@ if (getAuthUserId()) {
                 const res = await fetch('api/auth.php', { method: 'POST', body: formData });
                 const json = await res.json();
                 if (json.success) {
+                    if (json.token) localStorage.setItem('abuja_remember_token', json.token);
                     window.location.href = json.redirect || 'game.php';
                 } else {
                     alert(json.error || 'Registration error. Please choose a different username.');
@@ -1082,6 +1083,7 @@ if (getAuthUserId()) {
                 const res = await fetch('api/auth.php', { method: 'POST', body: data });
                 const json = await res.json();
                 if (json.success) {
+                    if (json.token) localStorage.setItem('abuja_remember_token', json.token);
                     window.location.href = json.redirect || 'game.php';
                 } else {
                     const errEl = document.getElementById('loginError');

@@ -109,8 +109,27 @@ const GameApp = {
 
     async fetchCharacter() {
         try {
-            const res = await fetch('api/character.php?action=get');
-            const data = await res.json();
+            const token = localStorage.getItem('abuja_remember_token');
+            const headers = {};
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            let res = await fetch('api/character.php?action=get', { headers });
+            let data = await res.json();
+            
+            if (!data.success && data.error === 'Unauthorized' && token) {
+                const restoreData = new FormData();
+                restoreData.append('token', token);
+                const restoreRes = await fetch('api/auth.php?action=restore_session', { method: 'POST', body: restoreData });
+                const restoreJson = await restoreRes.json();
+                
+                if (restoreJson.success) {
+                    res = await fetch('api/character.php?action=get', { headers });
+                    data = await res.json();
+                } else {
+                    localStorage.removeItem('abuja_remember_token');
+                }
+            }
+
             if (!data.success) {
                 if (data.redirect) window.location.href = data.redirect;
                 return;
@@ -3420,68 +3439,10 @@ const GameApp = {
     // ====================================================
     // IN-GAME 3D MAP DRAGGING & ZOOMING
     // ====================================================
-    inGameMapPan: { x: -500, y: -280, scale: 1, isDragging: false, startX: 0, startY: 0 },
     initInGameMap() {
-        const vp = document.getElementById('inGameMapViewport');
-        const canvas = document.getElementById('inGameMapCanvas');
-        if (!vp || !canvas || vp._mapInitialized) return;
-        vp._mapInitialized = true;
-
-        const applyTransform = () => {
-            canvas.style.transform = `translate(${this.inGameMapPan.x}px, ${this.inGameMapPan.y}px) scale(${this.inGameMapPan.scale})`;
-        };
-
-        vp.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button') || e.target.closest('.pin-animated') || e.target.closest('[onclick]')) return;
-            this.inGameMapPan.isDragging = true;
-            this.inGameMapPan.startX = e.clientX - this.inGameMapPan.x;
-            this.inGameMapPan.startY = e.clientY - this.inGameMapPan.y;
-            vp.style.cursor = 'grabbing';
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!this.inGameMapPan.isDragging) return;
-            this.inGameMapPan.x = e.clientX - this.inGameMapPan.startX;
-            this.inGameMapPan.y = e.clientY - this.inGameMapPan.startY;
-            applyTransform();
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (this.inGameMapPan.isDragging) {
-                this.inGameMapPan.isDragging = false;
-                vp.style.cursor = 'grab';
-            }
-        });
-
-        vp.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const delta = e.deltaY < 0 ? 0.1 : -0.1;
-            const newScale = Math.min(2.0, Math.max(0.6, this.inGameMapPan.scale + delta));
-            this.inGameMapPan.scale = newScale;
-            applyTransform();
-        }, { passive: false });
-
-        // Touch support
-        vp.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                this.inGameMapPan.isDragging = true;
-                this.inGameMapPan.startX = e.touches[0].clientX - this.inGameMapPan.x;
-                this.inGameMapPan.startY = e.touches[0].clientY - this.inGameMapPan.y;
-            }
-        });
-
-        vp.addEventListener('touchmove', (e) => {
-            if (!this.inGameMapPan.isDragging || e.touches.length !== 1) return;
-            this.inGameMapPan.x = e.touches[0].clientX - this.inGameMapPan.startX;
-            this.inGameMapPan.y = e.touches[0].clientY - this.inGameMapPan.startY;
-            applyTransform();
-        });
-
-        vp.addEventListener('touchend', () => {
-            this.inGameMapPan.isDragging = false;
-        });
-
-        applyTransform();
+        if (window.Map3D && !window.Map3D.isInitialized) {
+            window.Map3D.init('map3d-container');
+        }
     }
 };
 

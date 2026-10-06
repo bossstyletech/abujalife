@@ -125,108 +125,50 @@ if (!$char) {
                         <p class="text-xs text-slate-500">Tap furniture to interact: sleep on bed, eat from cooler, cook on stove, or code on desk!</p>
                     </div>
 
-                    <!-- Room Mode Switcher -->
-                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/60 text-xs font-bold">
-                        <button id="btnRoomIsometric" onclick="GameApp.switchRoomRender('isometric')" class="px-3 py-1.5 rounded-xl bg-white text-slate-900 shadow-sm transition">
-                            <i class="fa-solid fa-couch text-xs mr-1 text-emerald-600"></i> Furnished Room
-                        </button>
-                        <button id="btnRoom3d" onclick="GameApp.switchRoomRender('orbit3d')" class="px-3 py-1.5 rounded-xl text-slate-600 hover:text-slate-900 transition">
-                            <i class="fa-solid fa-cube text-xs mr-1 text-blue-600"></i> 3D Orbit View
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 1. Interactive Isometric House Interior Container (Image 5) -->
-                <div id="isometricRoomContainer" class="w-full h-[440px] sm:h-[540px] rounded-3xl relative overflow-hidden shadow-inner border border-slate-200 select-none bg-slate-100">
-                    <!-- High-Res Isometric House Canvas Background -->
-                    <img 
-                        src="assets/img/house_interior_3d.png" 
-                        class="w-full h-full object-cover select-none pointer-events-none" 
-                        alt="House Interior"
-                    />
-
-                    <!-- Left Floating Quest / Activity Pills (Image 5) -->
-                    <div class="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-auto">
-                        <div onclick="GameApp.interactFurniture('fridge')" class="bg-white/95 hover:bg-white backdrop-blur-md border border-slate-200/90 rounded-full px-3.5 py-2 shadow-lg flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer transition transform active:scale-95">
-                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">🍲</span>
-                            <div>
-                                <span class="block text-slate-900">Eat something</span>
-                                <span class="text-[10px] text-slate-500 font-normal">Tap the cooler or stove</span>
+                    <!-- 3D House Viewport Container -->
+                    <div id="orbit3dContainer" class="w-full h-[440px] sm:h-[540px] rounded-3xl bg-slate-50 border border-slate-200/80 relative cursor-grab active:cursor-grabbing overflow-hidden shadow-inner mb-4">
+                        <div id="world3d-container" class="w-full h-full"></div>
+                        
+                        <!-- Left Floating Quest / Activity Pills -->
+                        <div class="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-auto">
+                            <div onclick="GameApp.claimDailyGem()" class="bg-white/95 hover:bg-white backdrop-blur-md border border-slate-200/90 rounded-full px-3.5 py-2 shadow-lg flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer transition transform active:scale-95">
+                                <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs">💎</span>
+                                <div>
+                                    <span class="block text-slate-900">Daily gem hunt</span>
+                                    <span class="text-[10px] text-slate-500 font-normal">Tap to collect ₦3,000</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div onclick="GameApp.claimDailyGem()" class="bg-white/95 hover:bg-white backdrop-blur-md border border-slate-200/90 rounded-full px-3.5 py-2 shadow-lg flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer transition transform active:scale-95">
-                            <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs">💎</span>
-                            <div>
-                                <span class="block text-slate-900">Daily gem hunt</span>
-                                <span class="text-[10px] text-slate-500 font-normal">Tap to collect ₦3,000</span>
-                            </div>
-                        </div>
-
-                        <button onclick="GameApp.toggleCleanScreen()" class="w-fit bg-white/90 hover:bg-white backdrop-blur-md border border-slate-200/80 rounded-full px-3 py-1 shadow text-[10px] font-bold text-slate-600 transition active:scale-95">
-                            <i class="fa-solid fa-chevron-up text-[9px] mr-1"></i> Clean screen
-                        </button>
-                    </div>
-
-                    <!-- Interactive Clickable Furniture Hotspots in the Room -->
-                    <!-- Bed Hotspot -->
-                    <div onclick="GameApp.interactFurniture('bed')" class="absolute top-[26%] left-[48%] cursor-pointer group pin-animated" style="transform: translate(-50%, -50%);">
-                        <div class="bg-white/95 border border-slate-200 text-slate-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>🛏️ Sleep on Bed</span>
+                            <button onclick="GameApp.toggleCleanScreen()" class="w-fit bg-white/90 hover:bg-white backdrop-blur-md border border-slate-200/80 rounded-full px-3 py-1 shadow text-[10px] font-bold text-slate-600 transition active:scale-95">
+                                <i class="fa-solid fa-chevron-up text-[9px] mr-1"></i> Clean screen
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Table / Cooler Hotspot -->
-                    <div onclick="GameApp.interactFurniture('fridge')" class="absolute top-[48%] left-[73%] cursor-pointer group pin-animated" style="transform: translate(-50%, -50%);">
-                        <div class="bg-white/95 border border-slate-200 text-slate-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>🧊 Cooler Chops</span>
+                    <!-- Home Interactions UI Grid -->
+                    <div class="mb-4">
+                        <h4 class="font-bold text-sm text-slate-900 mb-2">Home Actions</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <button onclick="GameApp.interactFurniture('bed')" class="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5">
+                                🛏️ Sleep on Bed
+                            </button>
+                            <button onclick="GameApp.interactFurniture('fridge')" class="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5">
+                                🧊 Cooler Chops
+                            </button>
+                            <button onclick="GameApp.interactFurniture('smart_tv')" class="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5">
+                                🛋️ Relax Sofa
+                            </button>
+                            <button onclick="GameApp.interactFurniture('mac_workstation')" class="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5">
+                                💻 Freelance & Trade
+                            </button>
+                            <button onclick="GameApp.interactFurniture('gas_cooker')" class="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5">
+                                🍳 Cook Jollof
+                            </button>
+                            <button onclick="GameApp.openCommuteModal()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border border-emerald-600 text-white font-bold text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 md:col-span-3">
+                                🚪 Exit & Commute
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Living Chair Hotspot -->
-                    <div onclick="GameApp.interactFurniture('smart_tv')" class="absolute top-[45%] left-[37%] cursor-pointer group pin-animated" style="transform: translate(-50%, -50%);">
-                        <div class="bg-white/95 border border-slate-200 text-slate-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>🛋️ Relax Sofa</span>
-                        </div>
-                    </div>
-
-                    <!-- Workstation Laptop Hotspot -->
-                    <div onclick="GameApp.interactFurniture('mac_workstation')" class="absolute top-[75%] left-[54%] cursor-pointer group pin-animated" style="transform: translate(-50%, -50%);">
-                        <div class="bg-white/95 border border-slate-200 text-slate-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>💻 Freelance & Trade</span>
-                        </div>
-                    </div>
-
-                    <!-- Cooker Hotspot -->
-                    <div onclick="GameApp.interactFurniture('gas_cooker')" class="absolute top-[68%] left-[45%] cursor-pointer group pin-animated" style="transform: translate(-50%, -50%);">
-                        <div class="bg-white/95 border border-slate-200 text-slate-800 text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>🍳 Cook Jollof</span>
-                        </div>
-                    </div>
-
-                    <!-- Exit Door Hotspot -->
-                    <div onclick="GameApp.openCommuteModal()" class="absolute top-[40%] left-[23%] cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full shadow-lg flex items-center gap-1 group-hover:scale-110 transition">
-                            <span>🚪 Exit & Commute</span>
-                        </div>
-                    </div>
-
-                    <!-- Player Sim Avatar Standing in Room Center (Image 5) -->
-                    <div class="absolute top-[52%] left-[49%] pointer-events-none" style="transform: translate(-50%, -50%);">
-                        <div class="relative flex flex-col items-center">
-                            <span class="text-xs bg-slate-900/80 text-white font-mono font-bold px-2 py-0.5 rounded-full shadow-md text-[9px] mb-1">@<?= htmlspecialchars($char['full_name'] ?: 'Sim') ?></span>
-                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-xl bg-amber-600">
-                                <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- 2. Alternate 3D Orbit Viewport Container (Toggled via button) -->
-                <div id="orbit3dContainer" class="hidden w-full h-[440px] sm:h-[540px] rounded-3xl bg-slate-50 border border-slate-200/80 relative cursor-grab active:cursor-grabbing overflow-hidden shadow-inner">
-                    <div id="world3d-container" class="w-full h-full"></div>
-                </div>
 
                 <!-- Footer Status -->
                 <div class="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-100">
@@ -1073,141 +1015,9 @@ if (!$char) {
                 </div>
             </div>
 
-            <!-- Pan & Zoom City Map Viewport -->
-            <section class="bg-slate-900 border border-slate-200/90 rounded-3xl p-0 shadow-lg relative overflow-hidden h-[540px] sm:h-[620px] select-none" id="inGameMapViewport">
-                
-                <!-- Panning Container -->
-                <div id="inGameMapCanvas" class="absolute origin-top-left transition-transform duration-75" style="width: 2500px; height: 1600px; transform: translate(-500px, -280px) scale(1);">
-                    <img 
-                        src="assets/img/abuja_map_3d.png" 
-                        class="w-full h-full object-cover select-none pointer-events-none" 
-                        alt="Abuja 3D City Map"
-                        draggable="false"
-                    />
-
-                    <!-- Destination Pins -->
-                    <!-- 1. Maitama Executive Gym -->
-                    <div onclick="GameApp.openTravelModal('gym')" class="absolute top-[28%] left-[64%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🏋️</span>
-                            <span>Maitama Gym</span>
-                        </div>
-                    </div>
-
-                    <!-- 2. Jabi Lake Seafood & Suya Restaurant -->
-                    <div onclick="GameApp.openTravelModal('restaurant')" class="absolute top-[39%] left-[28%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🍲</span>
-                            <span>Jabi Grill</span>
-                        </div>
-                    </div>
-
-                    <!-- 3. Banex Plaza Tech Hub -->
-                    <div onclick="GameApp.openTravelModal('banex')" class="absolute top-[29%] left-[38%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">📱</span>
-                            <span>Banex Tech</span>
-                        </div>
-                    </div>
-
-                    <!-- 4. Jabi Lake Waterfront & Boat Club -->
-                    <div onclick="GameApp.openTravelModal('jabi_lake')" class="absolute top-[39%] left-[21%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">⛵</span>
-                            <span>Jabi Lake</span>
-                        </div>
-                    </div>
-
-                    <!-- 5. Three Arms Zone & Secretariat -->
-                    <div onclick="GameApp.openTravelModal('secretariat')" class="absolute top-[52%] left-[74%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🏛️</span>
-                            <span>Secretariat</span>
-                        </div>
-                    </div>
-
-                    <!-- 6. Wuse Market -->
-                    <div onclick="GameApp.openTravelModal('market')" class="absolute top-[28%] left-[46%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🛍️</span>
-                            <span>Wuse Market</span>
-                        </div>
-                    </div>
-
-                    <!-- 7. Fraser Suites Hotel -->
-                    <div onclick="GameApp.openTravelModal('fraser')" class="absolute top-[62%] left-[50%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🏨</span>
-                            <span>Fraser Suites</span>
-                        </div>
-                    </div>
-
-                    <!-- 8. Corporate Twin Towers & CBD -->
-                    <div onclick="GameApp.openTravelModal('cbd_bank')" class="absolute top-[65%] left-[65%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                            <span class="text-sm">🏦</span>
-                            <span>CBD Towers</span>
-                        </div>
-                    </div>
-
-                    <!-- Roaming Online Citizens with Floating Username Tags -->
-                    <div onclick="GameApp.inspectCitizenFromMap('Farouk', '@aminu_fct', 'Special Assistant', 'Maitama')" class="absolute top-[50%] left-[71%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex flex-col items-center">
-                            <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                                <span>👑 @aminu_fct</span>
-                            </div>
-                            <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-amber-500 mt-1">
-                                <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div onclick="GameApp.inspectCitizenFromMap('Tunde', '@dapo_tech', 'Tech Lead', 'Wuse 2')" class="absolute top-[32%] left-[37%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex flex-col items-center">
-                            <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                                <span>💻 @dapo_tech</span>
-                            </div>
-                            <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-purple-500 mt-1">
-                                <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div onclick="GameApp.inspectCitizenFromMap('Zainab', '@zainab_fintech', 'Corporate Manager', 'CBD')" class="absolute top-[63%] left-[63%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex flex-col items-center">
-                            <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                                <span>💼 @zainab_fintech</span>
-                            </div>
-                            <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-pink-500 mt-1">
-                                <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div onclick="GameApp.inspectCitizenFromMap('Chidi', '@chidi_banex', 'Phone Technician', 'Wuse 2')" class="absolute top-[30%] left-[42%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                        <div class="flex flex-col items-center">
-                            <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                                <span>📱 @chidi_banex</span>
-                            </div>
-                            <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-blue-500 mt-1">
-                                <img src="assets/img/characters/chidi/Man_standing_in_hoodie_20261005064449.png" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zoom & Center Controls -->
-                <div class="absolute right-4 bottom-6 z-20 flex flex-col gap-2">
-                    <button onclick="GameApp.zoomInGameMap(1.2)" class="w-9 h-9 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-sm hover:bg-white active:scale-90 transition">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                    </button>
-                    <button onclick="GameApp.zoomInGameMap(0.8)" class="w-9 h-9 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-sm hover:bg-white active:scale-90 transition">
-                        <i class="fa-solid fa-minus text-xs"></i>
-                    </button>
-                    <button onclick="GameApp.resetInGameMap()" class="w-9 h-9 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-sm hover:bg-white active:scale-90 transition" title="Center Map">
-                        <i class="fa-solid fa-crosshairs text-xs"></i>
-                    </button>
-                </div>
+            <!-- 3D City Map Viewport -->
+            <section class="bg-slate-900 border border-slate-200/90 rounded-3xl p-0 shadow-lg relative overflow-hidden h-[540px] sm:h-[620px]" id="inGameMapViewport">
+                <div id="map3d-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
             </section>
         </div>
 
@@ -2853,6 +2663,7 @@ if (!$char) {
 
     <!-- Scripts -->
     <script src="assets/js/world3d.js"></script>
+    <script src="assets/js/map3d.js"></script>
     <script src="assets/js/phone.js"></script>
     <script src="assets/js/game.js"></script>
     <script>
