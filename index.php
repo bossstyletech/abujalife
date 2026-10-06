@@ -127,195 +127,34 @@ if (getAuthUserId()) {
         </div>
     </div>
 
-    <!-- ========================================================
-         2. FULL-SCREEN INTERACTIVE 3D MAP VIEWPORT (Image 1 & 6)
-         ======================================================== -->
-    <main id="mapViewport" class="flex-1 w-full h-full relative overflow-hidden bg-slate-900 select-none">
-        
-        <!-- Panning Map Container -->
-        <div id="mapCanvas" class="absolute origin-top-left transition-transform duration-75" style="width: 2500px; height: 1600px; transform: translate(-500px, -280px) scale(1);">
-            
-            <!-- High-Resolution Abuja 3D Isometric Map Image -->
-            <img 
-                src="assets/img/abuja_map_3d.png" 
-                class="w-full h-full object-cover pointer-events-none select-none" 
-                alt="Abuja 3D City Map"
-                draggable="false"
-            />
+    <!-- =====================================================
+         2. FULL-SCREEN INTERACTIVE CANVAS ISOMETRIC MAP
+         ===================================================== -->
+    <main id="mapViewport" class="flex-1 w-full h-full relative overflow-hidden select-none">
 
-            <!-- ================================================
-                 INTERACTIVE CITY LANDMARK PINS & BADGES
-                 ================================================ -->
-            
-            <!-- 1. Jabi Lake Waterfront & Boat Club -->
-            <div onclick="previewLocation('jabi_lake')" class="absolute top-[39%] left-[21%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">⛵</span>
-                    <span>Jabi Lake</span>
-                </div>
-            </div>
+        <!-- Pure Canvas Map — drawn in JS, no images, no HTML menus overlaid -->
+        <canvas id="abujaMapCanvas" class="absolute inset-0 w-full h-full" style="display:block;"></canvas>
 
-            <!-- 2. Banex Plaza Tech Hub (Wuse 2) -->
-            <div onclick="previewLocation('banex')" class="absolute top-[29%] left-[38%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">📱</span>
-                    <span>Banex Tech</span>
-                </div>
-            </div>
-
-            <!-- 3. Wuse Market -->
-            <div onclick="previewLocation('market')" class="absolute top-[28%] left-[46%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🛍️</span>
-                    <span>Wuse Market</span>
-                </div>
-            </div>
-
-            <!-- 4. Maitama Executive Gym -->
-            <div onclick="previewLocation('gym')" class="absolute top-[28%] left-[64%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🏋️</span>
-                    <span>Maitama Gym</span>
-                </div>
-            </div>
-
-            <!-- 5. Jabi Lake Seafood & Suya Restaurant -->
-            <div onclick="previewLocation('restaurant')" class="absolute top-[39%] left-[28%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🍲</span>
-                    <span>Jabi Grill</span>
-                </div>
-            </div>
-
-            <!-- 6. National Hospital Abuja -->
-            <div onclick="previewLocation('hospital')" class="absolute top-[35%] left-[46%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🏥</span>
-                    <span>Hospital</span>
-                </div>
-            </div>
-
-            <!-- 7. National Mosque -->
-            <div onclick="previewLocation('mosque')" class="absolute top-[36%] left-[54%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🕌</span>
-                    <span>National Mosque</span>
-                </div>
-            </div>
-
-            <!-- 8. National Christian Centre -->
-            <div onclick="previewLocation('church')" class="absolute top-[53%] left-[55%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">⛪</span>
-                    <span>National Church</span>
-                </div>
-            </div>
-
-            <!-- 9. Fraser Suites Luxury Hotel -->
-            <div onclick="previewLocation('fraser')" class="absolute top-[62%] left-[50%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🏨</span>
-                    <span>Fraser Suites</span>
-                </div>
-            </div>
-
-            <!-- 10. Central Business District & Corporate Twin Towers -->
-            <div onclick="previewLocation('cbd')" class="absolute top-[65%] left-[65%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🏦</span>
-                    <span>Corporate Towers</span>
-                </div>
-            </div>
-
-            <!-- 11. Three Arms Zone & Federal Secretariat -->
-            <div onclick="previewLocation('secretariat')" class="absolute top-[52%] left-[74%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">🏛️</span>
-                    <span>Three Arms Zone</span>
-                </div>
-            </div>
-
-            <!-- 12. Moshood Abiola National Stadium -->
-            <div onclick="previewLocation('stadium')" class="absolute top-[66%] left-[25%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">⚽</span>
-                    <span>National Stadium</span>
-                </div>
-            </div>
-
-            <!-- 13. Nnamdi Azikiwe Airport (Capital Terminal) -->
-            <div onclick="previewLocation('airport')" class="absolute top-[88%] left-[18%] pin-animated cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex items-center gap-1.5 bg-white border border-slate-200 text-slate-900 font-extrabold text-[11px] px-3 py-1.5 rounded-full shadow-lg group-hover:scale-110 transition">
-                    <span class="text-sm">✈️</span>
-                    <span>Capital Airport</span>
-                </div>
-            </div>
-
-            <!-- 14. Interactive Digital Billboards -->
-            <div onclick="openSignUpModal()" class="absolute top-[42%] left-[18%] cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-extrabold text-[9px] px-3 py-1 rounded shadow-lg group-hover:scale-105 transition border border-white/40">
-                    YOUR AD HERE • ₦50,000 / 7d
-                </div>
-            </div>
-            <div onclick="openSignUpModal()" class="absolute top-[45%] left-[66%] cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="bg-gradient-to-r from-pink-500 to-indigo-600 text-white font-extrabold text-[9px] px-3 py-1 rounded shadow-lg group-hover:scale-105 transition border border-white/40">
-                    YOUR AD HERE • ₦50,000 / 7d
-                </div>
-            </div>
-
-            <!-- ================================================
-                 ROAMING ABUJA CITIZENS WITH USERNAME BADGES
-                 ================================================ -->
-            <div onclick="previewCitizen('@aminu_fct', 'Special Assistant to Minister', 'Three Arms Zone', '₦4.8M')" class="absolute top-[50%] left-[71%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex flex-col items-center">
-                    <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                        <span>👑 @aminu_fct</span>
-                    </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-amber-500 mt-1">
-                        <img src="assets/img/characters/farouk/Man_wearing_green_streetwear_hoodie_20261005064505.png" class="w-full h-full object-cover">
-                    </div>
-                </div>
-            </div>
-
-            <div onclick="previewCitizen('@dapo_tech', 'Senior Fullstack Engineer', 'Wuse 2', '₦8.2M')" class="absolute top-[32%] left-[37%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex flex-col items-center">
-                    <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                        <span>💻 @dapo_tech</span>
-                    </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-purple-500 mt-1">
-                        <img src="assets/img/characters/tunde/Man_standing_in_hoodie_20261005064533.png" class="w-full h-full object-cover">
-                    </div>
-                </div>
-            </div>
-
-            <div onclick="previewCitizen('@zainab_fintech', 'Bank Relationship Manager', 'CBD Towers', '₦12.5M')" class="absolute top-[63%] left-[63%] citizen-floating cursor-pointer group" style="transform: translate(-50%, -50%);">
-                <div class="flex flex-col items-center">
-                    <div class="bg-slate-900/90 text-white font-mono font-bold text-[10px] px-2.5 py-0.5 rounded-full shadow-lg border border-slate-700 flex items-center gap-1 group-hover:bg-emerald-600 transition">
-                        <span>💼 @zainab_fintech</span>
-                    </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-pink-500 mt-1">
-                        <img src="assets/img/characters/zainab/Young_woman_standing_wearing_hoodie_20261005064439.png" class="w-full h-full object-cover">
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Map Navigation Controls (Zoom In / Out / Reset) -->
-        <div class="absolute right-4 bottom-24 z-30 flex flex-col gap-2">
-            <button onclick="zoomMap(1.2)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-base hover:bg-white active:scale-90 transition">
+        <!-- Zoom controls — these float cleanly, NOT on top of a PNG -->
+        <div class="absolute right-4 bottom-24 z-30 flex flex-col gap-2 pointer-events-auto">
+            <button onclick="AbujaMap.zoom(1.25)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
                 <i class="fa-solid fa-plus text-xs"></i>
             </button>
-            <button onclick="zoomMap(0.8)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-base hover:bg-white active:scale-90 transition">
+            <button onclick="AbujaMap.zoom(0.8)" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
                 <i class="fa-solid fa-minus text-xs"></i>
             </button>
-            <button onclick="resetMapView()" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center font-bold text-base hover:bg-white active:scale-90 transition" title="Center Map">
+            <button onclick="AbujaMap.resetView()" class="w-10 h-10 rounded-2xl bg-white/95 text-slate-800 border border-slate-200/90 shadow-lg flex items-center justify-center hover:bg-white active:scale-90 transition">
                 <i class="fa-solid fa-crosshairs text-xs"></i>
             </button>
         </div>
 
-    </main>
+        <!-- Location preview card — shown when pin clicked -->
+        <div id="locationPreviewCard" class="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-auto hidden"></div>
 
+        <!-- Citizen preview card — shown when citizen clicked -->
+        <div id="citizenPreviewCard" class="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-auto hidden"></div>
+
+    </main>
     <!-- ========================================================
          3. FLOATING COOKIE CONSENT BAR (Image 1)
          ======================================================== -->
@@ -701,85 +540,45 @@ if (getAuthUserId()) {
         </div>
     </div>
 
-    <!-- ========================================================
-         JAVASCRIPT ENGINE FOR INTERACTIVE MAP & REGISTRATION
-         ======================================================== -->
+    <!-- Canvas Map Renderer -->
+    <script src="assets/js/abuja_map.js"></script>
+
     <script>
-        // ----------------------------------------------------
-        // 1. Interactive Map Pan & Zoom Engine
-        // ----------------------------------------------------
-        const mapViewport = document.getElementById('mapViewport');
-        const mapCanvas = document.getElementById('mapCanvas');
+        // ─────────────────────────────────────────────────────────
+        // 1. Boot the Isometric Canvas Map
+        // ─────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('abujaMapCanvas');
+            if (!canvas) return;
 
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let currentX = -500, currentY = -280;
-        let mapScale = 1;
+            AbujaMap.init(
+                canvas,
+                // Location pin clicked → show the preview card
+                (id, label) => { previewLocation(id); },
+                // Citizen badge clicked → show citizen card
+                (citizen) => { previewCitizen(citizen.username, '', '', ''); }
+            );
 
-        mapViewport.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX - currentX;
-            startY = e.clientY - currentY;
-            mapViewport.classList.add('grabbing');
+            // Optionally fetch real registered citizens to show on map
+            fetch('api/citizens.php?action=search')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success && d.citizens) {
+                        AbujaMap.loadCitizens(d.citizens);
+                    }
+                }).catch(() => {
+                    // Not logged in on landing page — just show demo citizens
+                    AbujaMap.loadCitizens([
+                        { username: '@aminu_fct' },
+                        { username: '@dapo_tech' },
+                        { username: '@zainab_fct' },
+                        { username: '@kunle_builds' },
+                        { username: '@ibrahim_wuse' },
+                    ]);
+                });
         });
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            currentX = e.clientX - startX;
-            currentY = e.clientY - startY;
-            clampAndUpdateMap();
-        });
 
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-            mapViewport.classList.remove('grabbing');
-        });
-
-        // Touch support for mobile
-        mapViewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - currentX;
-                startY = e.touches[0].clientY - currentY;
-            }
-        }, { passive: true });
-
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging || e.touches.length !== 1) return;
-            currentX = e.touches[0].clientX - startX;
-            currentY = e.touches[0].clientY - startY;
-            clampAndUpdateMap();
-        }, { passive: true });
-
-        window.addEventListener('touchend', () => {
-            isDragging = false;
-        });
-
-        // Mouse Wheel Zoom
-        mapViewport.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const delta = e.deltaY < 0 ? 1.1 : 0.9;
-            zoomMap(delta);
-        }, { passive: false });
-
-        function zoomMap(factor) {
-            mapScale = Math.min(2.0, Math.max(0.6, mapScale * factor));
-            clampAndUpdateMap();
-        }
-
-        function resetMapView() {
-            currentX = -500;
-            currentY = -280;
-            mapScale = 1;
-            clampAndUpdateMap();
-        }
-
-        function clampAndUpdateMap() {
-            // Keep map in reasonable bounds
-            currentX = Math.min(100, Math.max(-1800, currentX));
-            currentY = Math.min(100, Math.max(-1200, currentY));
-            mapCanvas.style.transform = `translate(${currentX}px, ${currentY}px) scale(${mapScale})`;
-        }
 
         function dismissCookie() {
             document.getElementById('cookieBar').classList.add('hidden');
