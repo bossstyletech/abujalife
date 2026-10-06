@@ -9,7 +9,7 @@ const ABUJA_CHARACTERS = {
         id: 'tunde',
         name: 'Tunde Balogun',
         gender: 'Male',
-        tagline: 'Lagos-Abuja Tech Bro & Silicon Maitama Hustler',
+        tagline: 'Abuja Tech Bro & Silicon Maitama Hustler',
         archetype: 'middle',
         skinTone: '#704225',
         hairStyle: 'fade',

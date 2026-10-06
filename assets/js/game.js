@@ -102,6 +102,9 @@ const GameApp = {
         if (window.World3D) {
             World3D.init('world3d-container');
         }
+
+        const savedView = localStorage.getItem('abuja_main_view') || 'home';
+        this.switchMainView(savedView);
     },
 
     async fetchCharacter() {
@@ -204,6 +207,24 @@ const GameApp = {
         this.updateStatBar('barHappiness', 'valHappiness', c.happiness, 100, '%');
         this.updateStatBar('barIntelligence', 'valIntelligence', c.intelligence, 100, ' IQ');
         this.updateStatBar('barStreetCred', 'valStreetCred', c.street_cred, 100, ' Cred');
+
+        // Top Floating Cash Pill
+        const topCash = document.getElementById('topHudCash');
+        if (topCash) topCash.textContent = this.formatNaira(c.cash);
+
+        // 6 Mini Vitals Bars (Bottom Left Floating Widget)
+        const bHunger = document.getElementById('barHungerMini');
+        if (bHunger) bHunger.style.width = `${Math.min(100, Math.max(10, c.hunger || 85))}%`;
+        const bEnergy = document.getElementById('barEnergyMini');
+        if (bEnergy) bEnergy.style.width = `${Math.min(100, Math.max(5, c.energy || 50))}%`;
+        const bFun = document.getElementById('barFunMini');
+        if (bFun) bFun.style.width = `${Math.min(100, Math.max(5, c.happiness || 50))}%`;
+        const bSocial = document.getElementById('barSocialMini');
+        if (bSocial) bSocial.style.width = `${Math.min(100, Math.max(5, c.street_cred || 20))}%`;
+        const bHygiene = document.getElementById('barHygieneMini');
+        if (bHygiene) bHygiene.style.width = `${Math.min(100, Math.max(10, c.health || 90))}%`;
+        const bBladder = document.getElementById('barBladderMini');
+        if (bBladder) bBladder.style.width = `${Math.min(100, Math.max(5, c.bladder || 35))}%`;
 
         this.checkSapaStatus();
     },
@@ -2110,7 +2131,7 @@ const GameApp = {
                 const violation = document.getElementById('lastmaViolation');
                 const desc = document.getElementById('lastmaDesc');
                 if (violation) violation.textContent = data.violation;
-                if (desc) desc.textContent = 'LASTMA officer signals you to pull over. How do you handle this?';
+                if (desc) desc.textContent = 'VIO / FRSC officer signals you to pull over along Shehu Shagari Way. How do you handle this?';
                 if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
             } else {
                 this.notify('Checkpoint cleared! No violations detected. Safe travels!', 'success');
@@ -2279,7 +2300,7 @@ const GameApp = {
     // STREET ECONOMY MECHANICS
     // ====================================================
     async playHagglingGame() {
-        const market = document.getElementById('hagglingMarket')?.value || 'balogun';
+        const market = document.getElementById('hagglingMarket')?.value || 'wuse_market';
         const item = document.getElementById('hagglingItem')?.value || 'phone';
         const pct = parseInt(document.getElementById('hagglingSlider')?.value || 60);
         const formData = new FormData();
@@ -2965,6 +2986,502 @@ const GameApp = {
         } catch(e) {
             this.notify('Connection error during rebirth', 'error');
         }
+    },
+
+    // ====================================================
+    // MAIN 4-PILL VIEW CONTROLLER (HOME | BUY | MAP | PHONE)
+    // ====================================================
+    switchMainView(viewName) {
+        if (viewName === 'phone') {
+            if (window.PhoneApp) {
+                PhoneApp.toggle();
+            }
+            return;
+        }
+
+        localStorage.setItem('abuja_main_view', viewName);
+
+        const views = {
+            home: document.getElementById('mainView-home'),
+            buy: document.getElementById('mainView-buy'),
+            map: document.getElementById('mainView-map')
+        };
+
+        Object.keys(views).forEach(k => {
+            if (views[k]) {
+                if (k === viewName) {
+                    views[k].classList.remove('hidden');
+                } else {
+                    views[k].classList.add('hidden');
+                }
+            }
+        });
+
+        // Update nav pill styling
+        const navBtns = {
+            home: document.getElementById('mainnav-home'),
+            buy: document.getElementById('mainnav-buy'),
+            map: document.getElementById('mainnav-map'),
+            phone: document.getElementById('mainnav-phone')
+        };
+
+        Object.keys(navBtns).forEach(k => {
+            const btn = navBtns[k];
+            if (!btn) return;
+            if (k === viewName) {
+                btn.className = "main-nav-btn px-4 py-2 rounded-full font-extrabold text-xs bg-slate-900 text-white shadow-sm transition active:scale-95 flex items-center gap-1.5";
+            } else {
+                btn.className = "main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5";
+            }
+        });
+
+        this.playSfx('click');
+
+        if (viewName === 'map') {
+            this.initInGameMap();
+        }
+    },
+
+    cleanScreenMode: false,
+    toggleCleanScreen() {
+        this.cleanScreenMode = !this.cleanScreenMode;
+        const quests = document.getElementById('homeQuestPills');
+        const nav = document.getElementById('bottomNavPill');
+        const vitals = document.getElementById('vitalsFloatingWidget');
+
+        const elements = [quests, nav, vitals];
+        elements.forEach(el => {
+            if (!el) return;
+            if (this.cleanScreenMode) {
+                el.classList.add('opacity-0', 'pointer-events-none', 'transition-opacity');
+            } else {
+                el.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        });
+        this.notify(this.cleanScreenMode ? 'Clean screen enabled' : 'Clean screen disabled', 'info');
+    },
+
+    // ====================================================
+    // HOME & FURNITURE INTERACTION
+    // ====================================================
+    async interactFurniture(itemId, subAction = 'interact') {
+        const formData = new FormData();
+        formData.append('item_id', itemId);
+        formData.append('sub_action', subAction);
+
+        try {
+            const res = await fetch('api/character.php?action=interact_furniture', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx(itemId.includes('workstation') || itemId === 'laptop' ? 'money' : 'win');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Action failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Connection error with house appliance', 'error');
+        }
+    },
+
+    async buyFurniture(itemId) {
+        const formData = new FormData();
+        formData.append('item_id', itemId);
+
+        try {
+            const res = await fetch('api/character.php?action=buy_furniture', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('money');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+                setTimeout(() => this.switchMainView('home'), 1000);
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Purchase failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Furniture store connection error', 'error');
+        }
+    },
+
+    async claimDailyGem() {
+        try {
+            const res = await fetch('api/character.php?action=claim_gem', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('money');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+            } else {
+                this.notify(data.error || 'Gem already claimed today!', 'info');
+            }
+        } catch(e) {
+            this.notify('Gem network connection error', 'error');
+        }
+    },
+
+    // ====================================================
+    // DESTINATION TRAVEL & ACTIVITIES
+    // ====================================================
+    selectedDestId: null,
+    destinationsMeta: {
+        gym: { name: 'Maitama Executive Gym', sub: 'Maitama Highbrow', icon: '🏋️' },
+        restaurant: { name: 'Jabi Lake Suya & Grill', sub: 'Jabi Waterfront', icon: '🍲' },
+        banex: { name: 'Banex Plaza Tech Hub', sub: 'Wuse 2 Commercial', icon: '📱' },
+        jabi_lake: { name: 'Jabi Lake Waterfront & Boat Club', sub: 'Jabi Lake Resort', icon: '🛥️' },
+        secretariat: { name: 'Federal Secretariat Complex', sub: 'Central Area Ministries', icon: '🏛️' },
+        market: { name: 'Wuse Modern Market', sub: 'Wuse Market Zone', icon: '🥬' },
+        fraser: { name: 'Fraser Suites Presidential Hotel', sub: 'Central Business District', icon: '🏨' },
+        cbd_bank: { name: 'CBD Financial Towers', sub: 'Banking & Arbitrage', icon: '💼' }
+    },
+
+    openTravelModal(destId) {
+        this.selectedDestId = destId;
+        const meta = this.destinationsMeta[destId] || { name: 'Abuja Destination', sub: 'Federal Capital Territory', icon: '📍' };
+        
+        const titleEl = document.getElementById('travelDestTitle');
+        const subEl = document.getElementById('travelDestSubtitle');
+        const iconEl = document.getElementById('travelDestIcon');
+
+        if (titleEl) titleEl.textContent = meta.name;
+        if (subEl) subEl.textContent = meta.sub;
+        if (iconEl) iconEl.innerHTML = `<span class="text-xl">${meta.icon}</span>`;
+
+        const modal = document.getElementById('travelModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            this.playSfx('click');
+        }
+    },
+
+    closeTravelModal() {
+        const modal = document.getElementById('travelModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    async confirmTravel(mode) {
+        const destId = this.selectedDestId || 'jabi_lake';
+        this.closeTravelModal();
+
+        const formData = new FormData();
+        formData.append('destination_id', destId);
+        formData.append('travel_mode', mode);
+
+        try {
+            const res = await fetch('api/character.php?action=travel_destination', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('click');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+                setTimeout(() => {
+                    this.openActivityModal(destId);
+                }, 500);
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Travel failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Travel network error', 'error');
+        }
+    },
+
+    openActivityModal(destId) {
+        this.selectedDestId = destId;
+        const meta = this.destinationsMeta[destId] || { name: 'Abuja Destination', sub: 'FCT', icon: '📍' };
+
+        const titleEl = document.getElementById('activityHeaderTitle');
+        const subEl = document.getElementById('activityHeaderSub');
+        const iconEl = document.getElementById('activityHeaderIcon');
+        const container = document.getElementById('activityCardsContainer');
+
+        if (titleEl) titleEl.textContent = meta.name;
+        if (subEl) subEl.textContent = meta.sub;
+        if (iconEl) iconEl.innerHTML = `<span class="text-xl">${meta.icon}</span>`;
+
+        if (!container) return;
+
+        let html = '';
+        if (destId === 'gym') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('gym', 'workout')" class="w-full p-4 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg">🏋️</div>
+                        <div>
+                            <strong class="text-xs text-emerald-950 block">Cardio & Heavy Bench Press</strong>
+                            <span class="text-[11px] text-emerald-700">+20 Health, +8 Cred • Burns -20 Energy</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-800">₦2,500.00</span>
+                </button>
+            `;
+        } else if (destId === 'restaurant') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('restaurant', 'jollof')" class="w-full p-3.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg">🍛</div>
+                        <div>
+                            <strong class="text-xs text-amber-950 block">Smoky Party Jollof & Asun</strong>
+                            <span class="text-[11px] text-amber-700">+25 Energy, +25 Happiness</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-amber-800">₦3,500.00</span>
+                </button>
+                <button onclick="GameApp.doDestinationActivity('restaurant', 'tilapia')" class="w-full p-3.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg">🐟</div>
+                        <div>
+                            <strong class="text-xs text-teal-950 block">Grilled Jabi Lake Tilapia & Plantain</strong>
+                            <span class="text-[11px] text-teal-700">+40 Energy, +35 Happiness</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-teal-800">₦6,000.00</span>
+                </button>
+                <button onclick="GameApp.doDestinationActivity('restaurant', 'suya')" class="w-full p-3.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-600 text-white flex items-center justify-center text-lg">🍢</div>
+                        <div>
+                            <strong class="text-xs text-orange-950 block">Abuja Special Beef Suya & Masa</strong>
+                            <span class="text-[11px] text-orange-700">+20 Energy, +20 Happiness</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-orange-800">₦2,500.00</span>
+                </button>
+            `;
+        } else if (destId === 'banex') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('banex_flip')" class="w-full p-4 bg-purple-50 hover:bg-purple-100/80 border border-purple-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center text-lg">📱</div>
+                        <div>
+                            <strong class="text-xs text-purple-950 block">Wholesale iPhone & Gadget Lot Flip</strong>
+                            <span class="text-[11px] text-purple-700">Flipping electronics for ₦80k-₦115k payout!</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-purple-800">₦50,000.00 Cost</span>
+                </button>
+            `;
+        } else if (destId === 'jabi_lake') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('lake_cruise')" class="w-full p-4 bg-sky-50 hover:bg-sky-100/80 border border-sky-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center text-lg">🛥️</div>
+                        <div>
+                            <strong class="text-xs text-sky-950 block">Sunset Speedboat Cruise & Drinks</strong>
+                            <span class="text-[11px] text-sky-700">+40 Happiness, +10 Street Cred</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-sky-800">₦6,500.00</span>
+                </button>
+            `;
+        } else if (destId === 'secretariat') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('tender_bid')" class="w-full p-4 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg">🏛️</div>
+                        <div>
+                            <strong class="text-xs text-amber-950 block">Lobby for Ministry Procurement Tender</strong>
+                            <span class="text-[11px] text-amber-700">65% chance of ₦350k - ₦850k contract payout!</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-amber-800">₦20,000 Form</span>
+                </button>
+            `;
+        } else if (destId === 'cbd_bank' || destId === 'fraser') {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('crypto_p2p')" class="w-full p-4 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg">🪙</div>
+                        <div>
+                            <strong class="text-xs text-emerald-950 block">OTC Dollar & P2P Crypto Arbitrage</strong>
+                            <span class="text-[11px] text-emerald-700">+₦35,000 to ₦75,000 instant arbitrage profit</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-800">HIGH YIELD</span>
+                </button>
+            `;
+        } else {
+            html = `
+                <button onclick="GameApp.doDestinationActivity('pos_kiosk')" class="w-full p-4 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg">🏪</div>
+                        <div>
+                            <strong class="text-xs text-blue-950 block">Run Market POS Cashout Kiosk</strong>
+                            <span class="text-[11px] text-blue-700">+₦15k - ₦28k commissions, +6 Cred</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-blue-800">START BIZ</span>
+                </button>
+            `;
+        }
+
+        container.innerHTML = html;
+
+        const modal = document.getElementById('destActivityModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            this.playSfx('click');
+        }
+    },
+
+    closeActivityModal() {
+        const modal = document.getElementById('destActivityModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    },
+
+    async doDestinationActivity(act, sub = '') {
+        const formData = new FormData();
+        formData.append('activity', act);
+        if (sub) formData.append('sub_activity', sub);
+
+        try {
+            const res = await fetch('api/character.php?action=do_destination_activity', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                this.playSfx('money');
+                this.notify(data.message, 'success');
+                await this.fetchCharacter();
+                this.closeActivityModal();
+            } else {
+                this.playSfx('loss');
+                this.notify(data.error || 'Activity failed', 'error');
+            }
+        } catch(e) {
+            this.notify('Activity connection error', 'error');
+        }
+    },
+
+    // ====================================================
+    // CITIZEN MAP INTERACTIONS
+    // ====================================================
+    activeMapCitizen: null,
+    inspectCitizenFromMap(name, username, job, district, cred = 50) {
+        this.activeMapCitizen = { name, username: username.replace(/^@/, ''), job, district, cred };
+
+        const nameEl = document.getElementById('mapCitizenName');
+        const userEl = document.getElementById('mapCitizenUsername');
+        const distEl = document.getElementById('mapCitizenDistrict');
+        const jobEl = document.getElementById('mapCitizenJob');
+
+        if (nameEl) nameEl.textContent = name;
+        if (userEl) userEl.textContent = '@' + this.activeMapCitizen.username;
+        if (distEl) distEl.textContent = district;
+        if (jobEl) jobEl.textContent = job;
+
+        const modal = document.getElementById('citizenMapModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            this.playSfx('click');
+        }
+    },
+
+    chatWithMapCitizen() {
+        if (!this.activeMapCitizen) return;
+        const modal = document.getElementById('citizenMapModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        if (window.PhoneApp) {
+            if (!PhoneApp.isOpen) PhoneApp.toggle();
+            PhoneApp.openConversationWithUser(this.activeMapCitizen.username, this.activeMapCitizen.name, '👤');
+        }
+    },
+
+    transferToMapCitizen() {
+        if (!this.activeMapCitizen) return;
+        const modal = document.getElementById('citizenMapModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        if (window.PhoneApp) {
+            if (!PhoneApp.isOpen) PhoneApp.toggle();
+            PhoneApp.openDirectTransferModal('@' + this.activeMapCitizen.username);
+        }
+    },
+
+    greetMapCitizen() {
+        if (!this.activeMapCitizen) return;
+        const modal = document.getElementById('citizenMapModal');
+        if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+        this.playSfx('win');
+        this.notify(`👋 You greeted @${this.activeMapCitizen.username}: "How far Chairman!" (+2 Social, +1 Cred)`, 'success');
+    },
+
+    // ====================================================
+    // IN-GAME 3D MAP DRAGGING & ZOOMING
+    // ====================================================
+    inGameMapPan: { x: -500, y: -280, scale: 1, isDragging: false, startX: 0, startY: 0 },
+    initInGameMap() {
+        const vp = document.getElementById('inGameMapViewport');
+        const canvas = document.getElementById('inGameMapCanvas');
+        if (!vp || !canvas || vp._mapInitialized) return;
+        vp._mapInitialized = true;
+
+        const applyTransform = () => {
+            canvas.style.transform = `translate(${this.inGameMapPan.x}px, ${this.inGameMapPan.y}px) scale(${this.inGameMapPan.scale})`;
+        };
+
+        vp.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') || e.target.closest('.pin-animated') || e.target.closest('[onclick]')) return;
+            this.inGameMapPan.isDragging = true;
+            this.inGameMapPan.startX = e.clientX - this.inGameMapPan.x;
+            this.inGameMapPan.startY = e.clientY - this.inGameMapPan.y;
+            vp.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!this.inGameMapPan.isDragging) return;
+            this.inGameMapPan.x = e.clientX - this.inGameMapPan.startX;
+            this.inGameMapPan.y = e.clientY - this.inGameMapPan.startY;
+            applyTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (this.inGameMapPan.isDragging) {
+                this.inGameMapPan.isDragging = false;
+                vp.style.cursor = 'grab';
+            }
+        });
+
+        vp.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.1 : -0.1;
+            const newScale = Math.min(2.0, Math.max(0.6, this.inGameMapPan.scale + delta));
+            this.inGameMapPan.scale = newScale;
+            applyTransform();
+        }, { passive: false });
+
+        // Touch support
+        vp.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                this.inGameMapPan.isDragging = true;
+                this.inGameMapPan.startX = e.touches[0].clientX - this.inGameMapPan.x;
+                this.inGameMapPan.startY = e.touches[0].clientY - this.inGameMapPan.y;
+            }
+        });
+
+        vp.addEventListener('touchmove', (e) => {
+            if (!this.inGameMapPan.isDragging || e.touches.length !== 1) return;
+            this.inGameMapPan.x = e.touches[0].clientX - this.inGameMapPan.startX;
+            this.inGameMapPan.y = e.touches[0].clientY - this.inGameMapPan.startY;
+            applyTransform();
+        });
+
+        vp.addEventListener('touchend', () => {
+            this.inGameMapPan.isDragging = false;
+        });
+
+        applyTransform();
     }
 };
 

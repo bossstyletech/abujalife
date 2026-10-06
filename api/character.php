@@ -526,21 +526,21 @@ if ($action === 'manage_residence') {
 // COMMUTE FROM RESIDENCE TO WORKPLACE
 // ----------------------------------------------------
 if ($action === 'commute_to_work') {
-    $mode = cleanInput($_POST['mode'] ?? 'danfo');
+    $mode = cleanInput($_POST['mode'] ?? 'green_cab');
 
     $costs = [
-        'walk' => ['fare' => 0, 'energy' => -15, 'desc' => 'trekked through the morning heat'],
-        'okada' => ['fare' => 400, 'energy' => -5, 'desc' => 'hopped on an Okada dodging morning traffic'],
-        'danfo' => ['fare' => 500, 'energy' => -8, 'desc' => 'entered a yellow Danfo bus to Central Area'],
-        'bolt' => ['fare' => 2500, 'energy' => 0, 'desc' => 'took a smooth air-conditioned Bolt cab'],
-        'car' => ['fare' => 0, 'energy' => -2, 'desc' => 'drove your personal vehicle through the gates']
+        'walk' => ['fare' => 0, 'energy' => -15, 'desc' => 'trekked through the morning breeze'],
+        'keke' => ['fare' => 400, 'energy' => -5, 'desc' => 'hopped into a Keke Napep dodging junction traffic'],
+        'green_cab' => ['fare' => 800, 'energy' => -3, 'desc' => 'boarded an authentic green-and-white Abuja taxi cab to Central Area'],
+        'bolt' => ['fare' => 2200, 'energy' => 0, 'desc' => 'took a smooth air-conditioned Bolt cab on Shehu Shagari Way'],
+        'car' => ['fare' => 0, 'energy' => -2, 'desc' => 'drove your personal vehicle smoothly through the estate gates']
     ];
 
-    if (!isset($costs[$mode])) $mode = 'danfo';
+    if (!isset($costs[$mode])) $mode = 'green_cab';
     $spec = $costs[$mode];
 
     if ($mode === 'car' && empty($char['primary_vehicle_id'])) {
-        jsonResponse(['success' => false, 'error' => 'You do not have a car in your garage yet! Take Danfo or Okada.'], 400);
+        jsonResponse(['success' => false, 'error' => 'You do not have a car in your garage yet! Take an Abuja Green Cab or Keke.'], 400);
     }
 
     if ((float)$char['cash'] < $spec['fare']) {
@@ -627,6 +627,324 @@ if ($action === 'start_new_life') {
     jsonResponse([
         'success' => true,
         'message' => "Welcome to your new life, $newName! Clean start unlocked.",
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// 10. FURNITURE STORE & HOME CUSTOMIZATION
+// ----------------------------------------------------
+if ($action === 'buy_furniture') {
+    $itemId = cleanInput($_POST['item_id'] ?? '');
+    
+    $catalog = [
+        'bed_orthopedic'   => ['name' => 'Orthopedic Luxury Bed', 'price' => 120000, 'energy_boost' => 40, 'icon' => 'fa-bed'],
+        'fridge_haier'     => ['name' => 'Thermocool Refrigerator', 'price' => 180000, 'hunger_boost' => 35, 'icon' => 'fa-snowflake'],
+        'gas_cooker'       => ['name' => '4-Burner Gas Cooker & Oven', 'price' => 95000, 'hunger_boost' => 50, 'icon' => 'fa-fire-burner'],
+        'solar_inverter'   => ['name' => '3.5KVA Solar Inverter & Battery', 'price' => 450000, 'power' => true, 'icon' => 'fa-solar-panel'],
+        'mikano_gen'       => ['name' => '3.5KVA Mikano Petrol Gen', 'price' => 150000, 'power' => true, 'icon' => 'fa-bolt'],
+        'mac_workstation'  => ['name' => 'M3 Max Studio Workstation Desk', 'price' => 520000, 'hustle_mult' => 1.5, 'icon' => 'fa-laptop-code'],
+        'smart_tv'         => ['name' => '65" OLED 4K Smart TV', 'price' => 280000, 'fun_boost' => 40, 'icon' => 'fa-tv'],
+        'split_ac'         => ['name' => '2HP Inverter Split AC', 'price' => 210000, 'comfort' => 35, 'icon' => 'fa-wind'],
+        'leather_sofa'     => ['name' => 'Italian Leather Sectional Sofa', 'price' => 260000, 'comfort' => 30, 'icon' => 'fa-couch'],
+        'water_dispenser'  => ['name' => 'Executive Cold Water Dispenser', 'price' => 65000, 'health_boost' => 20, 'icon' => 'fa-faucet-drip'],
+    ];
+
+    if (!isset($catalog[$itemId])) {
+        jsonResponse(['success' => false, 'error' => 'Invalid furniture item.'], 400);
+    }
+
+    $item = $catalog[$itemId];
+    if ((float)$char['cash'] < $item['price']) {
+        jsonResponse(['success' => false, 'error' => "Insufficient cash! You need " . formatNaira($item['price']) . " for {$item['name']}."], 400);
+    }
+
+    $homeState = !empty($char['home_state']) ? json_decode($char['home_state'], true) : [];
+    if (!is_array($homeState)) $homeState = [];
+    if (!isset($homeState['furniture']) || !is_array($homeState['furniture'])) {
+        $homeState['furniture'] = [];
+    }
+
+    if (in_array($itemId, $homeState['furniture'])) {
+        jsonResponse(['success' => false, 'error' => "You already own this {$item['name']} in your house!"], 400);
+    }
+
+    $homeState['furniture'][] = $itemId;
+    $newCash = (float)$char['cash'] - $item['price'];
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, home_state = ? WHERE id = ?");
+    $stmt->execute([$newCash, json_encode($homeState), $char['id']]);
+
+    logActivity($char['id'], 'buy_furniture', "Bought {$item['name']} for " . formatNaira($item['price']) . " to furnish house.", -$item['price'], 0, 15);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "🎉 Purchased {$item['name']}! It has been placed inside your Abuja residence.",
+        'home_state' => $homeState,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// 11. INTERACT WITH HOME FURNITURE & APPLIANCES
+// ----------------------------------------------------
+if ($action === 'interact_furniture') {
+    $itemId = cleanInput($_POST['item_id'] ?? 'bed');
+    $subAction = cleanInput($_POST['sub_action'] ?? 'interact');
+
+    $deltas = ['cash' => 0, 'energy' => 0, 'happiness' => 0, 'health' => 0, 'cred' => 0];
+    $msg = '';
+
+    if ($itemId === 'bed' || $itemId === 'bed_orthopedic') {
+        $deltas['energy'] = 50;
+        $deltas['health'] = 15;
+        $deltas['happiness'] = 10;
+        $msg = "😴 You fell asleep on your bed and woke up energized and refreshed! (+50 Energy)";
+    } elseif ($itemId === 'fridge' || $itemId === 'fridge_haier') {
+        $deltas['energy'] = 15;
+        $deltas['health'] = 10;
+        $deltas['happiness'] = 15;
+        $msg = "🍱 You opened the cooler/fridge and enjoyed delicious chilled chops! Hunger satisfied.";
+    } elseif ($itemId === 'gas_cooker') {
+        $deltas['energy'] = -5;
+        $deltas['health'] = 15;
+        $deltas['happiness'] = 25;
+        $msg = "🍳 You cooked a hot plate of smoky Nigerian Party Jollof on your gas cooker! Super delicious.";
+    } elseif ($itemId === 'mac_workstation' || $itemId === 'laptop') {
+        $payout = (float)mt_rand(18000, 36000);
+        $deltas['cash'] = $payout;
+        $deltas['energy'] = -15;
+        $deltas['happiness'] = 10;
+        $msg = "💻 Worked freelance engineering and P2P trades from your home desk! Earned " . formatNaira($payout) . ".";
+    } elseif ($itemId === 'smart_tv') {
+        $deltas['happiness'] = 30;
+        $deltas['energy'] = 5;
+        $msg = "📺 Relaxed on the sofa watching Premier League live on your 4K Smart TV! High spirits.";
+    } elseif ($itemId === 'water_dispenser') {
+        $deltas['energy'] = 10;
+        $deltas['health'] = 15;
+        $msg = "💧 Drank a crisp glass of chilled mineral water from the dispenser. Hydrated and alert!";
+    } elseif ($itemId === 'split_ac') {
+        $deltas['happiness'] = 25;
+        $msg = "❄️ Chilled your apartment down to 18°C. Beating the Abuja heat in total luxury!";
+    } else {
+        $deltas['happiness'] = 10;
+        $msg = "Interacted with your home appliance.";
+    }
+
+    $newCash = max(0, (float)$char['cash'] + $deltas['cash']);
+    $newEnergy = min(100, max(0, (int)$char['energy'] + $deltas['energy']));
+    $newHealth = min(100, max(0, (int)$char['health'] + $deltas['health']));
+    $newHappy  = min(100, max(0, (int)$char['happiness'] + $deltas['happiness']));
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, energy = ?, health = ?, happiness = ? WHERE id = ?");
+    $stmt->execute([$newCash, $newEnergy, $newHealth, $newHappy, $char['id']]);
+
+    logActivity($char['id'], 'furniture_use', $msg, $deltas['cash'], $deltas['energy'], $deltas['happiness']);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// 12. TRAVEL TO ABUJA DESTINATION (WALK, GREEN CAB, BOLT)
+// ----------------------------------------------------
+if ($action === 'travel_destination') {
+    $destId = cleanInput($_POST['destination_id'] ?? 'jabi_lake');
+    $mode = cleanInput($_POST['travel_mode'] ?? 'taxi'); // walk, taxi (green cab), bolt
+
+    $destNames = [
+        'gym'          => 'Maitama Executive Gym',
+        'restaurant'   => 'Jabi Lake Grill & Suya Restaurant',
+        'banex'        => 'Banex Plaza Tech Hub (Wuse 2)',
+        'jabi_lake'    => 'Jabi Lake Waterfront & Boat Club',
+        'secretariat'  => 'Federal Secretariat Complex',
+        'market'       => 'Wuse Modern Market',
+        'cbd_bank'     => 'Central Business District & Corporate Towers',
+        'stadium'      => 'Moshood Abiola National Stadium',
+        'airport'      => 'Nnamdi Azikiwe International Airport',
+        'fraser'       => 'Fraser Suites Presidential Hotel'
+    ];
+
+    $destName = $destNames[$destId] ?? 'Central Abuja';
+    $cost = 0;
+    $energyCost = 0;
+    $msg = '';
+
+    if ($mode === 'walk') {
+        $cost = 0;
+        $energyCost = 15;
+        if ((int)$char['energy'] < $energyCost) {
+            jsonResponse(['success' => false, 'error' => "You're too exhausted to trek! Rest or take a Green Cab taxi."], 400);
+        }
+        $msg = "🚶 Walked along the Abuja boulevards to {$destName}. Exercised your legs and enjoyed the view!";
+    } elseif ($mode === 'taxi') {
+        $cost = 800.00;
+        $energyCost = 2;
+        if ((float)$char['cash'] < $cost) {
+            jsonResponse(['success' => false, 'error' => "You need ₦800 cash for an Abuja Green Cab!"], 400);
+        }
+        $msg = "🚕 Boarded an authentic green-and-white Abuja taxi cab straight to {$destName} (₦800 fare).";
+    } elseif ($mode === 'bolt') {
+        $cost = 2200.00;
+        $energyCost = 0;
+        if ((float)$char['cash'] < $cost) {
+            jsonResponse(['success' => false, 'error' => "You need ₦2,200 cash for a Bolt ride!"], 400);
+        }
+        $msg = "🚗 Chilled in an air-conditioned Bolt ride with smooth music arriving in style at {$destName} (₦2,200).";
+    }
+
+    $newCash = max(0, (float)$char['cash'] - $cost);
+    $newEnergy = max(0, (int)$char['energy'] - $energyCost);
+
+    $homeState = !empty($char['home_state']) ? json_decode($char['home_state'], true) : [];
+    if (!is_array($homeState)) $homeState = [];
+    $homeState['current_location'] = $destId;
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, energy = ?, home_state = ? WHERE id = ?");
+    $stmt->execute([$newCash, $newEnergy, json_encode($homeState), $char['id']]);
+
+    logActivity($char['id'], 'travel', $msg, -$cost, -$energyCost, 5);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'current_location' => $destId,
+        'destination_name' => $destName,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// 13. DESTINATION ACTIVITIES (GYM, RESTAURANT, BANEX FLIP, LAKE CRUISE)
+// ----------------------------------------------------
+if ($action === 'do_destination_activity') {
+    $act = cleanInput($_POST['activity'] ?? '');
+    $sub = cleanInput($_POST['sub_activity'] ?? '');
+
+    $deltas = ['cash' => 0, 'energy' => 0, 'happiness' => 0, 'health' => 0, 'cred' => 0];
+    $msg = '';
+
+    if ($act === 'gym') {
+        if ((int)$char['energy'] < 20) {
+            jsonResponse(['success' => false, 'error' => "Too tired for workout! Rest in your home first."], 400);
+        }
+        $gymFee = 2500.00;
+        if ((float)$char['cash'] < $gymFee) {
+            jsonResponse(['success' => false, 'error' => "Gym session ticket is ₦2,500."], 400);
+        }
+        $deltas['cash'] = -$gymFee;
+        $deltas['energy'] = -20;
+        $deltas['health'] = 20;
+        $deltas['cred'] = 8;
+        $deltas['happiness'] = 15;
+        $msg = "💪 Completed intense workout session at Maitama Executive Gym! Muscles pumping, health +20!";
+    } elseif ($act === 'restaurant') {
+        $meals = [
+            'jollof'   => ['name' => 'Smoky Party Jollof & Asun', 'cost' => 3500, 'energy' => 25, 'happy' => 25],
+            'tilapia'  => ['name' => 'Grilled Jabi Lake Tilapia & Plantain', 'cost' => 6000, 'energy' => 40, 'happy' => 35],
+            'suya'     => ['name' => 'Abuja Special Beef Suya & Masa', 'cost' => 2500, 'energy' => 20, 'happy' => 20],
+            'chapman'  => ['name' => 'Chilled Angostura Chapman Cocktail', 'cost' => 2000, 'energy' => 10, 'happy' => 15]
+        ];
+        $meal = $meals[$sub] ?? $meals['jollof'];
+        if ((float)$char['cash'] < $meal['cost']) {
+            jsonResponse(['success' => false, 'error' => "You need " . formatNaira($meal['cost']) . " cash for {$meal['name']}."], 400);
+        }
+        $deltas['cash'] = -$meal['cost'];
+        $deltas['energy'] = $meal['energy'];
+        $deltas['happiness'] = $meal['happy'];
+        $deltas['health'] = 10;
+        $msg = "🍲 Savored {$meal['name']} at Jabi Lake restaurant! Hunger crushed and spirits soaring.";
+    } elseif ($act === 'banex_flip') {
+        // High return gadget flip hustle
+        $cost = 50000.00;
+        if ((float)$char['cash'] < $cost) {
+            jsonResponse(['success' => false, 'error' => "You need ₦50,000 capital to purchase a Banex wholesale gadget lot."], 400);
+        }
+        $payout = (float)mt_rand(80000, 115000);
+        $profit = $payout - $cost;
+        $deltas['cash'] = $profit;
+        $deltas['energy'] = -15;
+        $deltas['cred'] = 12;
+        $deltas['happiness'] = 20;
+        $msg = "📱 Banex Flip Success! Bought wholesale smartphone lot for ₦50k and flipped online for " . formatNaira($payout) . "! Net profit: +" . formatNaira($profit) . "!";
+    } elseif ($act === 'lake_cruise') {
+        $cost = 6500.00;
+        if ((float)$char['cash'] < $cost) {
+            jsonResponse(['success' => false, 'error' => "Jabi Lake boat cruise costs ₦6,500."], 400);
+        }
+        $deltas['cash'] = -$cost;
+        $deltas['energy'] = 10;
+        $deltas['happiness'] = 40;
+        $deltas['cred'] = 10;
+        $msg = "🛥️ Enjoyed sunset boat cruise on Jabi Lake with music and cool breeze. VIP vibes (+40 Happiness)!";
+    } elseif ($act === 'crypto_p2p') {
+        $payout = (float)mt_rand(35000, 75000);
+        $deltas['cash'] = $payout;
+        $deltas['energy'] = -10;
+        $deltas['happiness'] = 15;
+        $msg = "🪙 P2P Dollar Arbitrage closed! Traded USDT on OTC exchange for +" . formatNaira($payout) . " instant profit!";
+    } elseif ($act === 'pos_kiosk') {
+        $payout = (float)mt_rand(15000, 28000);
+        $deltas['cash'] = $payout;
+        $deltas['energy'] = -12;
+        $deltas['cred'] = 6;
+        $msg = "🏪 Managed neighborhood POS cashout terminal! Collected +" . formatNaira($payout) . " in transaction charges.";
+    } elseif ($act === 'tender_bid') {
+        $formFee = 20000.00;
+        if ((float)$char['cash'] < $formFee) {
+            jsonResponse(['success' => false, 'error' => "Federal tender application fee is ₦20,000."], 400);
+        }
+        if (mt_rand(1, 100) <= 65) {
+            $tenderPayout = (float)mt_rand(350000, 850000);
+            $deltas['cash'] = $tenderPayout - $formFee;
+            $deltas['cred'] = 25;
+            $deltas['happiness'] = 35;
+            $msg = "🏛️ TENDER APPROVED! Federal Ministry awarded your supply contract! Payout: +" . formatNaira($tenderPayout) . "!";
+        } else {
+            $deltas['cash'] = -$formFee;
+            $deltas['cred'] = 5;
+            $msg = "🏛️ Tender bid was marked pending for review. Form fee ₦20,000 paid. Try again next cycle.";
+        }
+    }
+
+    $newCash = max(0, (float)$char['cash'] + $deltas['cash']);
+    $newEnergy = min(100, max(0, (int)$char['energy'] + $deltas['energy']));
+    $newHealth = min(100, max(0, (int)$char['health'] + $deltas['health']));
+    $newHappy  = min(100, max(0, (int)$char['happiness'] + $deltas['happiness']));
+    $newCred   = min(200, max(0, (int)$char['street_cred'] + $deltas['cred']));
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, energy = ?, health = ?, happiness = ?, street_cred = ? WHERE id = ?");
+    $stmt->execute([$newCash, $newEnergy, $newHealth, $newHappy, $newCred, $char['id']]);
+
+    logActivity($char['id'], 'destination_act', $msg, $deltas['cash'], $deltas['energy'], $deltas['happiness']);
+
+    jsonResponse([
+        'success' => true,
+        'message' => $msg,
+        'character' => getUserCharacter($userId)
+    ]);
+}
+
+// ----------------------------------------------------
+// 14. DAILY GEM HUNT CASH PRIZE
+// ----------------------------------------------------
+if ($action === 'claim_gem') {
+    $prize = 3000.00;
+    $newCash = (float)$char['cash'] + $prize;
+    $newHappy = min(100, (int)$char['happiness'] + 10);
+
+    $stmt = $pdo->prepare("UPDATE characters SET cash = ?, happiness = ? WHERE id = ?");
+    $stmt->execute([$newCash, $newHappy, $char['id']]);
+
+    logActivity($char['id'], 'gem_hunt', "Found hidden Abuja gem! Collected ₦3,000 cash prize.", $prize, 0, 10);
+
+    jsonResponse([
+        'success' => true,
+        'message' => "💎 Found a hidden gem! ₦3,000 cash added to your wallet.",
         'character' => getUserCharacter($userId)
     ]);
 }

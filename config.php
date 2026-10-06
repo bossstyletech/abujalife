@@ -170,6 +170,9 @@ function ensureDatabaseSchema($pdo, $driver = 'sqlite') {
                 if (!in_array('active_shift', $colNames)) {
                     $pdo->exec("ALTER TABLE characters ADD COLUMN active_shift TEXT DEFAULT NULL");
                 }
+                if (!in_array('traits', $colNames)) {
+                    $pdo->exec("ALTER TABLE characters ADD COLUMN traits TEXT DEFAULT NULL");
+                }
             }
 
             // 2. Check users table columns
@@ -210,6 +213,7 @@ function ensureDatabaseSchema($pdo, $driver = 'sqlite') {
             // MySQL
             try { $pdo->exec("ALTER TABLE `characters` ADD COLUMN `home_state` TEXT DEFAULT NULL"); } catch (Exception $e) {}
             try { $pdo->exec("ALTER TABLE `characters` ADD COLUMN `active_shift` TEXT DEFAULT NULL"); } catch (Exception $e) {}
+            try { $pdo->exec("ALTER TABLE `characters` ADD COLUMN `traits` TEXT DEFAULT NULL"); } catch (Exception $e) {}
             try { $pdo->exec("ALTER TABLE `users` ADD COLUMN `remember_token` VARCHAR(255) DEFAULT NULL"); } catch (Exception $e) {}
 
             $pdo->exec("

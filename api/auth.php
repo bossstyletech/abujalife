@@ -33,8 +33,17 @@ if ($action === 'register') {
         ]);
     }
 
-    if (empty($username) || empty($email) || empty($password) || empty($fullName)) {
-        jsonResponse(['success' => false, 'error' => 'All fields are required.'], 400);
+    $email = cleanInput($_POST['email'] ?? '');
+    if (empty($email)) {
+        $email = $username . '@abujalife.local';
+    }
+
+    $rawTraits = $_POST['traits'] ?? '[]';
+    $traitsArr = json_decode($rawTraits, true);
+    $traitsJson = is_array($traitsArr) && !empty($traitsArr) ? json_encode($traitsArr) : json_encode(['hustler']);
+
+    if (empty($username) || empty($password) || empty($fullName)) {
+        jsonResponse(['success' => false, 'error' => 'Full Name, Username, and Password are required.'], 400);
     }
 
     if (strlen($password) < 4) {
@@ -42,10 +51,10 @@ if ($action === 'register') {
     }
 
     // Check if user or email already exists
-    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR (email = ? AND email NOT LIKE '%@abujalife.local')");
     $stmt->execute([$username, $email]);
     if ($stmt->fetch()) {
-        jsonResponse(['success' => false, 'error' => 'Username or Email is already registered.'], 409);
+        jsonResponse(['success' => false, 'error' => 'Username is already taken. Please choose another.'], 409);
     }
 
     $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -127,28 +136,29 @@ if ($action === 'register') {
             $stmt = $pdo->prepare("
                 INSERT INTO characters (
                     user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
-                    cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
+                    cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state, traits
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
-                $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
+                $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState, $traitsJson
             ]);
         } catch (Exception $colEx) {
             // Self-heal: ensure column is added, or fallback insert
             try {
                 $pdo->exec("ALTER TABLE characters ADD COLUMN home_state TEXT DEFAULT NULL");
+                $pdo->exec("ALTER TABLE characters ADD COLUMN traits TEXT DEFAULT NULL");
                 $stmt = $pdo->prepare("
                     INSERT INTO characters (
                         user_id, full_name, gender, avatar, skin_tone, hair_style, hair_color, outfit, archetype,
-                        cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state
+                        cash, bank, district, street_cred, intelligence, education_level, primary_vehicle_id, home_state, traits
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ");
                 $stmt->execute([
                     $userId, $fullName, $gender, $avatarConfig, $skinTone, $hairStyle, $hairColor, $outfit, $assignedArchetype,
-                    $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState
+                    $startCash, $startBank, $startDistrict, $startCred, $startIQ, $startEdu, $primaryCar, $starterHomeState, $traitsJson
                 ]);
             } catch (Exception $fallbackEx) {
                 $stmt = $pdo->prepare("

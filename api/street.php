@@ -520,12 +520,12 @@ if ($action === 'market_haggle') {
     $itemType        = cleanInput($_POST['item_type']        ?? '');
     $offerPercentage = isset($_POST['offer_percentage']) ? (int)$_POST['offer_percentage'] : null;
 
-    $validMarkets    = ['balogun', 'computer_village', 'wuse_market'];
+    $validMarkets    = ['banex_plaza', 'garki_market', 'wuse_market'];
     $basePrices      = ['phone' => 85000, 'clothes' => 15000, 'food' => 5000, 'electronics' => 45000];
-    $marketLabels    = ['balogun' => 'Balogun Market (Lagos)', 'computer_village' => 'Computer Village (Ikeja)', 'wuse_market' => 'Wuse Market (Abuja)'];
+    $marketLabels    = ['banex_plaza' => 'Banex Plaza (Wuse 2)', 'garki_market' => 'Garki Model Market (Abuja)', 'wuse_market' => 'Wuse Market (Abuja)'];
 
     if (!in_array($market, $validMarkets)) {
-        jsonResponse(['success' => false, 'error' => 'Invalid market. Choose: balogun, computer_village, or wuse_market.'], 400);
+        $market = 'wuse_market';
     }
     if (!isset($basePrices[$itemType])) {
         jsonResponse(['success' => false, 'error' => 'Invalid item_type. Choose: phone, clothes, food, or electronics.'], 400);
