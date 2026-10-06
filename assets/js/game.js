@@ -325,6 +325,20 @@ const GameApp = {
         this.activeTab = tabId;
         try { localStorage.setItem('abuja_active_tab', tabId); } catch(e){}
 
+        // Activating a tab always shows the city view
+        ['mainView-home', 'mainView-buy', 'mainView-map'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
+        const cityView = document.getElementById('mainView-city');
+        if (cityView) cityView.classList.remove('hidden');
+        // Update bottom nav to highlight city
+        document.querySelectorAll('.main-nav-btn').forEach(b => {
+            b.className = 'main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5';
+        });
+        const cityNavBtn = document.getElementById('mainnav-city');
+        if (cityNavBtn) cityNavBtn.className = 'main-nav-btn px-4 py-2 rounded-full font-extrabold text-xs bg-slate-900 text-white shadow-sm transition active:scale-95 flex items-center gap-1.5';
+
         // Ensure parent hub button and subnav are synchronized
         const tabToHub = {
             overview: 'city', transport: 'city', vehicles: 'city',
@@ -3026,6 +3040,7 @@ const GameApp = {
 
         const views = {
             home: document.getElementById('mainView-home'),
+            city: document.getElementById('mainView-city'),
             buy: document.getElementById('mainView-buy'),
             map: document.getElementById('mainView-map')
         };
@@ -3043,6 +3058,7 @@ const GameApp = {
         // Update nav pill styling
         const navBtns = {
             home: document.getElementById('mainnav-home'),
+            city: document.getElementById('mainnav-city'),
             buy: document.getElementById('mainnav-buy'),
             map: document.getElementById('mainnav-map'),
             phone: document.getElementById('mainnav-phone')
@@ -3059,6 +3075,33 @@ const GameApp = {
         });
 
         this.playSfx('click');
+
+        // Home view extras
+        if (viewName === 'home') {
+            // Toggle action bars: when home venue is active show home bar; venue switcher handles others
+            const homeBar = document.getElementById('homeActionBar');
+            const venueBar = document.getElementById('venueActionBar');
+            const sel = document.getElementById('venueSwitcherSelect');
+            const currentVenue = sel ? sel.value : 'home';
+            if (homeBar && venueBar) {
+                if (currentVenue === 'home') {
+                    homeBar.classList.remove('hidden');
+                    venueBar.classList.add('hidden');
+                } else {
+                    homeBar.classList.add('hidden');
+                    venueBar.classList.remove('hidden');
+                }
+            }
+            // Resize 3D canvas on view reveal
+            setTimeout(() => {
+                if (window.World3D && World3D.onResize) World3D.onResize();
+                // Update online badge
+                fetch('api/citizens.php?action=search&limit=50').then(r => r.json()).then(d => {
+                    const badge = document.getElementById('onlineCountBadge');
+                    if (badge && d.success) badge.textContent = (d.total || d.citizens?.length || 0) + ' online';
+                }).catch(() => {});
+            }, 80);
+        }
 
         if (viewName === 'map') {
             this.initInGameMap();
@@ -3082,6 +3125,20 @@ const GameApp = {
             }
         });
         this.notify(this.cleanScreenMode ? 'Clean screen enabled' : 'Clean screen disabled', 'info');
+    },
+
+    // ====================================================
+    // VENUE CHANGE HELPER (called by dropdown onchange)
+    // ====================================================
+    onVenueChange(venueId) {
+        // World3D.switchVenue already handles the 3D scene + action bars
+        // This just ensures the online count updates for the venue
+        fetch(`api/citizens.php?action=search&venue=${encodeURIComponent(venueId)}&limit=50`)
+            .then(r => r.json())
+            .then(d => {
+                const badge = document.getElementById('onlineCountBadge');
+                if (badge && d.success) badge.textContent = (d.total || d.citizens?.length || 0) + ' here';
+            }).catch(() => {});
     },
 
     // ====================================================

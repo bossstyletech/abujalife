@@ -46,8 +46,8 @@ const World3D = {
         this.updateSkyForVenue(this.currentVenue);
 
         // Camera - Isometric Elevated Angle
-        this.camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 500);
-        this.camera.position.set(13.5, 10.5, 13.5);
+        this.camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 500);
+        this.camera.position.set(10, 8, 10);
 
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -186,6 +186,23 @@ const World3D = {
                 banex: '📱 Banex Tech Hub'
             };
             pillText.textContent = names[venueId] || 'Abuja Room';
+        }
+
+        // Sync select dropdown value
+        const sel = document.getElementById('venueSwitcherSelect');
+        if (sel && sel.value !== venueId) sel.value = venueId;
+
+        // Toggle home vs venue action bars
+        const homeBar = document.getElementById('homeActionBar');
+        const venueBar = document.getElementById('venueActionBar');
+        if (homeBar && venueBar) {
+            if (venueId === 'home') {
+                homeBar.classList.remove('hidden');
+                venueBar.classList.add('hidden');
+            } else {
+                homeBar.classList.add('hidden');
+                venueBar.classList.remove('hidden');
+            }
         }
     },
 
