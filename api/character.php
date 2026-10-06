@@ -902,6 +902,25 @@ if ($action === 'do_destination_activity') {
         $deltas['happiness'] = 40;
         $deltas['cred'] = 10;
         $msg = "🛥️ Enjoyed sunset boat cruise on Jabi Lake with music and cool breeze. VIP vibes (+40 Happiness)!";
+    } elseif ($act === 'beach_relax') {
+        $cost = 4000.00;
+        if ((float)$char['cash'] < $cost) {
+            jsonResponse(['success' => false, 'error' => "Beach Cabana reservation costs ₦4,000."], 400);
+        }
+        $deltas['cash'] = -$cost;
+        $deltas['energy'] = 15;
+        $deltas['health'] = 5;
+        $deltas['happiness'] = 35;
+        $msg = "🏖️ Relaxed under a beach cabana at Jabi Lake Beach sipping fresh coconut water! Peaceful vibes (+35 Happiness, +15 Energy).";
+    } elseif ($act === 'beach_volleyball') {
+        if ((int)$char['energy'] < 10) {
+            jsonResponse(['success' => false, 'error' => "Too exhausted for volleyball! Rest first."], 400);
+        }
+        $deltas['energy'] = -10;
+        $deltas['health'] = 25;
+        $deltas['cred'] = 15;
+        $deltas['happiness'] = 20;
+        $msg = "🏐 Played a spirited beach volleyball match in the warm sand! Met cool folks (+25 Health, +15 Street Cred).";
     } elseif ($act === 'crypto_p2p') {
         $payout = (float)mt_rand(35000, 75000);
         $deltas['cash'] = $payout;

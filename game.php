@@ -1456,6 +1456,9 @@ if (!$userId || !$char) {
         <button id="mainnav-city" onclick="GameApp.switchMainView('city')" class="main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5">
             <i class="fa-solid fa-city text-xs"></i> <span>City</span>
         </button>
+        <button id="mainnav-buy" onclick="GameApp.switchMainView('buy')" class="main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5">
+            <i class="fa-solid fa-couch text-xs"></i> <span>Buy</span>
+        </button>
         <button id="mainnav-map" onclick="GameApp.switchMainView('map')" class="main-nav-btn px-4 py-2 rounded-full font-bold text-xs text-slate-600 hover:text-slate-900 transition active:scale-95 flex items-center gap-1.5">
             <i class="fa-solid fa-map text-xs"></i> <span>Map</span>
         </button>

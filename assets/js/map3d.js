@@ -785,7 +785,8 @@ const Map3D = {
         const pins = [
             { id: 'airport',     name: 'Capital Airport',  icon: '✈️', color: '#8b5cf6', x: -58, z: 52 },
             { id: 'stadium',     name: 'National Stadium', icon: '⚽', color: '#10b981', x: -20, z: 52 },
-            { id: 'jabi_lake',   name: 'Jabi Lake',        icon: '⛵', color: '#0ea5e9', x: -62, z: -8 },
+            { id: 'jabi_lake',   name: 'Jabi Lake Beach',  icon: '🏖️', color: '#0ea5e9', x: -62, z: -8 },
+            { id: 'banex',       name: 'Banex Tech Hub',   icon: '📱', color: '#a855f7', x: -32, z: -26 },
             { id: 'novare',      name: 'Novare Mall',      icon: '🛍️', color: '#ec4899', x: -18, z: -24 },
             { id: 'hospital',    name: 'National Hospital',icon: '🏥', color: '#ef4444', x: -6,  z: -8 },
             { id: 'mosque',      name: 'National Mosque',  icon: '🕌', color: '#f59e0b', x: 18,  z: -22 },
@@ -794,7 +795,7 @@ const Map3D = {
             { id: 'fraser',      name: 'Fraser Suites',    icon: '🏨', color: '#f43f5e', x: 8,   z: 8 },
             { id: 'cbd',         name: 'CBD Twin Towers',  icon: '🏦', color: '#0284c7', x: 40,  z: 8 },
             { id: 'secretariat', name: 'Three Arms Zone',  icon: '🏛️', color: '#64748b', x: 65,  z: -20 },
-            { id: 'gym',         name: 'Maitama Gym',      icon: '🏋️', color: '#10b981', x: 48,  z: -42 },
+            { id: 'gym',         name: 'i-Fitness Gym',    icon: '🏋️', color: '#10b981', x: 48,  z: -42 },
             { id: 'wuse',        name: 'Wuse Market',      icon: '🛍️', color: '#f97316', x: -2,  z: -28 }
         ];
 

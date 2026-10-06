@@ -3145,6 +3145,25 @@ const GameApp = {
     // HOME & FURNITURE INTERACTION
     // ====================================================
     async interactFurniture(itemId, subAction = 'interact') {
+        // Trigger 3D in-room character animation if at home
+        if (window.World3D && World3D.currentVenue === 'home' && typeof THREE !== 'undefined') {
+            if (itemId === 'bed' || itemId === 'bed_orthopedic' || itemId === 'floor_mat') {
+                World3D.animatePlayerToAction('sleep', new THREE.Vector3(0.4, 0.15, -2.6));
+            } else if (itemId === 'bucket' || itemId === 'bucket_red' || itemId === 'bucket_blue') {
+                World3D.animatePlayerToAction('bathe', new THREE.Vector3(0.8, 0.15, 3.1));
+            } else if (itemId === 'cooler' || itemId === 'fridge') {
+                World3D.animatePlayerToAction('eat', new THREE.Vector3(3.7, 0.15, 0.8));
+            } else if (itemId === 'books') {
+                World3D.animatePlayerToAction('read', new THREE.Vector3(-2.6, 0.15, -3.4));
+            } else if (itemId === 'radio') {
+                World3D.animatePlayerToAction('radio', new THREE.Vector3(1.8, 0.15, -3.6));
+            } else if (itemId === 'mac_workstation' || itemId === 'desk' || itemId === 'laptop') {
+                World3D.animatePlayerToAction('code', new THREE.Vector3(0, 0.15, 1.5));
+            } else if (itemId === 'chair' || itemId === 'smart_tv') {
+                World3D.animatePlayerToAction('sit', new THREE.Vector3(-0.2, 0.15, -1.1));
+            }
+        }
+
         const formData = new FormData();
         formData.append('item_id', itemId);
         formData.append('sub_action', subAction);
@@ -3207,10 +3226,10 @@ const GameApp = {
     // ====================================================
     selectedDestId: null,
     destinationsMeta: {
-        gym: { name: 'Maitama Executive Gym', sub: 'Maitama Highbrow', icon: '🏋️' },
+        gym: { name: 'i-Fitness Gym & Wellness', sub: 'Maitama Highbrow', icon: '🏋️' },
         restaurant: { name: 'Jabi Lake Suya & Grill', sub: 'Jabi Waterfront', icon: '🍲' },
         banex: { name: 'Banex Plaza Tech Hub', sub: 'Wuse 2 Commercial', icon: '📱' },
-        jabi_lake: { name: 'Jabi Lake Waterfront & Boat Club', sub: 'Jabi Lake Resort', icon: '🛥️' },
+        jabi_lake: { name: 'Jabi Lake Beach & Boat Club', sub: 'Jabi Beach Resort & Lounge', icon: '🏖️' },
         secretariat: { name: 'Federal Secretariat Complex', sub: 'Central Area Ministries', icon: '🏛️' },
         market: { name: 'Wuse Modern Market', sub: 'Wuse Market Zone', icon: '🥬' },
         fraser: { name: 'Fraser Suites Presidential Hotel', sub: 'Central Business District', icon: '🏨' },
@@ -3349,15 +3368,35 @@ const GameApp = {
             `;
         } else if (destId === 'jabi_lake') {
             html = `
-                <button onclick="GameApp.doDestinationActivity('lake_cruise')" class="w-full p-4 bg-sky-50 hover:bg-sky-100/80 border border-sky-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
+                <button onclick="GameApp.doDestinationActivity('lake_cruise')" class="w-full p-3.5 bg-sky-50 hover:bg-sky-100/80 border border-sky-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center text-lg">🛥️</div>
                         <div>
                             <strong class="text-xs text-sky-950 block">Sunset Speedboat Cruise & Drinks</strong>
-                            <span class="text-[11px] text-sky-700">+40 Happiness, +10 Street Cred</span>
+                            <span class="text-[11px] text-sky-700">+40 Happiness, +10 Street Cred • Energy +10</span>
                         </div>
                     </div>
                     <span class="text-xs font-mono font-bold text-sky-800">₦6,500.00</span>
+                </button>
+                <button onclick="GameApp.doDestinationActivity('beach_relax')" class="w-full p-3.5 bg-teal-50 hover:bg-teal-100/80 border border-teal-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center text-lg">🏖️</div>
+                        <div>
+                            <strong class="text-xs text-teal-950 block">Beach Cabana & Fresh Coconut Water</strong>
+                            <span class="text-[11px] text-teal-700">+35 Happiness, +15 Energy, +5 Health</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-teal-800">₦4,000.00</span>
+                </button>
+                <button onclick="GameApp.doDestinationActivity('beach_volleyball')" class="w-full p-3.5 bg-amber-50 hover:bg-amber-100/80 border border-amber-200 rounded-2xl text-left transition active:scale-95 flex items-center justify-between group mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg">🏐</div>
+                        <div>
+                            <strong class="text-xs text-amber-950 block">Jabi Beach Sand Volleyball Match</strong>
+                            <span class="text-[11px] text-amber-700">+25 Health, +15 Street Cred, +20 Happiness</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-amber-800">FREE</span>
                 </button>
             `;
         } else if (destId === 'secretariat') {

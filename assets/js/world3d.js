@@ -291,46 +291,44 @@ const World3D = {
         skirtR.position.set(4.96, 0.35, 0);
         parent.add(skirtR);
 
-        // Door on Left Wall
+        // Door on Left Wall (matching user reference)
         this.createDoor(parent, -3.6, 2.4, -4.9);
 
         // Wall Sconce Lamps with Glowing Spherical Bulbs
-        this.createWallSconce(parent, -3.2, 5.0, -4.9, 0);
-        this.createWallSconce(parent, 4.9, 5.0, -1.8, Math.PI / 2);
+        this.createWallSconce(parent, -2.2, 5.0, -4.9, 0);
+        this.createWallSconce(parent, 2.2, 5.0, -4.9, 0);
 
-        // Wall Calendar
-        this.createWallCalendar(parent, -1.8, 4.6, -4.95);
+        // 4-Tier Bookshelf with colorful books (Left of bed, against back wall)
+        this.createBookshelf(parent, -2.6, 2.4, -4.5);
 
-        // Bed with Red Duvet & White Pillow
-        this.createBed(parent, -1.8, 0.7, -3.4);
+        // Large Double Bed with Purple Duvet and White Pillows (Center-back)
+        this.createBed(parent, 0.4, 0.7, -3.4);
 
-        // Blue Foam Floor Mattress Mat
-        this.createFloorMat(parent, 0.6, 0.25, -3.6);
+        // Nightstands / Stools next to bed
+        this.createRadioStool(parent, 2.5, 0.8, -3.6);
+        this.createWaterDispenserTable(parent, 4.0, 0.9, -3.4);
 
-        // 4-Tier Bookshelf with Colorful Books
-        this.createBookshelf(parent, 2.4, 2.4, -4.6);
+        // Window with Venetian Blinds on Right Wall
+        this.createWindowBlinds(parent, 4.95, 4.4, -1.2);
 
-        // Stool with Retro Radio
-        this.createRadioStool(parent, 3.8, 0.8, -4.5);
-
-        // Study Desk with Mug & Window with Blinds
-        this.createStudyDesk(parent, 4.6, 1.1, -3.2);
-        this.createWindowBlinds(parent, 4.95, 4.4, -0.6);
-
-        // Food Cooler (Ice Chest)
+        // Food Cooler (Ice Chest) and Water Supplies on Right Wall
         this.createCooler(parent, 4.4, 0.45, 0.8);
+        this.createWaterSupply(parent, 4.4, 0.9, 2.2);
 
-        // Water Drum (100L Blue) & 2 Yellow Jerry Cans
-        this.createWaterSupply(parent, 4.4, 0.9, 2.4);
+        // Modern Computer Workstation Desk in Center of Room with glowing screen & PC tower
+        this.createCenterWorkstation(parent, 0, 0, 0.4);
 
-        // Red Center Chair
-        this.createCenterChair(parent, 0.1, 0.65, -0.4);
+        // Red Accent Chair
+        this.createCenterChair(parent, -0.2, 0.65, -1.4);
 
-        // Red and Blue Buckets in Foreground
-        this.createBuckets(parent, 0.8, 1.9, 4.4);
+        // Buckets in Foreground
+        this.createBuckets(parent, 0.8, 1.8, 3.8);
 
-        // Player's Avatar standing with Golden Crown
-        this.createPlayerAvatarInRoom(parent, 0, 0.15, 2.0);
+        // Washing Basin / Commode in front left corner
+        this.createForeCourtSanitary(parent, -0.6, 0.5, 3.8);
+
+        // Player's Avatar standing in Room
+        this.createPlayerAvatarInRoom(parent, -1.4, 0.15, -1.2);
     },
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -1044,25 +1042,106 @@ const World3D = {
     createBed(parent, x, y, z) {
         const bedGroup = new THREE.Group();
         bedGroup.position.set(x, y, z);
-        const woodMat = new THREE.MeshStandardMaterial({ color: 0x936639 });
-        bedGroup.add(new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.4, 3.2), woodMat));
+        const woodMat = new THREE.MeshStandardMaterial({ color: 0x5c381e });
+        bedGroup.add(new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.45, 3.4), woodMat));
 
-        const head = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.6, 0.2), woodMat);
-        head.position.set(0, 0.6, -1.5);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.6, 0.22), woodMat);
+        head.position.set(0, 0.65, -1.6);
         bedGroup.add(head);
 
-        const redDuvet = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.45, 2.9), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
-        redDuvet.position.set(0, 0.35, 0.05);
-        bedGroup.add(redDuvet);
+        // Purple Duvet matching user image media_1791312963371.png
+        const purpleDuvet = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, 3.0), new THREE.MeshStandardMaterial({ color: 0x4c1d95, roughness: 0.5 }));
+        purpleDuvet.position.set(0, 0.4, 0.05);
+        bedGroup.add(purpleDuvet);
 
-        const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.22, 0.7), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
-        pillow.position.set(0, 0.6, -0.9);
-        bedGroup.add(pillow);
+        // White Double Pillows
+        const pillowL = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.22, 0.65), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }));
+        pillowL.position.set(-0.65, 0.65, -1.0);
+        bedGroup.add(pillowL);
 
-        this.registerInteractable(bedGroup, 'bed', '🛏️ Tap Bed to Sleep & Rest', () => {
+        const pillowR = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.22, 0.65), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }));
+        pillowR.position.set(0.65, 0.65, -1.0);
+        bedGroup.add(pillowR);
+
+        this.registerInteractable(bedGroup, 'bed', '🛏️ Tap Bed: Character Walks & Sleeps!', () => {
+            if (window.World3D) World3D.animatePlayerToAction('sleep', new THREE.Vector3(x, 0.15, z + 0.8));
             if (window.GameApp) GameApp.interactFurniture('bed');
         });
         parent.add(bedGroup);
+    },
+
+    createCenterWorkstation(parent, x, y, z) {
+        const wsGroup = new THREE.Group();
+        wsGroup.position.set(x, y, z);
+
+        // Desk Table
+        const deskMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
+        const desk = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.1, 1.2), deskMat);
+        desk.position.y = 0.55;
+        wsGroup.add(desk);
+
+        // Glowing Green/Cyan Gaming Display Monitor
+        const screenFrame = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.85, 0.08), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+        screenFrame.position.set(0, 1.55, -0.2);
+        wsGroup.add(screenFrame);
+
+        const screenFace = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.75), new THREE.MeshBasicMaterial({ color: 0x10b981 }));
+        screenFace.position.set(0, 1.55, -0.15);
+        wsGroup.add(screenFace);
+
+        // White Gaming PC Tower
+        const pcTower = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.75, 0.65), new THREE.MeshStandardMaterial({ color: 0xf8fafc }));
+        pcTower.position.set(0.7, 1.45, 0.1);
+        wsGroup.add(pcTower);
+
+        // Black/Red Swivel Gaming Chair
+        const chairSeat = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.15, 0.85), new THREE.MeshStandardMaterial({ color: 0xb91c1c }));
+        chairSeat.position.set(0, 0.6, 1.1);
+        wsGroup.add(chairSeat);
+
+        const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.0, 0.12), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+        chairBack.position.set(0, 1.1, 1.45);
+        wsGroup.add(chairBack);
+
+        this.registerInteractable(wsGroup, 'workstation', '💻 Tap Workstation: Trade & Code!', () => {
+            if (window.World3D) World3D.animatePlayerToAction('code', new THREE.Vector3(x, 0.15, z + 1.1));
+            if (window.GameApp) GameApp.interactFurniture('mac_workstation');
+        });
+        parent.add(wsGroup);
+    },
+
+    createWaterDispenserTable(parent, x, y, z) {
+        const table = new THREE.Group();
+        table.position.set(x, y, z);
+        table.add(new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.2, 0.9), new THREE.MeshStandardMaterial({ color: 0xb08050 })));
+        
+        // Dispenser Bottle
+        const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.65, 14), new THREE.MeshStandardMaterial({ color: 0x0284c7, transparent: true, opacity: 0.8 }));
+        bottle.position.y = 0.95;
+        table.add(bottle);
+
+        this.registerInteractable(table, 'water_dispenser', '💧 Pure Drinking Water', () => {
+            if (window.World3D) World3D.animatePlayerToAction('drink', new THREE.Vector3(x - 0.7, 0.15, z));
+            if (window.GameApp) GameApp.notify('💧 Took a refreshing cup of chilled borehole water!', 'info');
+        });
+        parent.add(table);
+    },
+
+    createForeCourtSanitary(parent, x, y, z) {
+        const commode = new THREE.Group();
+        commode.position.set(x, y, z);
+        commode.add(new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.75, 1.1), new THREE.MeshStandardMaterial({ color: 0xf1f5f9 })));
+        
+        // Red Wash Bowl
+        const redBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.22, 0.28, 14), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+        redBowl.position.set(0.65, -0.2, 0.1);
+        commode.add(redBowl);
+
+        this.registerInteractable(commode, 'wash_basin', '🧼 Wash Basin & Soap', () => {
+            if (window.World3D) World3D.animatePlayerToAction('bathe', new THREE.Vector3(x + 0.5, 0.15, z));
+            if (window.GameApp) GameApp.interactFurniture('bucket');
+        });
+        parent.add(commode);
     },
 
     createFloorMat(parent, x, y, z) {
@@ -1096,6 +1175,7 @@ const World3D = {
         }
 
         this.registerInteractable(shelfGroup, 'books', '📚 Tap Books to Read & Study', () => {
+            if (window.World3D) World3D.animatePlayerToAction('read', new THREE.Vector3(x, 0.15, z + 1.1));
             if (window.GameApp) GameApp.interactFurniture('books');
         });
         parent.add(shelfGroup);
@@ -1111,6 +1191,7 @@ const World3D = {
         stoolGroup.add(radio);
 
         this.registerInteractable(stoolGroup, 'radio', '📻 Tap Radio to Play Afrobeats', () => {
+            if (window.World3D) World3D.animatePlayerToAction('radio', new THREE.Vector3(x - 0.7, 0.15, z));
             if (window.GameApp) GameApp.interactFurniture('radio');
         });
         parent.add(stoolGroup);
@@ -1153,6 +1234,7 @@ const World3D = {
         coolerGroup.add(lid);
 
         this.registerInteractable(coolerGroup, 'cooler', '🧊 Tap Cooler to Eat Food', () => {
+            if (window.World3D) World3D.animatePlayerToAction('eat', new THREE.Vector3(x - 0.7, 0.15, z));
             if (window.GameApp) GameApp.interactFurniture('cooler');
         });
         parent.add(coolerGroup);
@@ -1186,6 +1268,7 @@ const World3D = {
         chairGroup.add(back);
 
         this.registerInteractable(chairGroup, 'chair', '🪑 Tap Chair to Sit & Relax', () => {
+            if (window.World3D) World3D.animatePlayerToAction('sit', new THREE.Vector3(x, 0.15, z + 0.3));
             if (window.GameApp) GameApp.interactFurniture('chair');
         });
         parent.add(chairGroup);
@@ -1195,6 +1278,7 @@ const World3D = {
         const rBucket = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.65, 18), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
         rBucket.position.set(x1, 0.4, z);
         this.registerInteractable(rBucket, 'bucket_red', '🪣 Tap Bucket to Bathe & Freshen Up', () => {
+            if (window.World3D) World3D.animatePlayerToAction('bathe', new THREE.Vector3(x1, 0.15, z - 0.7));
             if (window.GameApp) GameApp.interactFurniture('bucket');
         });
         parent.add(rBucket);
@@ -1202,6 +1286,7 @@ const World3D = {
         const bBucket = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.65, 18), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
         bBucket.position.set(x2, 0.4, z);
         this.registerInteractable(bBucket, 'bucket_blue', '🪣 Tap Bucket to Bathe & Freshen Up', () => {
+            if (window.World3D) World3D.animatePlayerToAction('bathe', new THREE.Vector3(x2, 0.15, z - 0.7));
             if (window.GameApp) GameApp.interactFurniture('bucket');
         });
         parent.add(bBucket);
@@ -1288,6 +1373,71 @@ const World3D = {
         this.buildVenueScene(this.currentVenue);
     },
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CHARACTER MOVEMENT & ACTIONS (Walking, Sleeping on Bed, Bathing)
+    // ─────────────────────────────────────────────────────────────────────────
+    playerAnim: {
+        active: false,
+        actionType: 'idle',
+        startPos: null,
+        targetPos: null,
+        startTime: 0,
+        duration: 1200,
+        origRot: 0
+    },
+
+    animatePlayerToAction(actionType, targetPos) {
+        if (!this.characterGroup) return;
+        this.playerAnim.active = true;
+        this.playerAnim.actionType = actionType;
+        this.playerAnim.startPos = this.characterGroup.position.clone();
+        this.playerAnim.targetPos = targetPos.clone();
+        this.playerAnim.startTime = performance.now();
+        this.playerAnim.duration = 1000;
+        this.playerAnim.origRot = this.characterGroup.rotation.y;
+
+        // Turn character to face target
+        const dx = targetPos.x - this.characterGroup.position.x;
+        const dz = targetPos.z - this.characterGroup.position.z;
+        this.characterGroup.rotation.y = Math.atan2(dx, dz);
+    },
+
+    updatePlayerMovement(now) {
+        if (!this.playerAnim.active || !this.characterGroup) return;
+        const elapsed = now - this.playerAnim.startTime;
+        const t = Math.min(1, elapsed / this.playerAnim.duration);
+
+        // Ease in-out interpolation
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+        // Walk to target
+        this.characterGroup.position.lerpVectors(this.playerAnim.startPos, this.playerAnim.targetPos, ease);
+
+        // Footstep bobbing
+        if (t < 1) {
+            this.characterGroup.position.y = 0.15 + Math.abs(Math.sin(t * Math.PI * 6)) * 0.12;
+        } else {
+            // Arrived at destination: perform action pose
+            if (this.playerAnim.actionType === 'sleep') {
+                // Lay flat on bed
+                this.characterGroup.position.set(this.playerAnim.targetPos.x, 0.95, this.playerAnim.targetPos.z - 0.4);
+                this.characterGroup.rotation.x = -Math.PI / 2;
+                this.characterGroup.rotation.y = 0;
+                this.characterGroup.rotation.z = 0;
+            } else if (this.playerAnim.actionType === 'bathe') {
+                this.characterGroup.position.set(this.playerAnim.targetPos.x, 0.35, this.playerAnim.targetPos.z);
+                this.characterGroup.rotation.x = 0;
+                this.characterGroup.rotation.y = Math.PI / 4;
+            } else if (this.playerAnim.actionType === 'code') {
+                // Sit on chair facing screen
+                this.characterGroup.position.set(this.playerAnim.targetPos.x, 0.45, this.playerAnim.targetPos.z);
+                this.characterGroup.rotation.x = 0;
+                this.characterGroup.rotation.y = Math.PI;
+            }
+            this.playerAnim.active = false;
+        }
+    },
+
     animate() {
         requestAnimationFrame(() => this.animate());
 
@@ -1295,7 +1445,11 @@ const World3D = {
             this.controls.update();
         }
 
-        const time = Date.now() * 0.003;
+        const now = performance.now();
+        const time = now * 0.003;
+
+        // Update character walking animation
+        this.updatePlayerMovement(now);
 
         // Idle crown floating
         if (this.crownMesh) {
@@ -1310,3 +1464,4 @@ const World3D = {
 };
 
 window.World3D = World3D;
+
